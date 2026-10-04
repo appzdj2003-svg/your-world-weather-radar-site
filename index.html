@@ -6,25 +6,392 @@
 <title>Your World Weather Radar — early storm alerts and Close-One</title>
 <meta name="description" content="Your World Weather Radar warns you before the storm hits, then helps you text someone who matters. Live radar, hurricanes, tides, and space launches.">
 <style>
-  body{margin:0;font-family:system-ui,sans-serif;background:#06101c;color:#e8f7ff}
-  main{max-width:680px;margin:0 auto;padding:48px 20px}
-  h1{font-size:2rem;line-height:1.15;margin:0 0 12px}
-  p{line-height:1.5;color:#c5d7e6}
-  a.btn{display:inline-block;margin-top:20px;background:#1ee0c6;color:#04140f;text-decoration:none;font-weight:700;padding:14px 18px;border-radius:12px}
-  ul{padding-left:18px;color:#c5d7e6}
+  :root {
+    --bg: #06101c;
+    --text: #e8f7ff;
+    --muted: #c5d7e6;
+    --accent: #1ee0c6;
+    --ink: #04140f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px 16px 48px;
+  }
+  h1 {
+    font-size: clamp(1.75rem, 6.2vw, 2.35rem);
+    line-height: 1.15;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: 1.05rem;
+    margin: 0 0 10px;
+    font-weight: 650;
+  }
+  p { line-height: 1.5; color: var(--muted); }
+  .lead { margin-top: 0; }
+  .kicker {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .demo {
+    margin-top: 28px;
+    padding: 16px;
+    border: 1px solid rgba(30, 224, 198, 0.28);
+    border-radius: 18px;
+    background: #081624;
+  }
+  .demo-note {
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .chips button,
+  .msg-btn,
+  a.btn {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .chips button {
+    flex: 1 1 96px;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 215, 230, 0.35);
+    background: transparent;
+    color: var(--text);
+    font-weight: 650;
+    font-size: 0.95rem;
+  }
+  .chips button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+  .radar-wrap {
+    display: grid;
+    justify-items: center;
+    margin: 4px 0 16px;
+  }
+  .radar {
+    position: relative;
+    width: min(100%, 280px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(30, 224, 198, 0.08), transparent 62%),
+      #071422;
+    border: 1px solid rgba(30, 224, 198, 0.4);
+    box-shadow: inset 0 0 36px rgba(8, 22, 36, 0.8);
+  }
+  .ring {
+    position: absolute;
+    border: 1px solid rgba(30, 224, 198, 0.22);
+    border-radius: 50%;
+  }
+  .ring.r1 { inset: 16%; }
+  .ring.r2 { inset: 32%; }
+  .ring.r3 { inset: 48%; }
+  .crosshair::before,
+  .crosshair::after {
+    content: "";
+    position: absolute;
+    background: rgba(30, 224, 198, 0.18);
+  }
+  .crosshair::before { left: 50%; top: 8%; bottom: 8%; width: 1px; }
+  .crosshair::after { top: 50%; left: 8%; right: 8%; height: 1px; }
+  .sweep {
+    position: absolute;
+    inset: -2%;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 292deg,
+      rgba(30, 224, 198, 0.02) 320deg,
+      rgba(30, 224, 198, 0.42) 360deg
+    );
+    animation: spin 4.5s linear infinite;
+  }
+  .blob {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    left: var(--x);
+    top: var(--y);
+    transform: translate(-50%, -50%);
+    border-radius: 46% 54% 48% 52%;
+    background: radial-gradient(circle at 40% 40%, #fff 0%, var(--c) 28%, transparent 72%);
+    opacity: 0.95;
+    transition: left 0.45s ease, top 0.45s ease, width 0.45s ease, height 0.45s ease, background 0.45s ease;
+    animation: blob 2.4s ease-in-out infinite;
+  }
+  .phone {
+    border-radius: 22px;
+    background: #0c1c2e;
+    border: 1px solid rgba(197, 215, 230, 0.16);
+    padding: 14px 14px 12px;
+  }
+  .phone-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+  .tag {
+    border: 1px solid rgba(30, 224, 198, 0.45);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .alert {
+    margin: 0 0 6px;
+    color: var(--text);
+    font-weight: 650;
+  }
+  .eta {
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+  }
+  .draft {
+    border-radius: 14px;
+    background: #10263a;
+    padding: 12px;
+    border: 1px solid transparent;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .draft.ready {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(30, 224, 198, 0.18);
+    transform: translateY(-2px);
+  }
+  .to {
+    margin: 0 0 4px;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .msg {
+    margin: 0;
+    color: var(--text);
+  }
+  .ready-label {
+    margin: 8px 0 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--accent);
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 8px;
+  }
+  .msg-btn {
+    width: 100%;
+    margin-top: 12px;
+    min-height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: #16324a;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .msg-btn:hover { background: #1b3d59; }
+  .explain {
+    margin: 10px 0 0;
+    font-size: 0.92rem;
+  }
+  .features {
+    margin: 22px 0 8px;
+    padding-left: 18px;
+    color: var(--muted);
+  }
+  .features li { margin: 6px 0; line-height: 1.4; }
+  a.btn {
+    display: block;
+    margin-top: 18px;
+    background: var(--accent);
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 800;
+    text-align: center;
+    padding: 16px 18px;
+    border-radius: 14px;
+    font-size: 1.05rem;
+  }
+  a.btn:hover { filter: brightness(1.05); }
+  .disclaimer {
+    margin-top: 16px;
+    font-size: 0.92rem;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes blob {
+    0%, 100% { filter: blur(0.2px); opacity: 0.88; }
+    50% { filter: blur(0.6px); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sweep, .blob { animation: none; }
+    .draft, .blob { transition: none; }
+  }
 </style>
 </head>
 <body>
 <main>
+  <p class="kicker">Your World Weather Radar</p>
   <h1>Know the storm before it hits. Then tell someone.</h1>
-  <p>Your World Weather Radar is a weather app that warns you early and drafts a text to a person you choose when weather turns dangerous near them. You tap Send. Rain alerts stay free.</p>
-  <ul>
+  <p class="lead">Your World Weather Radar is a weather app that warns you early and drafts a text to a person you choose when weather turns dangerous near them. You tap Send. Rain alerts stay free.</p>
+
+  <section class="demo" aria-labelledby="demo-title">
+    <h2 id="demo-title">Try a scenario</h2>
+    <p class="demo-note">This is a picture of the app, not a live forecast. The words below are example copy.</p>
+    <div class="chips" role="group" aria-label="Weather scenarios">
+      <button type="button" id="chip-rain" aria-pressed="true">Rain</button>
+      <button type="button" id="chip-hurricane" aria-pressed="false">Hurricane</button>
+      <button type="button" id="chip-lightning" aria-pressed="false">Lightning</button>
+    </div>
+
+    <div class="radar-wrap">
+      <div class="radar" id="radar" aria-hidden="true">
+        <div class="sweep"></div>
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="crosshair"></div>
+        <div class="blob" id="blob"></div>
+      </div>
+    </div>
+
+    <article class="phone" aria-live="polite">
+      <div class="phone-top">
+        <span>Close-One</span>
+        <span class="tag">Demo</span>
+      </div>
+      <p class="alert" id="alert"></p>
+      <p class="eta" id="eta"></p>
+      <div class="draft" id="draft">
+        <p class="to" id="who"></p>
+        <p class="msg" id="msg"></p>
+        <p class="ready-label" id="readyLabel" hidden>Ready to send</p>
+      </div>
+    </article>
+
+    <button type="button" class="msg-btn" id="openMsg">This opens your messages</button>
+    <p class="explain" id="explain" hidden>In the app, this opens your messaging app and you tap Send.</p>
+  </section>
+
+  <ul class="features">
     <li>Early storm alerts and a live rain ETA</li>
     <li>Close-One: a ready-to-send message for someone you pick</li>
     <li>Radar, hurricane tracks, tides, and rocket launches on one map</li>
   </ul>
+
   <a class="btn" href="https://play.google.com/store/apps/details?id=com.yourworld.weatheranalyzer">Get it on Google Play</a>
-  <p>Forecasts are informational. Follow official NWS and local emergency guidance.</p>
+  <p class="disclaimer">Forecasts are informational. Follow official NWS and local emergency guidance.</p>
 </main>
+<script>
+(function () {
+  var scenarios = {
+    rain: {
+      alert: "Rain is headed toward Mom. It looks close enough to check in.",
+      eta: "Rain ETA · about 25 minutes",
+      who: "To Mom",
+      msg: "Storm is close to you. I'm checking in. Stay inside if you can.",
+      blob: { x: "62%", y: "40%", s: "78px", c: "#3ec6ff" }
+    },
+    hurricane: {
+      alert: "A hurricane track is nearing Alex. The weather can turn dangerous.",
+      eta: "Closest approach · tonight",
+      who: "To Alex",
+      msg: "The hurricane is getting close to you. I'm checking in. Stay inside if you can.",
+      blob: { x: "34%", y: "58%", s: "120px", c: "#ff6a45" }
+    },
+    lightning: {
+      alert: "Lightning is near Sam. Waiting indoors is the safer call.",
+      eta: "Lightning nearby · now",
+      who: "To Sam",
+      msg: "Lightning is close to you. I'm checking in. Stay inside if you can.",
+      blob: { x: "70%", y: "30%", s: "52px", c: "#f6e27a" }
+    }
+  };
+
+  var current = "rain";
+  var alertEl = document.getElementById("alert");
+  var etaEl = document.getElementById("eta");
+  var whoEl = document.getElementById("who");
+  var msgEl = document.getElementById("msg");
+  var draftEl = document.getElementById("draft");
+  var readyLabel = document.getElementById("readyLabel");
+  var explain = document.getElementById("explain");
+  var blob = document.getElementById("blob");
+  var chips = {
+    rain: document.getElementById("chip-rain"),
+    hurricane: document.getElementById("chip-hurricane"),
+    lightning: document.getElementById("chip-lightning")
+  };
+
+  function clearReady() {
+    draftEl.classList.remove("ready");
+    readyLabel.hidden = true;
+    explain.hidden = true;
+  }
+
+  function paint(key) {
+    var data = scenarios[key];
+    current = key;
+    alertEl.textContent = data.alert;
+    etaEl.textContent = data.eta;
+    whoEl.textContent = data.who;
+    msgEl.textContent = data.msg;
+    blob.style.setProperty("--x", data.blob.x);
+    blob.style.setProperty("--y", data.blob.y);
+    blob.style.setProperty("--s", data.blob.s);
+    blob.style.setProperty("--c", data.blob.c);
+    Object.keys(chips).forEach(function (name) {
+      chips[name].setAttribute("aria-pressed", name === key ? "true" : "false");
+    });
+    clearReady();
+  }
+
+  Object.keys(chips).forEach(function (name) {
+    chips[name].addEventListener("click", function () { paint(name); });
+  });
+
+  document.getElementById("openMsg").addEventListener("click", function () {
+    draftEl.classList.add("ready");
+    readyLabel.hidden = false;
+    explain.hidden = false;
+  });
+
+  paint("rain");
+})();
+</script>
 </body>
 </html>
