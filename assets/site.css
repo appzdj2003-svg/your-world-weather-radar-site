@@ -103,3 +103,10 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .msg.bot{background:var(--sky-l);border-top-left-radius:4px}.msg.bot b{color:var(--sky-d)}
 .msg.me{align-self:flex-end;background:var(--slate);color:#fff;border-top-right-radius:4px}.msg.me p{color:#fff}
 .sug{font:inherit;font-size:.82rem;font-weight:600;border:1.5px solid var(--line);background:#fff;color:var(--slate-3);padding:6px 12px;border-radius:99px;cursor:pointer}.sug:hover{border-color:var(--sky);color:var(--sky-d)}
+/* voice input */
+.mic{flex:0 0 auto;width:50px;height:50px;border-radius:50%;border:1.5px solid var(--line);background:#fff;color:var(--slate-2);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s}
+.mic svg{width:22px;height:22px}.mic:hover{border-color:var(--sky);color:var(--sky-d)}
+.mic.listening{background:var(--red);border-color:var(--red);color:#fff;animation:micpulse 1.2s ease-out infinite}
+@keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}100%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
+@media (prefers-reduced-motion:reduce){.mic.listening{animation:none}}
+.vmsg{font-size:.88rem;color:var(--amber-d);margin:8px 0 0;font-weight:600}
