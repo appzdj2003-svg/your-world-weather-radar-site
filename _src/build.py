@@ -155,39 +155,66 @@ def guides():
 
 # ---------- gear ----------
 def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
+import gearart
+# (section id, title, intro, tone, [(art, product name, note)]). Real named products; links are Amazon searches for the exact name.
 GEAR = [
- ("Weather radios", "📻", "NOAA Weather Radio receivers sound an alarm for warnings even with no cell signal.", [
-   ("Midland WR120B NOAA Weather Radio", "Desktop alert radio with SAME county coding."),
-   ("Midland ER310 emergency crank radio", "Hand-crank and solar NOAA radio with flashlight."),
-   ("Eton American Red Cross FRX3 weather radio", "Hand-crank, solar and USB charging."),
-   ("Sangean CL-100 weather alert radio", "Tabletop NOAA alert radio with SAME.")]),
- ("Rain gauges", "🌧️", "Measure what actually fell in your yard.", [
-   ("Stratus Precision Rain Gauge RG202", "4-inch clear gauge, the type CoCoRaHS volunteers use."),
-   ("AcuRite wireless digital rain gauge", "Reads rainfall on an indoor display.")]),
- ("Home weather stations", "🏠", "Your own temperature, wind, rain and pressure readings.", [
-   ("Ambient Weather WS-2902 weather station", "Wi-Fi station with outdoor sensor array."),
-   ("AcuRite Iris 5-in-1 weather station", "Wind, rain, temperature and humidity sensor."),
-   ("Davis Instruments Vantage Vue", "Integrated wireless sensor suite."),
-   ("La Crosse Technology wireless weather station", "Indoor display with outdoor sensor.")]),
- ("Outdoor and emergency", "🎒", "For trips past the edge of coverage.", [
-   ("Kestrel 3000 pocket weather meter", "Handheld wind, temperature and humidity."),
-   ("Garmin inReach Mini 2 satellite communicator", "Two-way satellite messaging (needs a subscription)."),
-   ("Anker portable power bank", "Keep your phone charged during outages."),
-   ("battery powered LED lantern", "Light for power outages.")]),
+ ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
+   ("jacket", "Columbia Watertight II rain jacket", "Packable waterproof shell for everyday rain."),
+   ("jacket", "Marmot PreCip Eco rain jacket", "Lightweight waterproof, breathable jacket for hiking."),
+   ("jacket", "Frogg Toggs Ultra-Lite2 rain suit", "Budget jacket and pants set that packs small."),
+   ("poncho", "Frogg Toggs Ultra-Lite2 poncho", "Covers you and a small pack."),
+   ("poncho", "Sea to Summit Ultra-Sil Tarp-Poncho", "Works as a poncho or a small shelter tarp."),
+   ("umbrella", "Repel windproof travel umbrella", "Compact auto open/close umbrella."),
+   ("umbrella", "totes AutoOpen umbrella", "Classic auto-open umbrella."),
+   ("boots", "XTRATUF 6 inch ankle deck boot", "Waterproof rubber boot for docks, boats and puddles."),
+   ("boots", "Hunter Original Tall rain boot", "Tall waterproof rain boot."),
+   ("boots", "KEEN Targhee waterproof hiking boot", "Waterproof hiker for wet trails."),
+   ("drybag", "Sea to Summit Lightweight Dry Bag", "Keeps phone, clothes and papers dry."),
+   ("drybag", "Earth Pak waterproof dry bag", "Roll-top bag with shoulder strap."),
+ ]),
+ ("radios", "📻 NOAA weather radios", "Alarms for warnings even with no cell signal or power.", "gear", [
+   ("radio", "Midland WR120B NOAA weather radio", "Desktop alert radio with SAME county coding."),
+   ("radio", "Midland ER310 emergency crank radio", "Hand-crank and solar NOAA radio with flashlight."),
+   ("radio", "Eton American Red Cross FRX3 weather radio", "Hand-crank, solar and USB charging."),
+   ("radio", "Sangean CL-100 weather alert radio", "Tabletop NOAA alert radio with SAME."),
+ ]),
+ ("stations", "🏠 Weather stations & instruments", "Your own readings for your own yard.", "gear", [
+   ("station", "Ambient Weather WS-2902 weather station", "Wi-Fi station with outdoor sensor array."),
+   ("station", "AcuRite Iris 5-in-1 weather station", "Wind, rain, temperature and humidity."),
+   ("station", "Davis Instruments Vantage Vue weather station", "Integrated wireless sensor suite."),
+   ("gauge", "Stratus Precision Rain Gauge RG202", "4-inch clear gauge, the type CoCoRaHS volunteers use."),
+   ("gauge", "AcuRite wireless digital rain gauge", "Reads rainfall on an indoor display."),
+   ("thermo", "ThermoPro TP50 thermometer hygrometer", "Indoor temperature and humidity."),
+   ("thermo", "Govee H5075 thermometer hygrometer", "Bluetooth temperature and humidity logger."),
+   ("lightning", "AcuRite lightning detector 06045M", "Indoor display that counts strikes and estimates distance."),
+   ("lightning", "StrikeAlert HD personal lightning detector", "Clip-on detector for outdoor use."),
+   ("anemo", "Kestrel 3000 pocket weather meter", "Handheld wind, temperature and humidity."),
+   ("anemo", "BTMETER BT-100 handheld anemometer", "Pocket wind speed meter."),
+ ]),
+ ("emergency", "🔦 Emergency & power", "For outages, storms and trips past the edge of coverage.", "power", [
+   ("light", "Black Diamond Spot 400 headlamp", "Hands-free light, rated waterproof."),
+   ("light", "Energizer LED camping lantern", "Battery lantern for power outages."),
+   ("power", "Anker PowerCore 10000 power bank", "Pocket charger, about 2 phone charges."),
+   ("power", "Jackery Explorer 300 portable power station", "Runs small devices and charges phones in outages."),
+   ("kit", "Ready America 70280 emergency kit", "72-hour kit with food, water and supplies."),
+   ("kit", "First Aid Only 299 piece first aid kit", "All-purpose first-aid kit."),
+ ]),
 ]
 def gear():
+    jump = '<div class="tabs" style="margin-top:18px">' + "".join(f'<a href="#{sid}" class="btn" style="padding:7px 14px;font-size:.85rem">{E(t)}</a>' for sid, t, *_ in GEAR) + "</div>"
     secs = ""
-    for title, em, sub, items in GEAR:
-        secs += f'<h2>{em} {E(title)}</h2><p class="dim">{E(sub)}</p><div class="grid">' + "".join(
-            f'<div class="card gcard"><h3 style="margin-top:0">{E(n)}</h3><p>{E(d)}</p><a class="btn" href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener">See on Amazon →</a></div>' for n, d in items) + "</div>"
+    for sid, title, sub, tone, items in GEAR:
+        secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p><div class="pgrid">' + "".join(
+            f'<a class="pcard" href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearart.svg(k, tone)}</span>'
+            f'<span class="pc-body"><b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>' for k, n, d in items) + "</div>"
     deals = load_deals()
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
-    dsec = f'<h2>🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
-    b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Links go to Amazon search results for each product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. We don\'t show prices or ratings, so check details on Amazon. <a href="../affiliate-disclosure.html">Details</a></p>'
-         + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
-    page("gear/index.html", "Weather Gear: Radios, Rain Gauges & Home Weather Stations", "NOAA weather radios, rain gauges, home weather stations and emergency gear for storm season.", b, hero("Weather gear", "Radios, gauges and stations worth owning before storm season.", "Gear"), "0.7")
+    dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
+    b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to Amazon search results for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. We don\'t show prices or ratings, so check details on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
+         + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
+    page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
-DEAL_KW = ["weather radio", "weather station", "rain gauge", "generator", "power bank", "emergency radio", "lantern", "power station"]
+DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "emergency radio", "lantern", "headlamp"]
 def load_deals():
     f = ROOT / "assets/deals.json"; items = []
     try:
