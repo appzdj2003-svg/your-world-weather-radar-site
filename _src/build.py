@@ -17,6 +17,10 @@ SUPPORT, PRIVACY_MAIL = "support@yourworldapps.si", "appzdj2003@gmail.com"
 E = lambda s: html.escape(s, quote=True)
 enc = lambda s: urllib.parse.quote(s, safe="")
 PAGES = []
+import hashlib
+def V(name):  # cache-busting: short content hash of the asset
+    f = ROOT / "assets" / name
+    return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
 NAV = [("index.html", "Home"), ("features.html", "Features"), ("plan.html", "Alert Planner"), ("trip.html", "Trip Planner"), ("ask.html", "Ask Atlantis"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
@@ -36,7 +40,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
     nav = "".join(f'<a href="{p}{"" if h=="index.html" else h}"{" aria-current=page" if h==cur else ""}>{t}</a>' for h, t in NAV).replace('href=""', 'href="./"')
     slug = slug or (re.sub(r"[^a-z0-9]+", "-", path.replace(".html", "").replace("/index", "")).strip("-") or "home")
     lds = "".join(f'<script type="application/ld+json">{json.dumps(j, ensure_ascii=False)}</script>' for j in (jsonld or []))
-    sc = "".join(f'<script src="{p}assets/{s}"></script>' for s in scripts)
+    sc = "".join(f'<script src="{p}assets/{V(s)}"></script>' for s in scripts)
     full = title if APP in title else f"{title} | {APP}"
     doc = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -45,7 +49,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{p}assets/favicon.png"><link rel="apple-touch-icon" href="{p}assets/icon-192.png">
-<link rel="stylesheet" href="{p}assets/site.css">{lds}</head><body>
+<link rel="stylesheet" href="{p}assets/{V('site.css')}">{lds}</head><body>
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a><nav class="nav" aria-label="Main">{nav}</nav></div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
@@ -277,5 +281,5 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
 if __name__ == "__main__":
-    home(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); planner("plan.html", "plan"); planner("trip.html", "trip"); ask(); misc()
+    home(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("plan.html", "plan"); planner("trip.html", "trip"); misc()
     print(f"Built {len(PAGES)} pages")

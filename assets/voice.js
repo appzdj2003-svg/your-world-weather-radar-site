@@ -2,9 +2,11 @@
    Speech is handled by the browser's own recognizer; this site sends nothing anywhere. */
 (function () {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const MSG_NO = "Voice input isn't supported in this browser, type your plan instead.";
+  const MSG_NO = "Voice input isn't supported in this browser. In a Tesla, tap the box, then press the steering-wheel mic and speak; otherwise type your plan.";
   const MSG_DENIED = "Microphone access was blocked. Allow it in your browser settings, or type your plan instead.";
-  const TESLA = /Tesla|QtCarBrowser/.test((typeof navigator !== "undefined" && navigator.userAgent) || "");
+  const NAV = typeof navigator !== "undefined" ? navigator : {};
+  const UAD = NAV.userAgentData ? JSON.stringify(NAV.userAgentData.brands || []) + (NAV.userAgentData.platform || "") : "";
+  const TESLA = /Tesla|QtCarBrowser/i.test((NAV.userAgent || "") + UAD);
   const MSG_TESLA = "In a Tesla, tap the box, then press the steering-wheel mic and speak.";
   function note(btn, text) {
     let n = document.getElementById(btn.dataset.voiceFor + "-vmsg");
@@ -20,7 +22,7 @@
     const input = document.getElementById(btn.dataset.voiceFor); let rec = null, base = "", gotFinal = false;
     btn.addEventListener("click", () => {
       if (TESLA) { note(btn, MSG_TESLA); try { input.focus(); } catch (e) {} return; }   // car browser: use the car's own voice keyboard
-      if (!SR) return note(btn, MSG_NO);
+      if (!SR) { note(btn, MSG_NO); try { input.focus(); } catch (e) {} return; }
       if (rec) { rec.stop(); return; }
       rec = new SR(); rec.lang = document.documentElement.lang === "en" ? "en-US" : (document.documentElement.lang || "en-US");
       rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;

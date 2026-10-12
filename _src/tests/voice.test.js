@@ -26,7 +26,7 @@ last.onend(); assert.strictEqual(t.input.value, "hiking in Asheville this Saturd
 t = setup(FakeSR); t.btn.h(); last.onerror({ error: "not-allowed" }); last.onend();
 assert.match(t.els["qtext-vmsg"].textContent, /blocked/); assert.strictEqual(t.go.clicks, 0);
 // unsupported -> graceful message, button still present
-t = setup(null); t.btn.h(); assert.strictEqual(t.els["qtext-vmsg"].textContent, "Voice input isn't supported in this browser, type your plan instead.");
+t = setup(null); t.btn.h(); assert.strictEqual(t.els["qtext-vmsg"].textContent, "Voice input isn't supported in this browser. In a Tesla, tap the box, then press the steering-wheel mic and speak; otherwise type your plan.");
 // Tesla: hint + focus, no recognizer started (supported, unsupported, and both Tesla UA strings)
 const TH = "In a Tesla, tap the box, then press the steering-wheel mic and speak.";
 for (const ua of ["Mozilla/5.0 (X11; GNU/Linux) AppleWebKit/537.36 Chrome/109 Safari/537.36 Tesla/2024.20", "Mozilla/5.0 (X11; Linux) QtCarBrowser Safari/537.36"])
@@ -34,5 +34,5 @@ for (const ua of ["Mozilla/5.0 (X11; GNU/Linux) AppleWebKit/537.36 Chrome/109 Sa
     assert.strictEqual(t.els["qtext-vmsg"].textContent, TH); assert.strictEqual(t.input.focused, 1); assert.strictEqual(last, null); assert.ok(!t.btn.cls.has("listening")); }
 // non-Tesla unchanged: recognizer starts, unsupported message unchanged
 last = null; t = setup(FakeSR, "Mozilla/5.0 (Windows NT 10.0) Chrome/129"); t.btn.h(); assert.ok(last && last.started); assert.strictEqual(t.input.focused, 0);
-t = setup(null, "Mozilla/5.0 (iPhone) Safari/605"); t.btn.h(); assert.strictEqual(t.els["qtext-vmsg"].textContent, "Voice input isn't supported in this browser, type your plan instead.");
+t = setup(null, "Mozilla/5.0 (iPhone) Safari/605"); t.btn.h(); assert.strictEqual(t.els["qtext-vmsg"].textContent, "Voice input isn't supported in this browser. In a Tesla, tap the box, then press the steering-wheel mic and speak; otherwise type your plan.");
 console.log("All voice input tests passed");
