@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.yourworld.weatheranalyzer",
+    "sha256_cert_fingerprints": [
+      "1B:4D:92:6F:3C:3C:03:56:3E:A9:9A:30:01:6A:58:6F:B0:FC:99:FB:2C:FB:72:B4:1D:59:17:EA:DA:71:43:AE"
+    ]
+  }
+}]

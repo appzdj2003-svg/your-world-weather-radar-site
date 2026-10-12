@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy | Your World Weather Radar</title><meta name="description" content="Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why."><link rel="canonical" href="https://weather.yourworldapps.si/privacy.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Your World Weather Radar"><meta property="og:title" content="Privacy Policy | Your World Weather Radar">
+<meta property="og:description" content="Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why."><meta property="og:url" content="https://weather.yourworldapps.si/privacy.html"><meta property="og:image" content="https://weather.yourworldapps.si/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#0F172A">
+<link rel="icon" href="assets/favicon.png"><link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="assets/site.css"></head><body>
+<header class="top"><div class="wrap"><a class="brand" href="./"><img src="assets/icon-192.png" width="34" height="34" alt="">Your World Weather Radar</a><nav class="nav" aria-label="Main"><a href="./">Home</a><a href="features.html">Features</a><a href="plan.html">Alert Planner</a><a href="trip.html">Trip Planner</a><a href="guides/">Guides</a><a href="gear/">Gear</a><a href="pricing.html">Pricing</a><a href="support.html">Support</a></nav></div></header>
+<main><section class="hero"><div class="wrap"><span class=kicker>Privacy</span><h1>Privacy Policy</h1><p class=lead>Your World Weather Radar for Android</p></div></section><div class="wrap"><div class="article" style="margin-top:24px">
+
+<p><strong>App:</strong> Your World Weather Radar (Android, package <code>com.yourworld.weatheranalyzer</code>)<br/>
+<strong>Developer:</strong> Your World Apps ("we", "us")<br/>
+<strong>Last updated:</strong> 2026-10-08</p>
+<p>This policy explains, in plain language, what leaves your phone when you use Your World Weather Radar, who receives it, and why. We wrote it to be complete, including the small details.</p>
+<h2>The short version</h2>
+<ul><li><strong>No accounts, no ads of our own, no advertising ID, no analytics or crash-tracking SDKs, and we never sell your data.</strong> (YouTube may show its own ads in live streams you choose to play. See "YouTube" below.)
+</li><li>To show weather for a place, the app sends that place's <strong>coordinates</strong> to weather services such as NOAA's National Weather Service and Open-Meteo. If you use your GPS location, those are your <strong>precise</strong> coordinates. This also happens in the background (about every 15 minutes) so rain and storm alerts can reach you.
+</li><li>For weather cams, the app <strong>automatically</strong> sends a location <strong>rounded to about 11 km (7 miles)</strong> to our own small cams server whenever the Home screen is on screen (at most about every 10 minutes). The server keeps no logs and passes that rounded location only to Windy.com to find nearby webcams. WebCOOS never receives your location.
+</li><li>Every service the app contacts sees your device's <strong>IP address</strong>, like any website you visit.
+</li><li>Your settings, saved places, contacts you pick for storm texts, and any API keys you enter are stored <strong>only on your phone</strong>.
+</li></ul>
+<h2>Where your location goes</h2>
+<p><strong>Getting your location.</strong> The app asks for location permission only when you tap Near Me / Use GPS (or accept a Close-One invite). You can say no and search for a city instead; the app starts on New York until you choose. You can grant "approximate" instead of "precise" location. Location is read only while the app is open (it doesn't request background location permission). Google Play services provides the location fix, and Android's built-in geocoder (run by Google on most phones) turns your coordinates into a place name. If that fails, Open-Meteo's geocoding service is used instead.</p>
+<p><strong>Weather, alerts and radar.</strong> The coordinates of the place you're viewing are sent, at full precision, directly from your phone to:</p>
+<ul><li><strong>Open-Meteo</strong>: forecasts, past model runs, marine and air-quality data, and city search/place names.
+</li><li><strong>NOAA National Weather Service</strong> (api.weather.gov): alerts and current observations, U.S. only.
+</li><li><strong>Radar tile services</strong> (LibreWXR, RainViewer, or a radar host you enter yourself): map tiles around your location, which reveal the general area. This also runs in the background for rain and storm alerts. If you save a radar API key, it's saved only on your phone and sent only to the radar service you chose.
+</li></ul>
+<p>The app keeps refreshing alerts and rain/storm warnings in the background (about every 15 minutes, or continuously if you turn on Live storm watch) using your last saved location. Places you add for family members in Close-One (watch pins) are checked the same way. Other NOAA services (hurricane center, buoys, tides, climate indices, Aviation Weather Center, Great Lakes lab) are contacted with station IDs or a map area near you, not your exact coordinates.</p>
+<p><strong>Maps.</strong> Map tiles come from Esri (ArcGIS), CARTO, OpenSeaMap, and MapLibre (fonts). Tile requests show these services which part of the map you're looking at.</p>
+<p><strong>Optional overlays</strong> (only when you turn them on). These send the map center or your location, with a search radius, to the services that provide them:</p>
+<ul><li><strong>Aviation</strong>: adsb.fi, OpenSky Network, adsbdb, HexDB, airport-data.com.
+</li><li><strong>Marine</strong>: OpenWaters AIS, Fintraffic Digitraffic.
+</li><li><strong>Space</strong>: CelesTrak, The Space Devs.
+</li><li><strong>Hazards</strong>: USGS earthquakes and volcanoes, and NIFC fire data hosted on Esri ArcGIS.
+</li><li><strong>Lightning</strong>: a public mirror of NOAA satellite lightning data, hosted on GitHub and jsDelivr.
+</li></ul>
+<p>When you tap an aircraft, ship or spacecraft, its name is searched on Wikipedia/Wikimedia Commons for a photo.</p>
+<h2>Weather cams and our cams server</h2>
+<p>The app shows live weather cameras near the place you're viewing.</p>
+<ul><li><strong>Our cams server.</strong> The Home screen looks up nearby cams <strong>automatically</strong> whenever it's on screen, even if you never open the cams list: at most about once every 10 minutes, and again when the place you're viewing changes. The Radar "Weather cams" layer (off by default) does the same for the map area while it's on. Each lookup sends a location <strong>rounded to 0.1° (about 11 km / 7 miles)</strong> to our server at ywwa-cams.yourworldapps.workers.dev. If you use GPS, that's your rounded location; if you searched for a city, it's that city's. The server runs on <strong>Cloudflare</strong>, which hosts it for us, and never receives your exact position. There's currently no separate switch to turn off the Home cams lookup.
+</li><li><strong>What the server does.</strong> It passes the rounded location to <strong>Windy.com</strong> (and to no one else) to ask for webcams near that point. The request comes from Cloudflare's servers, not from your phone or your IP address. For <strong>WebCOOS</strong> coastal cams (SECOORA / NOAA IOOS), it doesn't send any location at all: it downloads WebCOOS's public camera list and picks the nearby cams itself. It also serves a short list of curated YouTube live streams.
+</li><li><strong>What the server keeps.</strong> Request logging is turned off, and we don't store your location, IP address, or any identifier. To avoid calling Windy and WebCOOS for every user, results are briefly cached by rounded area only, with no user information: Windy results for 4 minutes, WebCOOS latest-image lookups for 5 minutes, the WebCOOS camera list for 1 hour, and the YouTube list for 1 day. Cloudflare processes your IP address to deliver each request, under Cloudflare's privacy policy.
+</li><li><strong>Images.</strong> Camera images load directly from their owners: USGS (stored on Amazon Web Services), NOAA (buoy and Great Lakes cams), Windy.com, WebCOOS, and YouTube thumbnails. Those services see your IP address and which images you load. Public USGS, NOAA and WebCOOS images may be cached on your phone (up to 20 MB). Windy and YouTube images are kept in memory only. Favorite cams are saved only on your phone.
+</li></ul>
+<h2>YouTube</h2>
+<p>Live cam streams and launch webcasts play through the <strong>YouTube embedded player</strong> inside the app. This app uses YouTube API Services. By playing YouTube videos you agree to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>, and Google's use of the data is covered by the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+<p>When you play a video, YouTube receives your IP address, device and browser information, which video you watched, and playback details. It may set or read cookies (identifiers) in the app's web view, and can link them to your Google account if you're signed in to YouTube there. YouTube may show its own ads in some streams. We don't receive any of this. Clearing the app's storage removes these cookies. "Sign in to YouTube" opens your own browser.</p>
+<h2>AI briefings</h2>
+<ul><li><strong>Built-in briefings</strong> are written on your phone from forecast data. Nothing extra is sent.
+</li><li><strong>On-device AI (Premium).</strong> If you choose to download it, the app downloads Google's Gemma 3 1B model (about 557 MB) from our release page on GitHub. GitHub sees your IP address for the download. The model runs entirely on your phone, so your forecast and prompts never leave the device. The model is provided under the <a href="https://ai.google.dev/gemma/terms">Gemma Terms of Use</a>.
+</li><li><strong>Bring your own AI (Premium, optional).</strong> If you enter your own API key for OpenAI, xAI (Grok), Anthropic, or another HTTPS service you specify, the app sends requests directly to that provider. Each request carries your key plus your place name, forecast and alert data. Requests are sent when you open an AI briefing, when you look up a ship photo, and <strong>automatically</strong> by the rain-arrival helper during forecast refreshes when radar shows rain nearby; that helper also sends your <strong>coordinates</strong>. Your key is saved only on your phone, sent only to the provider you chose, and never sent to us. That provider's privacy policy applies.
+</li></ul>
+<h2>Premium purchases (Google Play)</h2>
+<p>Premium (for example $4.99/month; current plans and any free trial are shown in Google Play before you confirm) is sold through <strong>Google Play Billing</strong>. Google handles payment, renewals, trials and cancellations. We never see your card details. The app asks Google Play whether you have an active subscription so it can unlock Premium. The Google Play Billing library also sends Google diagnostic information about billing requests. We don't send purchase information to any server of ours. Manage or cancel in Google Play → Payments &amp; subscriptions.</p>
+<h2>Ratings prompt</h2>
+<p>Occasionally the app may show Google Play's in-app rating card. If you leave a rating or review, it goes to Google Play under Google's terms. The app isn't told what you wrote.</p>
+<h2>Close-One Share and storm texts (Premium)</h2>
+<p>You can pick contacts with Android's contact picker. The app can't read your whole address book. Names, phone numbers and watch places are stored only on your phone. When a storm alert hits a contact's watch place, the app opens your Messages app with a <strong>draft</strong> text addressed to that contact (it may open by itself while the app is on screen), and <strong>you</strong> decide whether to tap Send. The app never sends texts itself. Invites are also sent as drafts you send yourself. Live location sharing between phones isn't active in the current app. The app does contain Google's Firebase Realtime Database library for that possible future feature, but it isn't connected to any real Firebase project and sends nothing. We'll update this policy and the Google Play Data safety section before live sharing is ever turned on.</p>
+<h2>Things you choose to share</h2>
+<p>When you tap Share on a cam or export your Product Pulse (an on-device log of which app features you've used, with no location, contacts or keys), the app hands the text to the app you pick. Links to web pages open in your browser.</p>
+<h2>What stays on your phone</h2>
+<p>Settings, saved places, favorites, Close-One contacts and watch places, alert history, Product Pulse, API keys you enter, and the downloaded AI model all stay on your phone. They're never uploaded to us. Android's backup excludes the app's settings store (which holds your keys, contacts and places). A few small preferences, such as favorite cams and tip/rating-prompt counters, may be included in your own Android backup if you use it. Uninstalling the app or clearing its storage deletes all of this.</p>
+<h2>What we don't do</h2>
+<ul><li>We don't create accounts or ask for your name, email or phone number.
+</li><li>We don't show ads of our own or use the advertising ID. (YouTube may show its own ads in streams you play.)
+</li><li>We don't include analytics, crash-reporting or tracking SDKs.
+</li><li>We don't sell or rent personal data, or use it for advertising profiles.
+</li><li>The app doesn't use the microphone or camera, or read your files, calendar, or full contact list.
+</li></ul>
+<h2>Permissions and why</h2>
+<ul><li><strong>Location (approximate or precise):</strong> weather, alerts, radar and cams for where you are. Optional.
+</li><li><strong>Notifications:</strong> rain, storm, lightning, launch and other alerts you turn on.
+</li><li><strong>Run at startup, wake lock, vibrate:</strong> keep scheduled alerts working after a restart and deliver them on time.
+</li><li><strong>Foreground service:</strong> the optional Live storm watch shows an ongoing notification while it monitors weather.
+</li><li><strong>Ignore battery optimizations (you're asked first):</strong> helps alerts arrive on phones that delay background work.
+</li><li><strong>Internet and network state:</strong> fetch data and avoid large downloads on metered connections.
+</li></ul>
+<h2>Services the app contacts</h2>
+<p>Each of these services handles your data under its own privacy policy:</p>
+<ul><li><strong>Weather, forecast and hazards:</strong>
+<ul><li><a href="https://open-meteo.com/en/terms">Open-Meteo</a> (forecasts, geocoding, marine, air quality)
+</li><li><a href="https://www.weather.gov/privacy">NOAA / National Weather Service</a> (alerts, observations, hurricane center, buoys, tides, Great Lakes lab, Aviation Weather Center; see also <a href="https://www.noaa.gov/protecting-your-privacy">NOAA privacy</a>)
+</li><li><a href="https://www.usgs.gov/policies-and-notices">U.S. Geological Survey</a> (earthquakes, volcanoes, river cams)
+</li><li><a href="https://www.esri.com/en-us/privacy/overview">NIFC fire data on Esri ArcGIS</a>
+</li><li>Lightning mirror on <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a> / <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net">jsDelivr</a>
+</li></ul>
+</li><li><strong>Maps and radar:</strong>
+<ul><li><a href="https://www.esri.com/en-us/privacy/overview">Esri</a>
+</li><li><a href="https://carto.com/privacy">CARTO</a>
+</li><li><a href="https://openseamap.org/">OpenSeaMap</a>
+</li><li><a href="https://maplibre.org/">MapLibre</a> (map fonts)
+</li><li><a href="https://librewxr.net/">LibreWXR</a>
+</li><li><a href="https://www.rainviewer.com/privacy.html">RainViewer</a>
+</li></ul>
+</li><li><strong>Weather cams:</strong>
+<ul><li>our cams server on <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>
+</li><li><a href="https://account.windy.com/agreements/windy-privacy-policy">Windy.com</a>
+</li><li><a href="https://webcoos.org/usage-guidelines">WebCOOS</a> (SECOORA / NOAA IOOS)
+</li><li>USGS and NOAA (above)
+</li><li>YouTube (<a href="https://www.youtube.com/t/terms">Terms</a>, <a href="https://policies.google.com/privacy">Google Privacy Policy</a>)
+</li></ul>
+</li><li><strong>Aviation, marine and space overlays:</strong>
+<ul><li><a href="https://adsb.fi/">adsb.fi</a>
+</li><li><a href="https://opensky-network.org/about/privacy-policy">OpenSky Network</a>
+</li><li><a href="https://www.adsbdb.com/">adsbdb</a>
+</li><li><a href="https://hexdb.io/">HexDB</a>
+</li><li>airport-data.com
+</li><li><a href="https://ais.openwaters.io/">OpenWaters AIS</a>
+</li><li><a href="https://www.fintraffic.fi/en/privacy-policy">Fintraffic Digitraffic</a>
+</li><li><a href="https://celestrak.org/">CelesTrak</a>
+</li><li><a href="https://thespacedevs.com/privacy">The Space Devs</a>
+</li><li><a href="https://foundation.wikimedia.org/wiki/Policy:Privacy_policy">Wikimedia Foundation</a> (photos)
+</li></ul>
+</li><li><strong>Google:</strong>
+<ul><li>Google Play services location, Android geocoder, Google Play Billing, and Google Play in-app review (<a href="https://policies.google.com/privacy">Google Privacy Policy</a>)
+</li></ul>
+</li><li><strong>On-device AI download:</strong>
+<ul><li><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a>
+</li></ul>
+</li><li><strong>Your own AI provider (only if you add a key):</strong>
+<ul><li><a href="https://openai.com/policies/privacy-policy">OpenAI</a>
+</li><li><a href="https://x.ai/legal/privacy-policy">xAI</a>
+</li><li><a href="https://www.anthropic.com/legal/privacy">Anthropic</a>
+</li><li>or the service you enter
+</li></ul>
+</li></ul>
+<h2>Data retention and deletion</h2>
+<p>We don't keep any personal data on our servers. The cams server keeps no request logs. Its short-lived caches, keyed only by rounded area, expire within 5 minutes to 1 day (1 hour for the WebCOOS list, which has no location in it). Everything else lives on your phone until you delete it, clear the app's storage, or uninstall. Third-party services keep data under their own policies.</p>
+<p><strong>Deletion requests.</strong> You can ask us to delete your data at any time by emailing <a href="mailto:appzdj2003@gmail.com"><strong>appzdj2003@gmail.com</strong></a> (a subject like "Data deletion request" helps). Because we don't store any personal data on our servers, there's normally nothing on our side to delete; we'll confirm that in our reply and explain how to remove the data stored on your phone (clear the app's storage or uninstall). Your Premium purchase and subscription records are held by <strong>Google Play</strong>, not by us; you can manage them in Google Play and your Google Account. Data received by the other services listed above is held by those services; contact them directly to ask for its deletion.</p>
+<h2>Security</h2>
+<p>All connections use encrypted HTTPS, and the app refuses unencrypted connections. API keys used by our cams server are kept as server secrets and are never included in the app.</p>
+<h2>Children</h2>
+<p>The app is a general-audience weather app and isn't directed at children under 13. We don't knowingly collect personal information from children.</p>
+<h2>Your choices</h2>
+<ul><li>Deny or revoke location permission and search for a city instead.
+</li><li>Turn off alerts, overlays, the Radar cams layer, or Live storm watch.
+</li><li>Don't play YouTube streams, or clear the app's storage to remove YouTube cookies.
+</li><li>Remove an AI key or the on-device model at any time.
+</li><li>Clear the app's storage or uninstall to delete everything stored on your phone.
+</li><li>Email <a href="mailto:appzdj2003@gmail.com">appzdj2003@gmail.com</a> to ask a question or request deletion.
+</li></ul>
+<h2>Weather information isn't advice</h2>
+<p>Forecasts, radar, alerts and AI briefings are for information only. They aren't professional meteorological, marine, aviation or emergency advice. Always follow official National Weather Service and local emergency guidance.</p>
+<h2>Changes</h2>
+<p>If anything here changes, for example a new service or a new kind of data, we'll update this policy and the "Last updated" date, and update the Google Play Data safety section before the change ships.</p>
+<h2>Contact</h2>
+<p>Your World Apps: <a href="mailto:appzdj2003@gmail.com"><strong>appzdj2003@gmail.com</strong></a></p>
+<p>Questions, privacy requests and data deletion requests all go to this address.</p>
+<p class="dim small">This page mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:appzdj2003@gmail.com">appzdj2003@gmail.com</a>.</p></div></div></main>
+<footer><div class="wrap"><div class="cols">
+<div><h4>Your World Weather Radar</h4><ul><li><a href="https://play.google.com/store/apps/details?id=com.yourworld.weatheranalyzer&amp;referrer=utm_source%3Dweathersite%26utm_medium%3Dprivacy%26utm_campaign%3Dfooter" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="features.html">Features</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="plan.html">Forecast &amp; Alert Planner</a></li><li><a href="trip.html">Weather Trip Planner</a></li></ul></div>
+<div><h4>Weather guides</h4><ul><li><a href="guides/how-to-read-weather-radar.html">How to read weather radar</a></li><li><a href="guides/watch-vs-warning.html">Watch vs. warning</a></li><li><a href="guides/hurricane-preparedness.html">Hurricane preparedness</a></li><li><a href="guides/lightning-safety.html">Lightning safety</a></li><li><a href="guides/barometric-pressure-and-weather.html">Barometric pressure</a></li><li><a href="guides/off-grid-emergency-weather.html">Off-grid emergency weather</a></li></ul></div>
+<div><h4>More</h4><ul><li><a href="gear/">Weather gear</a></li><li><a href="support.html">Support</a></li><li><a href="privacy.html">Privacy policy</a></li><li><a href="affiliate-disclosure.html">Affiliate disclosure</a></li></ul></div>
+</div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; 2026 Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
+</body></html>
