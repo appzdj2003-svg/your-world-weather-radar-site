@@ -127,3 +127,85 @@ dict(slug="off-grid-emergency-weather", short="Off-grid emergency weather", emoj
  sources=[("NOAA Weather Radio All Hazards", NWS + "/nwr/"), ("FCC: Text to 911", "https://www.fcc.gov/consumers/guides/what-you-need-know-about-text-911"), ("Ready.gov: Build a kit", "https://www.ready.gov/kit"), ("NWS: Weather-Ready Nation", NWS + "/wrn/")],
  app="The app's free Off-Grid Safety tab saves your last location and helps you text it to emergency contacts. If your phone supports it, the text can go by satellite. Carrier message and data rates may apply."),
 ]
+
+GUIDES += [
+dict(slug="flood-safety-turn-around", short="Flood safety", emoji="🌊",
+ title="Flood Safety: Turn Around, Don't Drown",
+ desc="Why floodwater is so dangerous, how little moving water it takes to sweep away a person or a car, and what NWS says to do.",
+ body="""
+<p>Flooding is one of the deadliest weather hazards in the United States, and many flood deaths happen in vehicles. The National Weather Service's message is simple: <strong>Turn Around, Don't Drown.</strong></p>
+<h2>Why floodwater is so dangerous</h2>
+<ul><li>Just <strong>6 inches</strong> of fast-moving water can knock an adult off their feet.</li>
+<li><strong>12 inches</strong> of moving water can carry away most cars.</li>
+<li><strong>2 feet</strong> of moving water can carry away SUVs and trucks.</li></ul>
+<p>You can't tell how deep the water is, or whether the road underneath has washed out.</p>
+<h2>What to do</h2>
+<ul><li>Never drive around barricades or into flooded roads. Find another route.</li>
+<li>Take extra care at night, when flooded roads are harder to see.</li>
+<li>During a <strong>Flash Flood Warning</strong>, move to higher ground right away. (For what a watch or a warning means, see <a href="watch-vs-warning.html">Watch vs. warning</a>.)</li>
+<li>Stay out of floodwater on foot. It can hide debris, downed power lines and contamination.</li></ul>
+""",
+ sources=[("NWS: Turn Around Don't Drown", NWS + "/safety/flood-turn-around-dont-drown"), ("NWS: Flood safety", NWS + "/safety/flood"), ("Ready.gov: Floods", "https://www.ready.gov/floods")],
+ related=["watch-vs-warning", "weather-emergency-kit", "how-to-read-weather-radar"],
+ app="The app shows NWS flood alerts as compact cards, along with rain arrival notifications for your place."),
+dict(slug="thunderstorm-lightning-safety", short="Severe thunderstorm safety", emoji="⛈️",
+ title="Severe Thunderstorm Safety: Wind, Hail and What 'Severe' Means",
+ desc="What makes a thunderstorm 'severe' by NWS criteria, the dangers of straight-line wind and hail, and how to stay safe.",
+ body="""
+<p>Every thunderstorm produces lightning. For lightning rules, such as when to go indoors and how long to wait, see our <a href="lightning-safety.html">lightning safety guide</a>. This page covers what makes a storm <em>severe</em>.</p>
+<h2>What "severe" means</h2>
+<p>The National Weather Service calls a thunderstorm severe when it produces at least one of:</p>
+<ul><li>Hail <strong>1 inch</strong> in diameter or larger</li><li>Wind gusts of <strong>58 mph</strong> or stronger</li><li>A tornado</li></ul>
+<h2>Damaging wind</h2>
+<p>Most thunderstorm wind damage comes from straight-line winds, not tornadoes. They can down trees and power lines. On radar, a <a href="how-to-read-weather-radar.html">bow echo</a> is a classic sign.</p>
+<h2>During a Severe Thunderstorm Warning</h2>
+<ul><li>Go indoors to a sturdy building and stay away from windows.</li><li>Bring in or secure loose outdoor items before the storm if you can.</li>
+<li>Don't drive through flooded roads (<a href="flood-safety-turn-around.html">Turn Around, Don't Drown</a>).</li>
+<li>If the warning also mentions a possible tornado, follow your <a href="tornado-watch-vs-warning.html">tornado shelter plan</a>.</li></ul>
+""",
+ sources=[("NWS: Thunderstorm safety", NWS + "/safety/thunderstorm"), ("NOAA SPC: Severe weather FAQ", "https://www.spc.noaa.gov/faq/"), ("Ready.gov: Thunderstorms & lightning", "https://www.ready.gov/thunderstorms-lightning")],
+ related=["lightning-safety", "tornado-watch-vs-warning", "how-to-read-weather-radar"],
+ app="The app's radar and NWS alert cards help you see a severe storm coming, and the lightning layer shows strikes nearby."),
+dict(slug="tornado-watch-vs-warning", short="Tornado safety", emoji="🌪️",
+ title="Tornado Safety: Watch vs. Warning and Where to Shelter",
+ desc="What a tornado watch and a tornado warning mean, and the safest places to shelter at home, in a mobile home or on the road.",
+ body="""
+<p>For how watches, warnings and advisories work in general, see <a href="watch-vs-warning.html">Watch vs. warning</a>. Here's what they mean for tornadoes.</p>
+<ul><li><strong>Tornado Watch:</strong> conditions are favorable for tornadoes in and near the watch area. Review your plan and be ready to act.</li>
+<li><strong>Tornado Warning:</strong> a tornado has been sighted or indicated by weather radar. Take shelter immediately.</li></ul>
+<h2>Where to go</h2>
+<ul><li>A basement, storm cellar, or the lowest floor of a sturdy building.</li>
+<li>No basement? Pick a small interior room with no windows on the lowest floor, such as a closet, a bathroom or an interior hallway.</li>
+<li>Get under something sturdy, and cover your head and neck with your arms, a blanket or a helmet.</li>
+<li><strong>Mobile homes don't offer protection.</strong> Plan ahead to get to a sturdy building.</li></ul>
+<h2>Have more than one way to get warnings</h2>
+<p>Don't rely on outdoor sirens alone. Use NOAA Weather Radio, Wireless Emergency Alerts on your phone, local media and apps.</p>
+""",
+ sources=[("NWS: Tornado safety", NWS + "/safety/tornado"), ("Ready.gov: Tornadoes", "https://www.ready.gov/tornadoes"), ("NOAA SPC", "https://www.spc.noaa.gov/")],
+ related=["watch-vs-warning", "thunderstorm-lightning-safety", "weather-emergency-kit"],
+ app="The app shows NWS tornado watches and warnings as alert cards and can notify you in the background."),
+dict(slug="weather-emergency-kit", short="Emergency kit", emoji="🧰",
+ title="Build a Basic Weather Emergency Kit",
+ desc="Ready.gov's basic emergency kit checklist for storms and power outages: water, food, radio, light, first aid and more.",
+ body="""
+<p>Severe storms can knock out power and water for days. Ready.gov recommends a basic kit you can grab quickly.</p>
+<h2>Basic kit checklist</h2>
+<ul><li><strong>Water:</strong> one gallon per person per day for several days.</li><li><strong>Food:</strong> several days' supply of non-perishable food, and a manual can opener.</li>
+<li>A battery-powered or hand-crank radio, and a NOAA Weather Radio with tone alert.</li><li>A flashlight, a first-aid kit and extra batteries.</li>
+<li>A whistle to signal for help, and a dust mask.</li><li>Moist towelettes, garbage bags and plastic ties for sanitation.</li>
+<li>A wrench or pliers to turn off utilities, and local maps.</li><li>A cell phone with chargers and a backup battery.</li></ul>
+<h2>Don't forget</h2>
+<p>Prescription medicines, glasses, pet supplies, and copies of important documents. Check your kit and replace expired items regularly.</p>
+<p>Shopping ideas: see our <a href="../gear/#emergency">weather gear page</a>.</p>
+""",
+ sources=[("Ready.gov: Build a kit", "https://www.ready.gov/kit"), ("NOAA Weather Radio", NWS + "/nwr/")],
+ related=["hurricane-preparedness", "off-grid-emergency-weather", "tornado-watch-vs-warning"],
+ app="The app's free Off-Grid Safety tab helps you text your saved location to emergency contacts, by satellite if your phone supports it. Carrier message and data rates may apply."),
+]
+REL = {"watch-vs-warning": ["tornado-watch-vs-warning", "thunderstorm-lightning-safety", "flood-safety-turn-around"],
+       "lightning-safety": ["thunderstorm-lightning-safety", "off-grid-emergency-weather"],
+       "hurricane-preparedness": ["weather-emergency-kit", "flood-safety-turn-around"],
+       "how-to-read-weather-radar": ["thunderstorm-lightning-safety", "watch-vs-warning"],
+       "barometric-pressure-and-weather": ["how-to-read-weather-radar"],
+       "off-grid-emergency-weather": ["weather-emergency-kit", "lightning-safety"]}
+for g in GUIDES: g.setdefault("related", REL.get(g["slug"], []))

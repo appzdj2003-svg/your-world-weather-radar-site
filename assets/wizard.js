@@ -59,7 +59,7 @@
     $("qtext").onkeydown = e => { if (e.key === "Enter") $("qgo").click(); };
     // Opened with an existing link: show it.
     if (location.hash.startsWith("#v1.")) cfg.codec.decode(location.hash).then(o => { Object.assign(st, o); i = steps.length; render(); }).catch(() => render());
-    else render();
+    else { render(); const q = new URLSearchParams(location.search).get("q"); if (q) { $("qtext").value = q.slice(0, 300); $("qgo").click(); } }
   }
   root.YWWizard = { run, E };
 })(this);
