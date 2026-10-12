@@ -246,14 +246,16 @@ def planner(path, kind):
     title = "Forecast & Alert Planner" if is_plan else "Weather Trip Planner"
     lead = ("Pick a place, what you're doing and when. Get a link and QR code that open the plan in the app." if is_plan
             else "Destination, dates and how you're traveling. Get a link and QR code that open the trip in the app.")
-    b = f'''<div class="wiz"><div class="wcard" style="margin-bottom:16px"><h3 style="margin-top:0">⚡ Quick Plan: say it in one sentence</h3>
-<div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="Describe your plan">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">Plan it</button></div>
+    head = ('<div class="atl-head"><span class="atl-av" aria-hidden="true">🌊</span><div><b>Ask Atlantis</b><span>Describe your trip, or ask a weather question</span></div></div>'
+            if not is_plan else '<h3 style="margin-top:0">⚡ Quick Plan: say it in one sentence</h3>')
+    b = f'''<div class="wiz"><div class="wcard" style="margin-bottom:16px">{head}
+<div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="{"Describe your plan" if is_plan else "Ask Atlantis about your trip"}">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">{"Plan it" if is_plan else "Ask"}</button></div>
 <p class="note">Try: “{E(ex)}”. Tap 🎤 to speak. Parsed in your browser; this site sends nothing anywhere (your browser's own speech service handles voice).</p><div class="parsed" id="qout"></div></div>
 <div class="wcard"><div class="prog"><i id="prog"></i></div><div id="wiz"></div></div>
 <p class="note" style="text-align:center">Don't have the app? {play_btn(path.replace(".html",""), "dark", "planner", "Get it on Google Play")}</p></div>'''
     codec = "plancodec.js" if is_plan else "tripcodec.js"
     page(path, title, lead, b, hero(title, lead, "Planner"), "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js", "wizard.js", "plan.js" if is_plan else "trip.js", "voice.js"))
+         scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js") + (() if is_plan else ("askdata.js", "ask.js")) + ("wizard.js", "plan.js" if is_plan else "trip.js", "voice.js"))
 
 def ask():
     import askdata

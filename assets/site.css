@@ -110,3 +110,6 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 @keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}100%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
 @media (prefers-reduced-motion:reduce){.mic.listening{animation:none}}
 .vmsg{font-size:.88rem;color:var(--amber-d);margin:8px 0 0;font-weight:600}
+.atl-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}.atl-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;background:linear-gradient(135deg,var(--sky),var(--sky-d));box-shadow:0 0 0 3px var(--sky-l)}
+.atl-head b{display:block;color:var(--sky-d);font-size:1.05rem}.atl-head span{font-size:.85rem;color:var(--mute)}
+.msg.atl{max-width:100%;margin-top:10px}

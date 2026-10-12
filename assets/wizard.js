@@ -51,6 +51,7 @@
     }
     // Quick plan
     $("qgo").onclick = () => {
+      const pre = cfg.preQuick && cfg.preQuick($("qtext").value); if (pre) { $("qout").innerHTML = pre; return; }
       const r = cfg.parse($("qtext").value, todayIso()); Object.keys(r).forEach(k => { if (k !== "missing" && k !== "alNamed") st[k] = r[k]; });
       $("qout").innerHTML = cfg.chipsFor(r).map(c => `<span>${E(c)}</span>`).join("") + (r.missing.length ? `<span style="background:#FEF3C7;color:#92400E">Still need: ${E(r.missing.map(m => cfg.missingName[m]).join(", "))}</span>` : "");
       const firstMissing = steps.findIndex(s => r.missing.includes(s.key) || (s.kind === "dates" && r.missing.includes("sd")));
