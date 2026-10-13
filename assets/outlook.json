@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T14:18:55+00:00",
+  "fetchedAt": "2026-10-13T14:28:07+00:00",
   "items": [
    {
     "id": "ep202026",
@@ -21,7 +21,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T14:18:55+00:00",
+  "fetchedAt": "2026-10-13T14:28:07+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -50,16 +50,16 @@
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1791899400,
-    "temp": 20,
-    "dewp": 7,
-    "wdir": 280,
+    "obsTime": 1791901200,
+    "temp": 21,
+    "dewp": 8,
+    "wdir": 290,
     "wspd": 18,
-    "wgst": 30,
+    "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR EGLL 131350Z AUTO 28018G30KT 9999 NCD 20/07 Q1020",
+    "rawOb": "METAR EGLL 131420Z AUTO 29018KT 9999 NCD 21/08 Q1020",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
@@ -231,7 +231,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T14:18:55+00:00",
+  "fetchedAt": "2026-10-13T14:28:07+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",

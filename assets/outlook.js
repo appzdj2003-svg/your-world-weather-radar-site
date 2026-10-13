@@ -70,6 +70,13 @@ function parseLaunches(items, now) {
   const today = all.filter(l => l.ms >= t - 3600e3 && l.ms <= t + 24 * 3600e3 && l.status !== "Success" && l.status !== "Failure");
   return today.length ? { today: true, list: today } : { today: false, list: all.filter(l => l.ms > t && l.status !== "Success").slice(0, 2) };
 }
+/* GMGSI gap-filler: only synoptic (00/06/12/18 UTC) frames, the Meteosat cadence NOAA may pass on "without fee for any use"
+   under the NOAA-EUMETSAT agreement. Parses the time list from the nowCOAST WMS capabilities. */
+function parseWmsTimes(xml) {
+  const m = /<Dimension[^>]*name="time"[^>]*>([^<]+)</i.exec(xml || ""); if (!m) return [];
+  return m[1].split(",").map(t => t.trim()).filter(t => !isNaN(Date.parse(t))).sort();
+}
+function latestSynoptic(times) { const s = (times || []).filter(t => new Date(t).getUTCHours() % 6 === 0 && new Date(t).getUTCMinutes() === 0); return s.length ? s[s.length - 1] : null; }
 /* Satellite frames: GIBS geostationary IR runs ~1.5-2 h behind; use 10-min slots ending 150 min ago. */
 function frameTimes(now, n, stepMin, lagMin) {
   const step = (stepMin || 20) * 60000, end = Math.floor(((now || Date.now()) - (lagMin || 150) * 60000) / 600000) * 600000;
@@ -116,7 +123,7 @@ function briefingScript(d) {
   L.push("Want this for your own backyard? Your World Weather Radar writes AI storm briefings for your exact location, from right now out to ten days.");
   return L;
 }
-const api = { parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
+const api = { parseWmsTimes, latestSynoptic, parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
 if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
 root.YWOutlook = api;
 
@@ -154,6 +161,11 @@ function initMap() {
     im.onload = () => { loaded++; frames.push({ t, im }); frames.sort((a, b) => a.t < b.t ? -1 : 1); if (loaded === 1) { im.classList.add("on"); stamp.textContent = "Satellite " + local(t); box.classList.add("ready"); } };
     im.onerror = () => { failed++; if (failed === times.length) { box.classList.add("ready", "failed"); stamp.textContent = "Satellite imagery is unavailable right now"; } };
     im.src = GIBS + "&LAYERS=" + IR + "&TIME=" + t; box.querySelector(".owo-frames").appendChild(im); });
+  const NC = "https://nowcoast.noaa.gov/geoserver/satellite/global_longwave_imagery_mosaic/ows?service=WMS&version=1.1.1";
+  fetch(NC.replace("1.1.1", "1.3.0") + "&request=GetCapabilities").then(r => r.text()).then(x => { const t = latestSynoptic(parseWmsTimes(x)); if (!t) return;
+    const g = new Image(); g.alt = ""; g.className = "owo-gmgsi"; g.onload = () => { box.classList.add("gap-filled"); const n = $("owo-gmgsi-t"); if (n) n.textContent = local(t); };
+    g.src = NC + "&request=GetMap&layers=global_longwave_imagery_mosaic&styles=&srs=EPSG:4326&bbox=-180,-90,180,90&width=" + W + "&height=" + H + "&format=image/png&transparent=true&time=" + encodeURIComponent(t.replace(".000Z", "Z"));
+    box.querySelector(".owo-base").after(g); }).catch(() => {});
   if (!lite) setInterval(() => { if (frames.length < 2 || document.hidden) return; frames[i % frames.length].im.classList.remove("on"); i = (i + 1) % frames.length;
     frames[i].im.classList.add("on"); stamp.textContent = "Satellite " + local(frames[i].t) + (i === frames.length - 1 ? " · latest" : ""); }, 650);
 }
