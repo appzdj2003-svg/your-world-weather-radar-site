@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T15:43:30+00:00",
+  "fetchedAt": "2026-10-13T15:54:52+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -37,45 +37,49 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T15:43:30+00:00",
+  "fetchedAt": "2026-10-13T15:54:52+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1791903060,
+    "obsTime": 1791906660,
     "temp": 20,
-    "dewp": 13.9,
-    "wdir": 170,
-    "wspd": 8,
+    "dewp": 15,
+    "wdir": 130,
+    "wspd": 10,
     "wgst": null,
     "wxString": null,
     "cover": "SCT",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 1700
+      "base": 2300
+     },
+     {
+      "cover": "FEW",
+      "base": 19000
      },
      {
       "cover": "SCT",
       "base": 25000
      }
     ],
-    "rawOb": "METAR KJFK 131451Z 17008KT 10SM FEW017 SCT250 20/14 A3002 RMK AO2 SLP164 T02000139 50007 $",
+    "rawOb": "METAR KJFK 131551Z 13010KT 10SM FEW023 FEW190 SCT250 20/15 A3000 RMK AO2 SLP158 T02000150 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1791904800,
-    "temp": 20,
-    "dewp": 8,
+    "obsTime": 1791906600,
+    "temp": 19,
+    "dewp": 9,
     "wdir": 270,
-    "wspd": 19,
+    "wspd": 18,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR EGLL 131520Z AUTO 27019KT 9999 NCD 20/08 Q1021",
+    "rawOb": "METAR EGLL 131550Z AUTO 27018KT 9999 NCD 19/09 Q1022",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
@@ -239,7 +243,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T15:43:30+00:00",
+  "fetchedAt": "2026-10-13T15:54:52+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
@@ -360,6 +364,26 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/electron_image_20190705175640.jpeg"
+   },
+   {
+    "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
+    "name": "Falcon 9 Block 5 | Starlink Group 15-16",
+    "net": "2026-10-24T05:29:00Z",
+    "windowStart": "2026-10-24T05:29:00Z",
+    "windowEnd": "2026-10-24T09:29:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
+    "rocket": "Falcon 9 Block 5",
+    "provider": "SpaceX",
+    "mission": "Starlink Group 15-16",
+    "orbit": "LEO",
+    "pad": "Space Launch Complex 4E",
+    "site": "Vandenberg SFB, CA, USA",
+    "lat": "34.632",
+    "lon": "-120.611",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon2520925_image_20221009234147.png"
    },
    {
     "id": "ef9850ad-1096-425b-9d27-f7bbd186e61a",
@@ -720,26 +744,6 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/new_glenn_on_lc_image_20240313170026.jpeg"
-   },
-   {
-    "id": "0b85fcca-5252-48d7-9ccb-c10b1da9d183",
-    "name": "Ariane 62 | Galileo L15 (FOC FM28 & FM31)",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Ariane 62",
-    "provider": "Arianespace",
-    "mission": "Galileo L15 (FOC FM28 & FM31)",
-    "orbit": "MEO",
-    "pad": "Ariane Launch Area 4",
-    "site": "Guiana Space Centre, French Guiana",
-    "lat": "5.256319",
-    "lon": "-52.786838",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_62_lifto_image_20240711132056.jpeg"
    }
   ]
  }

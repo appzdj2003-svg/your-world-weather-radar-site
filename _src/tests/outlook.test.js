@@ -4,11 +4,16 @@ const nhc = O.parseNhc([{ id: "ep202026", name: "Simon", classification: "HU", i
   { id: "al012026", name: "Bad" }]);
 assert.strictEqual(nhc.length, 1); assert.deepStrictEqual([nhc[0].mph, nhc[0].cat, nhc[0].basin, nhc[0].move, nhc[0].type], [92, 1, "Eastern Pacific", "WNW at 3 mph", "Hurricane"]);
 const gd = O.parseGdacs({ features: [
-  { geometry: { coordinates: [-107.2, 20.6] }, properties: { eventtype: "TC", iscurrent: "true", eventname: "SIMON-26", alertlevel: "Orange", country: "Mexico", severitydata: { severity: 250 }, url: { report: "r" } } },
-  { geometry: { coordinates: [130, 15] }, properties: { eventtype: "TC", iscurrent: "true", eventname: "FUNG-WONG-26", severitydata: { severity: 160.9 } } },
-  { geometry: { coordinates: [1, 1] }, properties: { eventtype: "TC", iscurrent: "false", eventname: "OLD-25" } }] });
-assert.deepStrictEqual(gd.map(g => g.name), ["Simon", "Fung-Wong"]); assert.strictEqual(gd[1].mph, 100);
-const all = O.mergeStorms(nhc, gd); assert.deepStrictEqual(all.map(s => s.src + ":" + s.name), ["GDACS:Fung-Wong", "NHC:Simon"]);
+  { geometry: { coordinates: [-84, 37.5] }, properties: { eventtype: "TC", iscurrent: "true", eventname: "ISAIAS-26", todate: "2026-10-11T15:00:00", country: "United States", severitydata: { severity: 194.4 } } },
+  { geometry: { coordinates: [-107.2, 20.6] }, properties: { eventtype: "TC", iscurrent: "true", eventname: "SIMON-26", todate: "2026-10-13T12:00:00", alertlevel: "Orange", country: "Mexico", severitydata: { severity: 250 }, url: { report: "r" } } },
+  { geometry: { coordinates: [130, 15] }, properties: { eventtype: "TC", iscurrent: "true", eventname: "FUNG-WONG-26", todate: "2026-10-13T09:00:00", severitydata: { severity: 160.9 } } },
+  { geometry: { coordinates: [1, 1] }, properties: { eventtype: "TC", iscurrent: "false", eventname: "OLD-25" } }] }, Date.parse("2026-10-13T14:00:00Z"));
+assert.deepStrictEqual(gd.map(g => g.name), ["Simon", "Fung-Wong"], "stale Isaias (last advisory 47 h old) dropped");
+assert.strictEqual(gd[1].mph, null, "GDACS peak wind is not shown as current wind"); assert.strictEqual(gd[1].peakMph, 100);
+{ const td = O.parseNhc([{ id: "ep212026", name: "Twenty-One-e", classification: "TD", intensity: "30", latitudeNumeric: 12, longitudeNumeric: -100, cone: "cones/x.png" }]);
+  assert.deepStrictEqual([td[0].name, td[0].type, td[0].mph, td[0].cat], ["Twenty-One-E", "Tropical Depression", 35, 0]);
+  const near = O.mergeStorms(td, [{ src: "GDACS", name: "Twenty-One", lat: 12.5, lon: -100.4 }]); assert.strictEqual(near.length, 1, "GDACS duplicate by position merged"); }
+const all = O.mergeStorms(nhc, gd); assert.deepStrictEqual(all.map(s => s.src + ":" + s.name), ["NHC:Simon", "GDACS:Fung-Wong"]);
 const now = Date.parse("2026-10-13T14:00:00Z");
 const al = O.parseAlerts({ features: [
   { properties: { event: "Flood Warning", severity: "Severe", areaDesc: "A; B; C; D", expires: "2026-10-13T20:00:00Z" } },

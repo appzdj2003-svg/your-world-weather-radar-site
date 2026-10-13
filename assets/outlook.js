@@ -15,24 +15,30 @@ function parseNhc(items) {
   return (items || []).filter(s => s && s.name).map(s => {
     const kt = +s.intensity, mph = isNaN(kt) ? null : kt2mph(kt);
     const cls = s.classification || "";
-    return { src: "NHC", name: s.name, type: CLS[cls] || cls || "Tropical system", cat: cls === "HU" && mph ? saffir(mph) : 0,
+    return { src: "NHC", name: titleName(s.name), type: CLS[cls] || cls || "Tropical system", cat: cls === "HU" && mph ? saffir(mph) : 0,
       mph, pressure: +s.pressure || null, lat: s.latitudeNumeric, lon: s.longitudeNumeric,
       basin: BASIN[(s.id || "").slice(0, 2).toUpperCase()] || "", move: s.movementSpeed != null ? `${compass(s.movementDir)} at ${kt2mph(+s.movementSpeed)} mph` : "",
       cone: s.cone ? (/^https?:/.test(s.cone) ? s.cone : ASSET_BASE() + s.cone) : null, link: s.graphics || s.advisory || "https://www.nhc.noaa.gov/", updated: s.lastUpdate || null };
   }).filter(s => typeof s.lat === "number" && typeof s.lon === "number");
 }
-function parseGdacs(fc) {
+/* GDACS: severitydata is the event's PEAK wind over its life, not current intensity, so it's not shown as wind.
+   Events whose last advisory (todate) is older than 18 h are stale (e.g. post-landfall remnants still flagged current) and dropped. */
+function parseGdacs(fc, now) {
+  const t = now || Date.now();
   return ((fc && fc.features) || []).filter(f => f.properties && String(f.properties.iscurrent) === "true" && f.properties.eventtype === "TC").map(f => {
     const p = f.properties, c = (f.geometry && f.geometry.coordinates) || [], kmh = p.severitydata && +p.severitydata.severity;
-    return { src: "GDACS", name: (p.eventname || p.name || "").replace(/-\d+$/, "").replace(/^\w/, ch => ch).toLowerCase().replace(/(^|[\s-])\w/g, m => m.toUpperCase()),
-      type: "Tropical cyclone", alert: p.alertlevel || "", mph: kmh ? Math.round(kmh / 1.609) : null, lat: c[1], lon: c[0],
-      where: p.country || "", link: (p.url && p.url.report) || "https://www.gdacs.org/", updated: p.datemodified ? p.datemodified + "Z" : null };
-  }).filter(s => typeof s.lat === "number");
+    const last = p.todate ? Date.parse(p.todate + (/[zZ]|[+-]\d\d:?\d\d$/.test(p.todate) ? "" : "Z")) : NaN;
+    return { src: "GDACS", name: titleName((p.eventname || p.name || "").replace(/-\d+$/, "")),
+      type: "Tropical cyclone", alert: p.alertlevel || "", mph: null, peakMph: kmh ? Math.round(kmh / 1.609) : null, lat: c[1], lon: c[0],
+      where: p.country || "", link: (p.url && p.url.report) || "https://www.gdacs.org/", updated: isNaN(last) ? null : new Date(last).toISOString(), _last: last };
+  }).filter(s => typeof s.lat === "number" && !isNaN(s._last) && t - s._last <= 18 * 3600e3);
 }
+function titleName(n) { return String(n).toLowerCase().replace(/(^|[\s-])(\w)/g, (m, a, b) => a + b.toUpperCase()); }
 /* NHC first (richer), then GDACS storms NHC doesn't already list (matched by name). */
 function mergeStorms(nhc, gd) {
   const seen = new Set(nhc.map(s => s.name.toLowerCase()));
-  return nhc.concat(gd.filter(s => !seen.has(s.name.toLowerCase()))).sort((a, b) => (b.mph || 0) - (a.mph || 0));
+  const near = g => nhc.some(n => Math.abs(n.lat - g.lat) < 3 && Math.abs(((n.lon - g.lon + 540) % 360) - 180) < 3);
+  return nhc.concat(gd.filter(g => !seen.has(g.name.toLowerCase()) && !near(g))).sort((a, b) => (b.mph || 0) - (a.mph || 0));
 }
 function parseAlerts(fc, now) {
   const t = now || Date.now();
@@ -182,13 +188,13 @@ function renderStorms(list, note) {
   if (map) { map.innerHTML = ""; list.forEach(s => pin(map, s)); }
   const n = $("owo-storm-n"); if (n) n.textContent = list.length;
   if (!list.length) { out.innerHTML = `<p class="owo-empty">🌤️ No active tropical cyclones listed by NHC or GDACS right now.</p>`; return; }
-  const lim = +out.dataset.limit || 6;
+  const lim = +out.dataset.limit || 50;
   out.innerHTML = list.slice(0, lim).map(s => `<div class="owo-sw"><a class="owo-storm c${s.cat || 0}" href="${E(s.link)}" target="_blank" rel="noopener">
 <div class="owo-sicon" aria-hidden="true"><svg viewBox="0 0 48 48"><path fill="currentColor" d="M24 18a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm14-12c-6 0-12 3-15 7a12 12 0 0 1 13 12 12 12 0 0 1-2 6c4-3 7-9 7-15 0-4-1-7-3-10zM10 42c6 0 12-3 15-7a12 12 0 0 1-13-12 12 12 0 0 1 2-6c-4 3-7 9-7 15 0 4 1 7 3 10z"/></svg></div>
 <div class="owo-sbody"><span class="owo-badge">${s.cat ? "Cat " + s.cat : E(s.type)}</span><h3>${E(s.name)}</h3>
 <p>${E([s.cat ? s.type : "", s.basin || s.where].filter(Boolean).join(" · "))}</p>
-<div class="owo-stats">${s.mph ? `<b>${s.mph}<small> mph</small></b>` : ""}${s.pressure ? `<b>${s.pressure}<small> mb</small></b>` : ""}${s.move ? `<b><small>moving</small> ${E(s.move)}</b>` : ""}</div>
-<p class="owo-src">${s.src}${s.alert ? " · " + E(s.alert) + " alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
+<div class="owo-stats">${s.mph ? `<b>${s.mph}<small> mph</small></b>` : s.peakMph ? `<b><small>peak</small> ${s.peakMph}<small> mph</small></b>` : ""}${s.pressure ? `<b>${s.pressure}<small> mb</small></b>` : ""}${s.move ? `<b><small>moving</small> ${E(s.move)}</b>` : ""}</div>
+<p class="owo-src">${s.src}${s.alert ? " · " + E(s.alert) + " impact alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
 </a>${s.cone ? `<a class="owo-cone" href="${E(s.cone)}" target="_blank" rel="noopener" title="Open full-size NHC cone"><img src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.parentNode.remove()"><span>🔍 Tap to enlarge</span></a>` : ""}</div>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
 }
 function renderAlerts(a) {
