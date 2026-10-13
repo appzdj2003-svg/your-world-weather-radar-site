@@ -50,7 +50,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/{V('og-image.png')}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{SITE}assets/{V('og-image.png')}"><meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{p}assets/favicon.png"><link rel="apple-touch-icon" href="{p}assets/icon-192.png">
-<link rel="stylesheet" href="{p}assets/{V('site.css')}">{lds}</head><body>
+<link rel="stylesheet" href="{p}assets/{V('site.css')}">{lds}<script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head><body>
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a><nav class="nav" aria-label="Main">{nav}</nav></div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
