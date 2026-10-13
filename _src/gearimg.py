@@ -13,5 +13,5 @@ def key(kind, name):
 def art(kind, tone, name):
     k = key(kind, name)
     if (ROOT/f"assets/items/{k}.webp").exists():
-        return f'<img class="gart" src="/assets/items/{k}.webp" width="400" height="400" loading="lazy" alt="">'
+        return f'<img class="gart" src="/assets/items/{k}.webp" width="560" height="420" loading="lazy" alt="" style="object-fit:cover">'
     return gearart.svg(kind, tone)

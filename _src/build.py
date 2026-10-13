@@ -225,7 +225,7 @@ def guides():
 
 # ---------- gear ----------
 def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
-import gearart
+import gearart, gearimg
 # (section id, title, intro, tone, [(art, product name, note)]). Real named products; links are Amazon searches for the exact name.
 GEAR = [
  ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
@@ -275,7 +275,7 @@ def gear():
     secs = ""
     for sid, title, sub, tone, items in GEAR:
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p><div class="pgrid">' + "".join(
-            f'<a class="pcard" href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearart.svg(k, tone)}</span>'
+            f'<a class="pcard" href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
             f'<span class="pc-body"><b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>' for k, n, d in items) + "</div>"
     deals = load_deals()
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
