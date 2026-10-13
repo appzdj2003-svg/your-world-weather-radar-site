@@ -14,7 +14,7 @@ PLAY = f"https://play.google.com/store/apps/details?id={PKG}"
 APP = "Your World Weather Radar"
 PRICE_M, PRICE_Y = "4.99", "47.99"          # must match Google Play exactly
 AMZ_TAG = "yourworldapps-20"
-SUPPORT, PRIVACY_MAIL = "support@yourworldapps.si", "appzdj2003@gmail.com"
+SUPPORT, PRIVACY_MAIL = "support@yourworldapps.si", "support@yourworldapps.si"
 E = lambda s: html.escape(s, quote=True)
 enc = lambda s: urllib.parse.quote(s, safe="")
 PAGES = []
