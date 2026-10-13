@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T16:41:09+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -37,7 +37,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T16:41:09+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -139,11 +139,11 @@
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1791909000,
-    "temp": 21,
+    "obsTime": 1791907200,
+    "temp": 20,
     "dewp": 20,
-    "wdir": 170,
-    "wspd": 7,
+    "wdir": 160,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
@@ -153,21 +153,21 @@
       "base": 1000
      }
     ],
-    "rawOb": "METAR RJTT 131630Z 17007KT 9999 FEW010 21/20 Q1011 NOSIG",
+    "rawOb": "METAR RJTT 131600Z 16006KT 9999 FEW010 20/20 Q1011 NOSIG",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791909420,
+    "obsTime": 1791909000,
     "temp": 14,
     "dewp": 12,
-    "wdir": 170,
-    "wspd": 21,
+    "wdir": 160,
+    "wspd": 20,
     "wgst": null,
-    "wxString": "-SHRA",
-    "cover": "OVC",
+    "wxString": "SHRA",
+    "cover": "BKN",
     "clouds": [
      {
       "cover": "BKN",
@@ -178,11 +178,11 @@
       "base": 2600
      },
      {
-      "cover": "OVC",
-      "base": 4100
+      "cover": "BKN",
+      "base": 3300
      }
     ],
-    "rawOb": "SPECI YSSY 131637Z AUTO 17021KT 9999 -SHRA BKN021 BKN026 OVC041 14/12 Q1022",
+    "rawOb": "SPECI YSSY 131630Z AUTO 16020KT 9000 SHRA BKN021 BKN026 BKN033 14/12 Q1022",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
@@ -243,7 +243,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T16:41:09+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
