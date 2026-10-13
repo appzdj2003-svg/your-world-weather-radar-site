@@ -1,4 +1,4 @@
-"""Build-time snapshot for the World Weather Radar Outlook (feeds with no browser CORS): NHC CurrentStorms.json + cone images,
+"""Build-time snapshot for the Your World Weather Radar Outlook (feeds with no browser CORS): NHC CurrentStorms.json + cone images,
 and METAR city observations from aviationweather.gov. Writes assets/outlook.json; keeps the old file if a feed fails."""
 import json, re, datetime, urllib.request
 from pathlib import Path
