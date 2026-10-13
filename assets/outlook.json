@@ -1,7 +1,23 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T14:28:07+00:00",
+  "fetchedAt": "2026-10-13T14:34:44+00:00",
   "items": [
+   {
+    "id": "ep182026",
+    "binNumber": "EP3",
+    "name": "Rachel",
+    "classification": "PTC",
+    "intensity": "50",
+    "pressure": "987",
+    "latitudeNumeric": 31.5,
+    "longitudeNumeric": -116.5,
+    "movementDir": 15,
+    "movementSpeed": 36,
+    "lastUpdate": "2026-10-11T06:00:00.000Z",
+    "advisory": "https://www.nhc.noaa.gov/text/MIATCPEP3.shtml",
+    "graphics": "https://www.nhc.noaa.gov/graphics_ep3.shtml",
+    "cone": null
+   },
    {
     "id": "ep202026",
     "binNumber": "EP5",
@@ -21,7 +37,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T14:28:07+00:00",
+  "fetchedAt": "2026-10-13T14:34:44+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -66,57 +82,53 @@
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1791900000,
-    "temp": 24,
+    "obsTime": 1791901800,
+    "temp": 23,
     "dewp": 14,
-    "wdir": 260,
-    "wspd": 15,
+    "wdir": 270,
+    "wspd": 12,
     "wgst": null,
     "wxString": null,
     "cover": "BKN",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 4000
-     },
-     {
       "cover": "BKN",
-      "base": 5300
+      "base": 4500
      }
     ],
-    "rawOb": "METAR LFPG 131400Z 26015KT 9999 FEW040 BKN053 24/14 Q1023 NOSIG",
+    "rawOb": "METAR LFPG 131430Z 27012KT 9999 BKN045 23/14 Q1023 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1791900000,
+    "obsTime": 1791901800,
     "temp": 34,
     "dewp": 22,
-    "wdir": 330,
-    "wspd": 8,
+    "wdir": 360,
+    "wspd": 9,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 131400Z 33008KT 310V010 CAVOK 34/22 Q1013 NOSIG",
+    "rawOb": "METAR OMDB 131430Z 36009KT 320V030 CAVOK 34/22 Q1013 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1791900000,
-    "temp": 33,
+    "obsTime": 1791901800,
+    "temp": 34,
     "dewp": 22,
-    "wdir": 360,
+    "wdir": 20,
     "wspd": 5,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 131400Z 36005KT 3500 FU NSC 33/22 Q1011 NOSIG",
+    "rawOb": "METAR VABB 131430Z 02005KT 3500 FU NSC 34/22 Q1011 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
@@ -148,29 +160,29 @@
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791900780,
+    "obsTime": 1791901800,
     "temp": 14,
     "dewp": 13,
-    "wdir": 170,
-    "wspd": 19,
+    "wdir": 150,
+    "wspd": 17,
     "wgst": null,
     "wxString": "-RA",
-    "cover": "BKN",
+    "cover": "OVC",
     "clouds": [
      {
-      "cover": "SCT",
-      "base": 1000
-     },
-     {
-      "cover": "SCT",
-      "base": 1700
+      "cover": "BKN",
+      "base": 1300
      },
      {
       "cover": "BKN",
-      "base": 2800
+      "base": 2200
+     },
+     {
+      "cover": "OVC",
+      "base": 5000
      }
     ],
-    "rawOb": "SPECI YSSY 131413Z AUTO 17019KT 6000 -RA SCT010 SCT017 BKN028 14/13 Q1022 RERA",
+    "rawOb": "SPECI YSSY 131430Z AUTO 15017KT 9999 -RA BKN013 BKN022 OVC050 14/13 Q1022 RERA",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
@@ -231,7 +243,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T14:28:07+00:00",
+  "fetchedAt": "2026-10-13T14:34:44+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",

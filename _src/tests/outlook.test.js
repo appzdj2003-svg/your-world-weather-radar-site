@@ -41,7 +41,7 @@ console.log("All World Weather Outlook tests passed");
   assert.ok(sc.includes("one rocket launch is scheduled") && sc.includes("80 percent") && sc.includes("from Cape Canaveral SFS at 10:00 PM"), sc);
   assert.strictEqual(O.parseLaunches(null, N).list.length, 0);
   console.log("Launch parser tests passed"); }
-{ const x = '<Layer><Dimension name="time" default="x" units="ISO8601">2026-10-13T05:00:00.000Z,2026-10-13T06:00:00.000Z,2026-10-13T07:00:00.000Z,2026-10-13T12:00:00.000Z,2026-10-13T13:00:00.000Z</Dimension></Layer>';
-  const t = O.parseWmsTimes(x); assert.strictEqual(t.length, 5); assert.strictEqual(O.latestSynoptic(t), "2026-10-13T12:00:00.000Z");
-  assert.strictEqual(O.latestSynoptic(["2026-10-13T13:00:00Z"]), null); assert.deepStrictEqual(O.parseWmsTimes("junk"), []);
-  console.log("GMGSI time tests passed"); }
+{ assert.strictEqual(O.hourOf("2026-10-13T11:50:00Z"), "2026-10-13T11:00:00Z");
+  assert.deepStrictEqual(O.hourlySlots(["2026-10-13T10:50:00Z", "2026-10-13T11:10:00Z", "2026-10-13T11:30:00Z"]), ["2026-10-13T10:00:00Z", "2026-10-13T11:00:00Z"]);
+  assert.ok(O.hourlySlots(O.frameTimes(Date.now(), 8, 20, 150)).every(t => /T\d\d:00:00Z$/.test(t)), "only top-of-hour EUMETSAT frames");
+  console.log("EUMETSAT hourly slot tests passed"); }

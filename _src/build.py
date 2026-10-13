@@ -76,7 +76,7 @@ def owo_map(lite=False):
     return f'''<div class="owo-map" id="owo-map"{' data-lite="1"' if lite else ""}><img class="owo-base" src="{E(BASEMAP)}" alt="World map" width="1440" height="720">
 <div class="owo-frames"></div><div class="owo-pins"></div><div class="owo-scan" aria-hidden="true"></div>
 <div class="owo-live"><i></i>LIVE <span id="owo-time">Loading satellite…</span></div></div>
-<p class="owo-attr">Infrared satellite loop (colder, brighter colors mark stronger storms): GOES-East, GOES-West and Himawari via NASA GIBS. Europe, Africa and the Indian Ocean (gray clouds) come from the NOAA/NESDIS Global Mosaic of Geostationary Satellite Imagery, which includes EUMETSAT Meteosat data, updated every 6 hours<span class="owo-gt"> (latest <span id="owo-gmgsi-t"></span>)</span>. Storm pins: NHC and GDACS.</p>'''
+<p class="owo-attr">Infrared satellite loop (colder, brighter colors mark stronger storms): GOES-East, GOES-West and Himawari via NASA GIBS. Europe, Africa and the Indian Ocean: hourly Meteosat imagery via EUMETView. Contains modified EUMETSAT Meteosat data 2026 (CC BY 4.0)<span class="owo-gt">, latest <span id="owo-ev-t"></span></span>. Storm pins: NHC and GDACS.</p>'''
 def owo_briefing():
     return f'''<div class="owo-brief"><button type="button" class="owo-play" id="owo-play">{PLAY_ICO}<span>Play live briefing</span></button>
 <p class="dim small">A 1-minute spoken rundown of the live data on this page. Your browser's own voice reads it aloud.</p><div class="owo-cap" id="owo-cap" hidden aria-live="polite"></div></div>'''
