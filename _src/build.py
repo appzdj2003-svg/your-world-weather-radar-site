@@ -135,7 +135,7 @@ def feature_cards():
 
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
-<span class="kicker">⚡ Android · by Your World Apps</span><h1>See the storm before it reaches you.</h1>
+<h1>See the storm before it reaches you.</h1>
 <p class="lead">Live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
 <div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="plan.html">Plan alerts for a day out →</a></div>
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
