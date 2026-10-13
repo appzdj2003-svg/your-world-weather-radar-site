@@ -67,7 +67,7 @@ def hero(h1, lead="", kicker=None, extra=""):
     return f'<section class="hero"><div class="wrap">{f"<span class=kicker>{E(kicker)}</span>" if kicker else ""}<h1>{E(h1)}</h1>{f"<p class=lead>{lead}</p>" if lead else ""}{extra}</div></section>'
 
 def hero_atlas(h1, lead, kicker):
-    return f'<section class="hero"><div class="wrap"><span class=kicker>{E(kicker)}</span><h1 class="atl-h1"><img src="/assets/{V("atlas.svg")}" width="72" height="72" alt="">{E(h1)}</h1><p class=lead>{lead}</p></div></section>'
+    return f'<section class="hero"><div class="wrap"><h1 class="atl-h1"><img src="/assets/{V("atlas.svg")}" width="72" height="72" alt="">{E(h1)}</h1><p class=lead>{lead}</p></div></section>'
 
 def cta(p, slug, text):
     return f'<div class="cta"><img src="{p}assets/icon-192.png" alt=""><div class="grow"><h3>{APP}</h3><p>{E(text)}</p></div>{play_btn(slug)}</div>'
