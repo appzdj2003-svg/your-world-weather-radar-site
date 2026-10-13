@@ -23,8 +23,12 @@ def nhc():
                     src = "https://www.nhc.noaa.gov" + m.group(1) if m.group(1).startswith("/") else m.group(1)
                     d = ROOT / "assets" / "cones"; d.mkdir(exist_ok=True)
                     for old in d.glob(f"{s.get('id')}*.png"): old.unlink()
-                    name = f"{s.get('id')}-{re.sub(r'[^0-9A-Za-z]', '', (s.get('publicAdvisory') or {}).get('advNum', ''))}.png"
-                    (d / name).write_bytes(get(src)); cone = "cones/" + name
+                    name = f"{s.get('id')}-{re.sub(r'[^0-9A-Za-z]', '', (s.get('publicAdvisory') or {}).get('advNum', ''))}-5day.png"
+                    full = re.sub(r"_5day_cone_sm\+png/(\d+)_5day_cone_sm\.png$", r"_5day_cone+png/\1.png", src)  # full-res (~900px) graphic
+                    try: data = get(full)
+                    except Exception: data = get(src)
+                    if not data.startswith(b"\x89PNG"): data = get(src)
+                    (d / name).write_bytes(data); cone = "cones/" + name
             except Exception: pass
         keep = {k: s.get(k) for k in ("id", "binNumber", "name", "classification", "intensity", "pressure", "latitudeNumeric", "longitudeNumeric", "movementDir", "movementSpeed", "lastUpdate")}
         keep["advisory"] = (s.get("publicAdvisory") or {}).get("url"); keep["graphics"] = g; keep["cone"] = cone

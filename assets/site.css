@@ -161,7 +161,7 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .owo-badge{display:inline-block;font:800 .7rem system-ui;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.14);padding:4px 9px;border-radius:999px}
 .owo-stats{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0}.owo-stats b{font-size:1.1rem}.owo-stats small{font-weight:500;color:#94A3B8}
 .owo-src{font-size:.72rem!important;color:#94A3B8!important}
-.owo-cone{grid-column:1/-1;border-radius:12px;width:100%;background:#fff}
+.owo-sw{display:grid;gap:8px;align-content:start}.owo-cone{position:relative;display:block;border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}.owo-cone img{display:block;width:100%;max-width:100%;height:auto;object-fit:contain;image-rendering:auto}.owo-cone span{position:absolute;right:8px;bottom:8px;background:rgba(15,23,42,.8);color:#fff;font:700 .72rem system-ui;padding:5px 9px;border-radius:999px}
 .owo-empty{background:var(--white);border:1px dashed var(--line);border-radius:14px;padding:16px;color:var(--mute);grid-column:1/-1}
 .shimmer{background:linear-gradient(90deg,#fff 0,#F1F5F9 50%,#fff 100%);background-size:200% 100%;animation:owoShim 1.3s infinite}
 @keyframes owoShim{to{background-position:-200% 0}}

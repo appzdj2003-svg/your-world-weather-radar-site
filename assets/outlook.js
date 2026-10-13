@@ -169,13 +169,13 @@ function renderStorms(list, note) {
   const n = $("owo-storm-n"); if (n) n.textContent = list.length;
   if (!list.length) { out.innerHTML = `<p class="owo-empty">🌤️ No active tropical cyclones listed by NHC or GDACS right now.</p>`; return; }
   const lim = +out.dataset.limit || 6;
-  out.innerHTML = list.slice(0, lim).map(s => `<a class="owo-storm c${s.cat || 0}" href="${E(s.link)}" target="_blank" rel="noopener">
+  out.innerHTML = list.slice(0, lim).map(s => `<div class="owo-sw"><a class="owo-storm c${s.cat || 0}" href="${E(s.link)}" target="_blank" rel="noopener">
 <div class="owo-sicon" aria-hidden="true"><svg viewBox="0 0 48 48"><path fill="currentColor" d="M24 18a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm14-12c-6 0-12 3-15 7a12 12 0 0 1 13 12 12 12 0 0 1-2 6c4-3 7-9 7-15 0-4-1-7-3-10zM10 42c6 0 12-3 15-7a12 12 0 0 1-13-12 12 12 0 0 1 2-6c-4 3-7 9-7 15 0 4 1 7 3 10z"/></svg></div>
 <div class="owo-sbody"><span class="owo-badge">${s.cat ? "Cat " + s.cat : E(s.type)}</span><h3>${E(s.name)}</h3>
 <p>${E([s.cat ? s.type : "", s.basin || s.where].filter(Boolean).join(" · "))}</p>
 <div class="owo-stats">${s.mph ? `<b>${s.mph}<small> mph</small></b>` : ""}${s.pressure ? `<b>${s.pressure}<small> mb</small></b>` : ""}${s.move ? `<b><small>moving</small> ${E(s.move)}</b>` : ""}</div>
 <p class="owo-src">${s.src}${s.alert ? " · " + E(s.alert) + " alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
-${s.cone ? `<img class="owo-cone" src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.remove()">` : ""}</a>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
+</a>${s.cone ? `<a class="owo-cone" href="${E(s.cone)}" target="_blank" rel="noopener" title="Open full-size NHC cone"><img src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.parentNode.remove()"><span>🔍 Tap to enlarge</span></a>` : ""}</div>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
 }
 function renderAlerts(a) {
   const out = $("owo-alerts"), n0 = $("owo-alert-n"); if (n0 && a) n0.textContent = a.count; if (!out) return;

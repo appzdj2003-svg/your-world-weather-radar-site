@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T14:13:38+00:00",
+  "fetchedAt": "2026-10-13T14:18:55+00:00",
   "items": [
    {
     "id": "ep202026",
@@ -16,12 +16,12 @@
     "lastUpdate": "2026-10-13T12:00:00.000Z",
     "advisory": "https://www.nhc.noaa.gov/text/MIATCPEP5.shtml",
     "graphics": "https://www.nhc.noaa.gov/graphics_ep5.shtml",
-    "cone": "cones/ep202026-024a.png"
+    "cone": "cones/ep202026-024a-5day.png"
    }
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T14:13:38+00:00",
+  "fetchedAt": "2026-10-13T14:18:55+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -148,17 +148,17 @@
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791900540,
-    "temp": 15,
-    "dewp": 14,
+    "obsTime": 1791900780,
+    "temp": 14,
+    "dewp": 13,
     "wdir": 170,
-    "wspd": 20,
+    "wspd": 19,
     "wgst": null,
     "wxString": "-RA",
     "cover": "BKN",
     "clouds": [
      {
-      "cover": "FEW",
+      "cover": "SCT",
       "base": 1000
      },
      {
@@ -167,10 +167,10 @@
      },
      {
       "cover": "BKN",
-      "base": 4300
+      "base": 2800
      }
     ],
-    "rawOb": "SPECI YSSY 131409Z AUTO 17020KT 8000 -RA FEW010 SCT017 BKN043 15/14 Q1022 RERA",
+    "rawOb": "SPECI YSSY 131413Z AUTO 17019KT 6000 -RA SCT010 SCT017 BKN028 14/13 Q1022 RERA",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
@@ -231,7 +231,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T14:13:38+00:00",
+  "fetchedAt": "2026-10-13T14:18:55+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
