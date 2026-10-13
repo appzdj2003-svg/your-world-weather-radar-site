@@ -28,6 +28,7 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
       const a = m[0][1];
       return `<div class="msg bot atl"><b>${window.YW_ATL_IMG()}Atlas<button type="button" class="lsay" data-say="msg" aria-label="Listen" title="Listen">🔊</button></b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a> · ${more}</p></div>`;
     },
+    afterDone: (st, el) => window.YWTripGear && YWTripGear.mount(st, el),
     appNote: "Open on your Android phone with Your World Weather Radar installed. If the app isn't installed yet, the link opens this page with a Google Play button.",
   });
 })();

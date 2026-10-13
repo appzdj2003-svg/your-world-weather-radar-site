@@ -47,6 +47,7 @@
       $("copy").onclick = () => navigator.clipboard.writeText(url).then(() => $("copy").textContent = "Copied ✓");
       if ($("share")) $("share").onclick = () => navigator.share({ title: cfg.doneTitle, url });
       $("again").onclick = () => { Object.keys(st).forEach(k => delete st[k]); Object.assign(st, { v: 1 }, cfg.defaults()); i = 0; history.replaceState(null, "", location.pathname); render(); };
+      if (cfg.afterDone) try { cfg.afterDone(st, $("plan-result")); } catch (e) {}
       history.replaceState(null, "", "#" + tok);
     }
     // Quick plan

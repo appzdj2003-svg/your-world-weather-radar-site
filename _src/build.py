@@ -272,10 +272,14 @@ GEAR = [
 ]
 def gear():
     jump = '<div class="tabs" style="margin-top:18px">' + "".join(f'<a href="#{sid}" class="btn" style="padding:7px 14px;font-size:.85rem">{E(t)}</a>' for sid, t, *_ in GEAR) + "</div>"
-    secs = ""
+    secs = ""; seen = set()
+    def gid(k, n):  # anchor on the first card of each image key, e.g. /gear/#g-jacket (Trip Planner gear card links here)
+        g = gearimg.key(k, n)
+        if g in seen: return ""
+        seen.add(g); return f' id="g-{g}"'
     for sid, title, sub, tone, items in GEAR:
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p><div class="pgrid">' + "".join(
-            f'<a class="pcard" href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
+            f'<a class="pcard"{gid(k, n)} href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
             f'<span class="pc-body"><b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>' for k, n, d in items) + "</div>"
     deals = load_deals()
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
@@ -330,7 +334,7 @@ def planner(path, kind):
 <p class="note" style="text-align:center">Don't have the app? {play_btn("plan" if is_plan else "trip", "dark", "planner", "Get it on Google Play")}</p></div>'''
     codec = "plancodec.js" if is_plan else "tripcodec.js"
     page(path, title, lead, b, hero(title, lead, "Planner"), "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js") + (() if is_plan else ("askdata.js", "ask.js")) + ("wizard.js", "plan.js" if is_plan else "trip.js", "voice.js", "listen.js"))
+         scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js") + (() if is_plan else ("askdata.js", "ask.js")) + ("wizard.js",) + (("plan.js",) if is_plan else ("tripgear.js", "trip.js")) + ("voice.js", "listen.js"))
 
 def ask():
     import askdata
