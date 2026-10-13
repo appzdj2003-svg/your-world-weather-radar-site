@@ -22,7 +22,7 @@
       const r = YWQuick.parseTrip(q), tripish = (r.to || r.sd) && !YWAsk.isQuestion(q);
       if (tripish) return null;
       const m = YWAsk.best(q), E = YWWizard.E;
-      const more = `<a href="ask.html?q=${encodeURIComponent(q)}">Ask Atlantis more →</a>`;
+      const more = `<a href="/ask.html?q=${encodeURIComponent(q)}">Ask Atlantis more →</a>`;
       if (!m.length) return YWAsk.isQuestion(q) || !r.to ? `<div class="msg bot atl"><b>🌊 Atlantis</b><p>I don't have a sourced answer for that. Describe your trip (like “Road trip to Nashville Oct 30 – Nov 1”) or ${more}</p></div>` : null;
       const a = m[0][1];
       return `<div class="msg bot atl"><b>🌊 Atlantis</b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a> · ${more}</p></div>`;

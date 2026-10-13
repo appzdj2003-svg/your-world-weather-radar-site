@@ -38,3 +38,9 @@ Without the app, the https link just loads the web page, which shows the plan an
 - Behavior: geocode `loc`/`to` with the existing city search, then show a confirm sheet ("Add plan: Asheville, NC · Hiking · Oct 17–18 · alerts: ..."),
   which saves it as a saved place plus a watch window with those alert types. Nothing should be saved without a tap.
 - The reference implementation is assets/plancodec.js, assets/tripcodec.js and assets/codec-core.js. Test vectors: node _src/tests/quickparse.test.js.
+
+## Site navigation vs. App Links (2026-10-13)
+The app claims exactly `/plan`, `/plan.html`, `/trip`, `/trip.html` (android:path). The website's planners therefore live at
+`/alert-planner/` and `/trip-planner/` so site navigation never opens the app. Shared plan links still use `/plan#v1.…` and
+`/trip#v1.…` (codec-core.js `webUrl`) so they open the app on purpose. The old paths are redirect pages that keep `?q=` and the `#v1.` hash.
+Never add an app intent filter (path or pathPrefix) that matches `/alert-planner` or `/trip-planner`.

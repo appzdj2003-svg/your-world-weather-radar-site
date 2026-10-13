@@ -23,7 +23,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("features.html", "Features"), ("plan.html", "Alert Planner"), ("trip.html", "Trip Planner"), ("ask.html", "Ask Atlantis"), ("outlook.html", "Outlook"),
+NAV = [("index.html", "Home"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlantis"), ("outlook.html", "Outlook"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -54,7 +54,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a><nav class="nav" aria-label="Main">{nav}</nav></div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
-<div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}plan.html">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip.html">Weather Trip Planner</a></li></ul></div>
+<div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
 <div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
@@ -145,7 +145,7 @@ def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>See the storm before it reaches you.</h1>
 <p class="lead">Live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
-<div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="plan.html">Plan alerts for a day out →</a></div>
+<div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
 <div class="phone"><img src="assets/shot-home.jpg" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
     b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
@@ -158,8 +158,8 @@ def home():
 <div><h2 style="margin-top:0">Weather cams near you, free</h2><p>Real camera views from USGS, NOAA, Windy.com and <strong>WebCOOS</strong> coastal cams (SECOORA / NOAA IOOS), plus YouTube live streams. Coastal imagery courtesy of WebCOOS.</p>
 <h2>Off-Grid Safety, free for everyone</h2><p>When you're out of signal near a severe alert, the app helps you text your saved location to your emergency contacts. If your phone supports satellite texting, it can go out by satellite. Use Emergency SOS or call 911 first. <em>Satellite texting may require a compatible plan. Carrier message and data rates may apply.</em></p></div></div>
 <h2>Plan ahead</h2><div class="grid">
-<a class="card" href="plan.html" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
-<a class="card" href="trip.html" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
+<a class="card" href="alert-planner/" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
+<a class="card" href="trip-planner/" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
 {hunt_promo()}{cta("", "home", "Free on Google Play. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year.")}'''
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android", "applicationCategory": "WeatherApplication",
@@ -301,6 +301,17 @@ def load_deals():
     return json.loads(f.read_text())["items"] if f.exists() else []
 
 # ---------- planners ----------
+# The app's verified App Links claim exactly /plan, /plan.html, /trip and /trip.html (android:path, not pathPrefix), so the
+# planners live at /alert-planner/ and /trip-planner/ and site navigation stays in the browser. Shared plan links keep using
+# /plan#v1.… and /trip#v1.… so they DO open the app. The old paths remain as tiny redirect pages for browsers without the app.
+def legacy_planners():
+    for old, new, t in (("plan.html", "alert-planner/", "Forecast & Alert Planner"), ("trip.html", "trip-planner/", "Weather Trip Planner")):
+        (ROOT / old).write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{E(t)} | {APP}</title><link rel="canonical" href="{SITE}{new}"><meta name="robots" content="noindex">
+<script>location.replace("/{new}" + location.search + location.hash);</script>
+<script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head>
+<body style="font-family:system-ui;padding:24px"><p>The {E(t)} has moved: <a href="/{new}">{SITE}{new}</a></p></body></html>''')
+
 def planner(path, kind):
     is_plan = kind == "plan"
     ex = ("Hiking in Asheville, NC this Saturday, warn me about lightning" if is_plan else "Road trip from Atlanta to Nashville Oct 30 - Nov 1")
@@ -313,15 +324,15 @@ def planner(path, kind):
 <div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="{"Describe your plan" if is_plan else "Ask Atlantis about your trip"}">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">{"Plan it" if is_plan else "Ask"}</button></div>
 <p class="note">Try: “{E(ex)}”. Tap 🎤 to speak. Parsed in your browser; this site sends nothing anywhere (your browser's own speech service handles voice).</p><div class="parsed" id="qout"></div></div>
 <div class="wcard"><div class="prog"><i id="prog"></i></div><div id="wiz"></div></div>
-<p class="note" style="text-align:center">Don't have the app? {play_btn(path.replace(".html",""), "dark", "planner", "Get it on Google Play")}</p></div>'''
+<p class="note" style="text-align:center">Don't have the app? {play_btn("plan" if is_plan else "trip", "dark", "planner", "Get it on Google Play")}</p></div>'''
     codec = "plancodec.js" if is_plan else "tripcodec.js"
     page(path, title, lead, b, hero(title, lead, "Planner"), "0.8",
          scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js") + (() if is_plan else ("askdata.js", "ask.js")) + ("wizard.js", "plan.js" if is_plan else "trip.js", "voice.js"))
 
 def ask():
     import askdata
-    qa = [{"k": k, "q": q, "a": a, "u": f"guides/{u}.html", "t": BYSLUG[u]["short"]} for k, q, a, u in askdata.QA]
-    qa += [{"k": k, "q": q, "a": a, "u": u[3:], "t": "More"} for k, q, a, u in askdata.APP_QA]
+    qa = [{"k": k, "q": q, "a": a, "u": f"/guides/{u}.html", "t": BYSLUG[u]["short"]} for k, q, a, u in askdata.QA]
+    qa += [{"k": k, "q": q, "a": a, "u": "/" + u[3:], "t": "More"} for k, q, a, u in askdata.APP_QA]
     (ROOT / "assets/askdata.js").write_text("/* generated by _src/build.py from _src/askdata.py */\nwindow.YW_ASK = " + json.dumps(qa, ensure_ascii=False) + ";\n")
     sugg = ["Hiking in Asheville, NC this Saturday", "Road trip from Atlanta to Nashville Oct 30 - Nov 1", "Where should I shelter from a tornado?", "What do the radar colors mean?", "How much water can sweep away a car?", "How much is Premium?"]
     b = f'''<div class="wiz"><div class="wcard"><div class="ask-log" id="log" aria-live="polite"><div class="msg bot"><b>🌊 Atlantis</b><p>Hi! Ask me a weather safety question, or describe a day out or a trip, and I'll set up a forecast plan you can open in the app.</p></div></div>
@@ -338,5 +349,5 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
 if __name__ == "__main__":
-    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("plan.html", "plan"); planner("trip.html", "trip"); misc()
+    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); misc()
     print(f"Built {len(PAGES)} pages")

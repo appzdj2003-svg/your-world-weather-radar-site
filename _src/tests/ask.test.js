@@ -17,9 +17,9 @@ const cases = [
   ["what category is 120 mph hurricane?", "hurricane-preparedness"],
   ["How much is Premium?", "pricing.html"],
   ["What does falling pressure mean?", "barometric-pressure-and-weather"],
-  ["Hiking in Asheville, NC this Saturday", "plan.html?q="],
-  ["Road trip from Atlanta to Nashville Oct 30 - Nov 1", "trip.html?q="],
-  ["Boating on Lake Lanier Oct 24-25, warn me about wind", "plan.html?q="],
+  ["Hiking in Asheville, NC this Saturday", "/alert-planner/?q="],
+  ["Road trip from Atlanta to Nashville Oct 30 - Nov 1", "/trip-planner/?q="],
+  ["Boating on Lake Lanier Oct 24-25, warn me about wind", "/alert-planner/?q="],
   ["tell me a joke", "don't have a sourced answer"],
 ];
 let fail = 0; for (const [q, want] of cases) { const h = last(q); if (!h.includes(want)) { fail++; console.log("FAIL", q, "->", h.slice(0, 160)); } }
