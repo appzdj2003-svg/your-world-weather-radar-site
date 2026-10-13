@@ -150,14 +150,14 @@ def home():
 <p class="lead">Live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
 <div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
-<div class="phone"><img src="assets/shot-home.jpg" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
+<div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
     b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
 <div class="tabs"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>3D</span><span>4D</span><span>5D</span><span>7D</span><span>10D</span></div>
 <p>Tap a tab and get a short, plain-English summary of that window. Built-in briefings are written on your phone from forecast data. With Premium you can download Gemma to write them on-device, or use your own AI provider key.</p>
 <h2>Radar you can actually read</h2><p>Classic rain colors, snow that stays light blue, and a timeline you can scrub. Turn on lightning, hurricane, fire or earthquake layers only when you need them.</p></div>
-<div class="shot"><img src="assets/shot-radar.jpg" width="320" height="569" alt="Radar screen" loading="lazy"></div></div>
-<div class="split" style="margin-top:20px"><div class="shot"><img src="assets/shot-alerts.jpg" width="320" height="569" alt="Alerts screen" loading="lazy"></div>
+<div class="shot"><img src="assets/{V('shot-radar.jpg')}" width="320" height="569" alt="Radar screen" loading="lazy"></div></div>
+<div class="split" style="margin-top:20px"><div class="shot"><img src="assets/{V('shot-alerts.jpg')}" width="320" height="569" alt="Alerts screen" loading="lazy"></div>
 <div><h2 style="margin-top:0">Weather cams near you, free</h2><p>Real camera views from USGS, NOAA, Windy.com and <strong>WebCOOS</strong> coastal cams (SECOORA / NOAA IOOS), plus YouTube live streams. Coastal imagery courtesy of WebCOOS.</p>
 <h2>Off-Grid Safety, free for everyone</h2><p>When you're out of signal near a severe alert, the app helps you text your saved location to your emergency contacts. If your phone supports satellite texting, it can go out by satellite. Use Emergency SOS or call 911 first. <em>Satellite texting may require a compatible plan. Carrier message and data rates may apply.</em></p></div></div>
 <h2>Plan ahead</h2><div class="grid">
