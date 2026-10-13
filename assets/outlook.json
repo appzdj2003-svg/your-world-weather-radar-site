@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T16:27:00+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -37,7 +37,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T16:27:00+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -91,53 +91,48 @@
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1791907200,
-    "temp": 22,
-    "dewp": 15,
+    "obsTime": 1791909000,
+    "temp": 19,
+    "dewp": 17,
     "wdir": 300,
-    "wspd": 12,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "BKN",
-      "base": 4000
-     }
-    ],
-    "rawOb": "METAR LFPG 131600Z 30012KT 9999 BKN040 22/15 Q1024 NOSIG",
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR LFPG 131630Z 30006KT CAVOK 19/17 Q1025 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1791907200,
-    "temp": 34,
+    "obsTime": 1791909000,
+    "temp": 33,
     "dewp": 22,
-    "wdir": 340,
+    "wdir": 20,
     "wspd": 5,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 131600Z 34005KT 310V030 CAVOK 34/22 Q1014 NOSIG",
+    "rawOb": "METAR OMDB 131630Z 02005KT 360V080 CAVOK 33/22 Q1014 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1791907200,
+    "obsTime": 1791909000,
     "temp": 32,
-    "dewp": 22,
-    "wdir": 20,
-    "wspd": 7,
+    "dewp": 21,
+    "wdir": 50,
+    "wspd": 4,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 131600Z 02007KT 3500 FU NSC 32/22 Q1012 NOSIG",
+    "rawOb": "METAR VABB 131630Z 05004KT 3500 FU NSC 32/21 Q1012 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
@@ -165,29 +160,29 @@
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791908400,
+    "obsTime": 1791909000,
     "temp": 14,
     "dewp": 12,
-    "wdir": 180,
-    "wspd": 22,
+    "wdir": 160,
+    "wspd": 20,
     "wgst": null,
     "wxString": "SHRA",
     "cover": "BKN",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 1600
-     },
-     {
-      "cover": "SCT",
+      "cover": "BKN",
       "base": 2100
      },
      {
       "cover": "BKN",
       "base": 2600
+     },
+     {
+      "cover": "BKN",
+      "base": 3300
      }
     ],
-    "rawOb": "SPECI YSSY 131620Z AUTO 18022KT 6000 SHRA FEW016 SCT021 BKN026 14/12 Q1022",
+    "rawOb": "SPECI YSSY 131630Z AUTO 16020KT 9000 SHRA BKN021 BKN026 BKN033 14/12 Q1022",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
@@ -248,7 +243,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T16:27:00+00:00",
+  "fetchedAt": "2026-10-13T16:38:38+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
