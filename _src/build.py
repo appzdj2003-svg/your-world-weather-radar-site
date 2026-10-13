@@ -56,7 +56,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <footer><div class="wrap"><div class="cols">
 <div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}plan.html">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip.html">Weather Trip Planner</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
-<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li></ul></div>
+<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
 {sc}</body></html>'''
     doc = re.sub(r'href="' + re.escape(PLAY) + '"', f'href="{E(play_ref(slug, "inline"))}"', doc)
@@ -117,6 +117,14 @@ def home_outlook():
 <div class="owo-storms" id="owo-storms" data-limit="2"><p class="owo-empty shimmer">Loading storms…</p></div>
 <div class="btns" style="justify-content:center"><a class="btn primary glow" href="outlook.html">See the full live Outlook →</a></div></section>'''
 
+HUNT = "https://hunt.yourworldapps.si/"
+def hunt_promo():
+    return f'''<a class="hunt-promo" href="{HUNT}" target="_blank" rel="noopener"><div class="hp-ico" aria-hidden="true">🦌</div><div class="hp-body">
+<span class="hp-kick">Sister app</span><h3>Hunt smarter with Your World Hunt</h3><ul>
+<li>🧭 Hunting map with GPS return and directions</li><li>💨 Wind, barometric pressure, moon and sun times, plus deer feeding times (Premium)</li>
+<li>🗺️ Trip Planner with Ask Hawk and Top spots: public refuges and private lodges near you</li><li>🎧 Guides with a Listen button, in English and Spanish</li></ul>
+<span class="hp-go">Visit hunt.yourworldapps.si →</span></div></a>'''
+
 # ---------- features (from the app source; keep in sync) ----------
 FEATURES = [
  ("📡", "Live radar", "free", "Rain in classic colors with snow kept light blue. Play the loop back and ahead, and add layers for lightning, hurricanes, fire, quakes and more."),
@@ -153,7 +161,7 @@ def home():
 <a class="card" href="plan.html" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
 <a class="card" href="trip.html" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
-{cta("", "home", "Free on Google Play. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year.")}'''
+{hunt_promo()}{cta("", "home", "Free on Google Play. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year.")}'''
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android", "applicationCategory": "WeatherApplication",
            "author": {"@type": "Organization", "name": "Your World Apps"}, "installUrl": PLAY, "url": SITE,
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]}]
@@ -177,7 +185,7 @@ def privacy():
     src = (Path(__file__).parent / "privacy_source.html").read_text()
     inner = re.search(r"<body>(.*)</body>", src, re.S).group(1)
     inner = re.sub(r"<h1>.*?</h1>", "", inner, count=1, flags=re.S)
-    b = '<div class="article" style="margin-top:24px">' + inner + f'<p class="dim small">This page mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
+    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The app itself has no analytics.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
     page("privacy.html", "Privacy Policy", "Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why.", b, hero("Privacy Policy", f"{APP} for Android", "Privacy"), "0.4")
 
 def support():
@@ -207,7 +215,7 @@ def guides():
     for g in GUIDES:
         src = "".join(f'<li><a href="{u}" target="_blank" rel="noopener">{E(t)}</a></li>' for t, u in g["sources"])
         body = (f'<div class="article"><p class="crumbs"><a href="../">Home</a> / <a href="./">Guides</a> / {E(g["short"])}</p>{g["body"]}'
-                f'{related(g)}{cta("../", "guide-" + g["slug"], g["app"])}<h2>Sources</h2><ul class="sources">{src}</ul><p class="dim small">Last reviewed {datetime.date.today():%B %Y}. General information only; follow official guidance in an emergency.</p></div>')
+                f'{related(g)}{cta("../", "guide-" + g["slug"], g["app"])}<h2>Sources</h2><ul class="sources">{src}</ul>{hunt_promo()}<p class="dim small">Last reviewed {datetime.date.today():%B %Y}. General information only; follow official guidance in an emergency.</p></div>')
         ld = [{"@context": "https://schema.org", "@type": "Article", "headline": g["title"], "description": g["desc"], "author": {"@type": "Organization", "name": "Your World Apps"},
                "dateModified": datetime.date.today().isoformat(), "mainEntityOfPage": SITE + f'guides/{g["slug"]}.html'}]
         page(f'guides/{g["slug"]}.html', g["title"], g["desc"], body, hero(g["title"], "", "Guide"), "0.7", jsonld=ld)

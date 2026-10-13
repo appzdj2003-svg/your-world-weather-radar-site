@@ -212,3 +212,12 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .owo-map .owo-ev.on{opacity:.95}
 .owo-ev-mtg{-webkit-mask-image:linear-gradient(90deg,transparent 42%,#000 46%,#000 60%,transparent 63%);mask-image:linear-gradient(90deg,transparent 42%,#000 46%,#000 60%,transparent 63%)}
 .owo-ev-iodc{-webkit-mask-image:linear-gradient(90deg,transparent 59%,#000 62%,#000 70%,transparent 73%);mask-image:linear-gradient(90deg,transparent 59%,#000 62%,#000 70%,transparent 73%)}
+/* ---------- sister app promo ---------- */
+.hunt-promo{display:flex;gap:16px;align-items:flex-start;margin:36px 0;padding:20px;border-radius:20px;text-decoration:none;color:#fff;background:radial-gradient(120% 140% at 0 0,#3F2A14,#1C1917 70%);border:1px solid rgba(234,88,12,.35);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.hunt-promo:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(234,88,12,.25);color:#fff}
+.hp-ico{font-size:2.4rem;line-height:1;flex:none;filter:drop-shadow(0 0 10px rgba(234,88,12,.5))}
+.hp-kick{display:inline-block;font:800 .7rem system-ui;letter-spacing:.06em;text-transform:uppercase;color:#FDBA74}
+.hunt-promo h3{color:#fff;margin:.2em 0 .5em;font-size:1.25rem}
+.hunt-promo ul{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}.hunt-promo li{color:#E7E5E4;font-size:.92rem}
+.hp-go{display:inline-block;font-weight:800;color:#1C1917;background:#F97316;padding:9px 16px;border-radius:10px;font-size:.92rem}
+@media(min-width:760px){.hunt-promo ul{grid-template-columns:1fr 1fr;gap:6px 18px}}
