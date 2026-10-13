@@ -1,4 +1,4 @@
-// Run: node _src/tests/outlook.test.js  — World Weather Outlook parsers + briefing script (no network).
+// Run: node _src/tests/outlook.test.js  — World Weather Radar Outlook parsers + briefing script (no network).
 const assert = require("assert"), O = require("../../assets/outlook.js");
 const nhc = O.parseNhc([{ id: "ep202026", name: "Simon", classification: "HU", intensity: "80", pressure: "977", latitudeNumeric: 20.4, longitudeNumeric: -107.2, movementDir: 285, movementSpeed: 3, cone: "c.png", graphics: "g" },
   { id: "al012026", name: "Bad" }]);
@@ -33,7 +33,7 @@ const bare = O.briefingScript({ storms: null, alerts: null, cities: [] });
 assert.strictEqual(bare.length, 2, "failed feeds -> only intro + teaser, nothing invented");
 assert.ok(O.briefingScript({ storms: [], alerts: { count: 0, events: [], top: [] }, cities: [] }).join(" ").includes("no active tropical cyclones"));
 assert.ok(s.split(/\s+/).length < 170, "script stays ~1 minute");
-console.log("All World Weather Outlook tests passed");
+console.log("All World Weather Radar Outlook tests passed");
 // launches
 { const N = Date.parse("2026-10-13T14:00:00Z"), L = O.parseLaunches([
   { name: "Falcon 9 Block 5 | Starlink 1", rocket: "Falcon 9 Block 5", mission: "Starlink 1", net: "2026-10-14T02:00:00Z", status: "Go", probability: 80, weatherConcerns: "Cumulus Cloud Rule", site: "Cape Canaveral SFS, FL, USA", lat: "28.5", lon: "-80.5" },

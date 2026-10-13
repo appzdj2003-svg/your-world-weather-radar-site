@@ -113,7 +113,7 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .atl-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}.atl-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;background:linear-gradient(135deg,var(--sky),var(--sky-d));box-shadow:0 0 0 3px var(--sky-l)}
 .atl-head b{display:block;color:var(--sky-d);font-size:1.05rem}.atl-head span{font-size:.85rem;color:var(--mute)}
 .msg.atl{max-width:100%;margin-top:10px}
-/* ---------- World Weather Outlook ---------- */
+/* ---------- World Weather Radar Outlook ---------- */
 .owo{--glow:0 0 0 1px rgba(14,165,233,.25),0 10px 40px rgba(14,165,233,.25)}
 .owo-home{margin-top:34px}
 .owo-map{position:relative;aspect-ratio:2/1;border-radius:20px;overflow:hidden;background:#0B1220;box-shadow:var(--glow);margin-top:18px}

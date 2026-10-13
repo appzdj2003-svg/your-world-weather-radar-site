@@ -72,7 +72,7 @@ def hero_atlas(h1, lead, kicker):
 def cta(p, slug, text):
     return f'<div class="cta"><img src="{p}assets/icon-192.png" alt=""><div class="grow"><h3>{APP}</h3><p>{E(text)}</p></div>{play_btn(slug)}</div>'
 
-# ---------- World Weather Outlook ----------
+# ---------- World Weather Radar Outlook ----------
 BASEMAP = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG:4326&BBOX=-180,-90,180,90&WIDTH=1440&HEIGHT=720&FORMAT=image/jpeg&LAYERS=BlueMarble_ShadedRelief_Bathymetry"
 PLAY_ICO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></svg>'
 def owo_map(lite=False):
@@ -110,11 +110,11 @@ def outlook_page():
 <h2>🌍 Today around the world</h2><div class="owo-cities" id="owo-cities"><p class="owo-empty shimmer">Loading…</p></div>
 <p class="owo-attr"><span id="owo-cities-at">Airport observations (METAR).</span> Source: <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>.</p>
 {owo_teasers("outlook")}</div>'''
-    page("outlook.html", "World Weather Outlook", "Live world weather: an animated satellite loop, active hurricanes and typhoons, US severe weather alerts and conditions in major cities, from NOAA, NWS, NASA and GDACS.",
-         b, hero("World Weather Outlook", "Live storms, warnings and weather around the globe, updated as you watch.", "🌍 Live"), "0.9", scripts=("outlook.js",))
+    page("outlook.html", "World Weather Radar Outlook", "Live world weather: an animated satellite loop, active hurricanes and typhoons, US severe weather alerts and conditions in major cities, from NOAA, NWS, NASA and GDACS.",
+         b, hero("World Weather Radar Outlook", "Live storms, warnings and weather around the globe, updated as you watch.", "🌍 Live"), "0.9", scripts=("outlook.js",))
 
 def home_outlook():
-    return f'''<section class="owo owo-home"><span class="kicker">🌍 Live now</span><h2 style="margin-top:.2em">World Weather Outlook</h2>
+    return f'''<section class="owo owo-home"><span class="kicker">🌍 Live now</span><h2 style="margin-top:.2em">World Weather Radar Outlook</h2>
 <p class="dim">What the planet's weather is doing right now: storms, warnings and cities.</p>{owo_map(lite=False)}
 <div class="owo-stats-row"><div><b id="owo-storm-n">–</b><span>active tropical cyclones</span></div><div><b id="owo-alert-n">–</b><span>severe US alerts</span></div></div>
 <div class="owo-storms" id="owo-storms" data-limit="2"><p class="owo-empty shimmer">Loading storms…</p></div>

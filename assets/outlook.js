@@ -1,4 +1,4 @@
-/* World Weather Outlook: live feeds (NWS, GDACS, NASA GIBS) + build-time snapshot (NHC, METAR) in assets/outlook.json.
+/* World Weather Radar Outlook: live feeds (NWS, GDACS, NASA GIBS) + build-time snapshot (NHC, METAR) in assets/outlook.json.
    Real data only: when a feed fails, the section says so instead of guessing. */
 (function (root) {
 "use strict";
@@ -90,7 +90,7 @@ function sayMove(m) { return m.replace(/^([NSEW]{1,3}) at (\d+) mph$/, (_, d, n)
 /* Briefing script: facts from the fetched data only; each part is skipped when its feed is missing. */
 function briefingScript(d) {
   const L = [], st = d.storms, al = d.alerts, cities = (d.cities || []).filter(Boolean);
-  L.push("Here's your World Weather Outlook.");
+  L.push("Here's your World Weather Radar Outlook.");
   if (st) {
     if (!st.length) L.push("Across the tropics, no active tropical cyclones are listed right now.");
     else {
