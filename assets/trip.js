@@ -1,3 +1,4 @@
+const ATL = () => `<img class="atl-ic" src="${(typeof window !== "undefined" && window.YW_ATLAS) || "/assets/atlas.svg"}" width="24" height="24" alt="">`;
 /* Weather Trip Planner (trip.html) */
 (function () {
   const ACT = [["SIGHTSEEING","Sightseeing"],["HIKE","Hiking & parks"],["BEACH","Beach"],["SKI","Ski & snow"],["CAMP","Camping"],["FISH","Fishing"],["BOAT","Boating"],["EVENT","Event"],["BUSINESS","Business"],["FAMILY","Family visit"]];
@@ -23,9 +24,9 @@
       if (tripish) return null;
       const m = YWAsk.best(q), E = YWWizard.E;
       const more = `<a href="/ask.html?q=${encodeURIComponent(q)}">Ask Atlas more →</a>`;
-      if (!m.length) return YWAsk.isQuestion(q) || !r.to ? `<div class="msg bot atl"><b>🧭 Atlas</b><p>I don't have a sourced answer for that. Describe your trip (like “Road trip to Nashville Oct 30 – Nov 1”) or ${more}</p></div>` : null;
+      if (!m.length) return YWAsk.isQuestion(q) || !r.to ? `<div class="msg bot atl"><b>${ATL()}Atlas</b><p>I don't have a sourced answer for that. Describe your trip (like “Road trip to Nashville Oct 30 – Nov 1”) or ${more}</p></div>` : null;
       const a = m[0][1];
-      return `<div class="msg bot atl"><b>🧭 Atlas</b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a> · ${more}</p></div>`;
+      return `<div class="msg bot atl"><b>${ATL()}Atlas</b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a> · ${more}</p></div>`;
     },
     appNote: "Open on your Android phone with Your World Weather Radar installed. If the app isn't installed yet, the link opens this page with a Google Play button.",
   });

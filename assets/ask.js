@@ -1,3 +1,4 @@
+const ATL = () => `<img class="atl-ic" src="${(typeof window !== "undefined" && window.YW_ATLAS) || "/assets/atlas.svg"}" width="24" height="24" alt="">`;
 /* Ask Atlas: client-side. Routes plan/trip sentences to the planners, otherwise answers from curated guide Q&A. */
 (function () {
   const $ = id => document.getElementById(id), E = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" })[c]);
@@ -22,11 +23,11 @@
   function ask(q) {
     q = q.trim(); if (!q) return; add("me", `<p>${E(q)}</p>`);
     const r = route(q);
-    if (r) return add("bot", `<b>🧭 Atlas</b><p>${r.text}</p><a class="btn dark" href="${r.href}">${r.label} →</a>`);
+    if (r) return add("bot", `<b>${ATL()}Atlas</b><p>${r.text}</p><a class="btn dark" href="${r.href}">${r.label} →</a>`);
     const ranked = best(q);
-    if (!ranked.length) return add("bot", `<b>🧭 Atlas</b><p>I don't have a sourced answer for that yet. Try the <a href="/guides/">weather guides</a>, or describe a day out (like “boating on Lake Lanier Saturday”) and I'll set up alerts.</p>`);
+    if (!ranked.length) return add("bot", `<b>${ATL()}Atlas</b><p>I don't have a sourced answer for that yet. Try the <a href="/guides/">weather guides</a>, or describe a day out (like “boating on Lake Lanier Saturday”) and I'll set up alerts.</p>`);
     const [, a] = ranked[0], more = ranked.slice(1, 3).filter(x => x[1].u !== a.u);
-    add("bot", `<b>🧭 Atlas</b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a></p>` +
+    add("bot", `<b>${ATL()}Atlas</b><p>${a.a}</p><p class="note">Source: <a href="${a.u}">${E(a.t === "More" ? "Your World Weather Radar" : a.t + " guide")}</a></p>` +
       (more.length ? `<div class="parsed">${more.map(x => `<button type="button" class="sug">${E(x[1].q)}</button>`).join("")}</div>` : ""));
   }
   window.YWAsk = { best, isQuestion, route };
