@@ -1,4 +1,4 @@
-// Run: node _src/tests/trip-atlantis.test.js — trip.html Ask Atlantis box: trip sentences fill the trip, questions get inline answers.
+// Run: node _src/tests/trip-atlas.test.js — trip.html Ask Atlas box: trip sentences fill the trip, questions get inline answers.
 const assert = require("assert"), fs = require("fs"), path = require("path"), A = f => fs.readFileSync(path.join(__dirname, "../../assets", f), "utf8");
 global.window = global; global.YWQuick = require("../../assets/quickparse.js");
 eval(A("askdata.js")); global.document = { getElementById: () => null }; global.location = { search: "" }; eval(A("ask.js"));
@@ -16,4 +16,4 @@ let fail = 0;
 for (const [q, want] of cases) { const h = cfg.preQuick(q);
   const ok = want === null ? h === null : (h && h.includes(want) && h.includes("ask.html?q="));
   if (!ok) { fail++; console.log("FAIL", q, "->", String(h).slice(0, 140)); } }
-console.log(fail ? fail + " failures" : `All ${cases.length} trip Ask Atlantis cases passed`); process.exit(fail ? 1 : 0);
+console.log(fail ? fail + " failures" : `All ${cases.length} trip Ask Atlas cases passed`); process.exit(fail ? 1 : 0);

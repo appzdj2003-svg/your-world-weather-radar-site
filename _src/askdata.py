@@ -1,4 +1,4 @@
-"""Ask Atlantis curated answers. Every fact here also appears, with sources, in the linked guide."""
+"""Ask Atlas curated answers. Every fact here also appears, with sources, in the linked guide."""
 QA = [
  (["watch", "warning", "difference", "advisory"], "What's the difference between a watch and a warning?",
   "A <b>watch</b> means conditions are favorable, so be prepared. A <b>warning</b> means the hazard is happening or about to happen, so take action now. An <b>advisory</b> is a less serious hazard that still calls for caution.", "watch-vs-warning"),

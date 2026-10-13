@@ -1,4 +1,4 @@
-// Run: node _src/tests/ask.test.js  — Ask Atlantis routing + answer matching (DOM stubbed).
+// Run: node _src/tests/ask.test.js  — Ask Atlas routing + answer matching (DOM stubbed).
 const assert = require("assert"), fs = require("fs"), path = require("path");
 global.YWQuick = require("../../assets/quickparse.js");
 global.window = {}; eval(fs.readFileSync(path.join(__dirname, "../../assets/askdata.js"), "utf8"));
@@ -24,4 +24,4 @@ const cases = [
 ];
 let fail = 0; for (const [q, want] of cases) { const h = last(q); if (!h.includes(want)) { fail++; console.log("FAIL", q, "->", h.slice(0, 160)); } }
 assert.ok(window.YW_ASK.every(x => fs.existsSync(path.join(__dirname, "../..", x.u))), "every answer links to an existing page");
-console.log(fail ? fail + " failures" : `All ${cases.length} Ask Atlantis cases passed`); process.exit(fail ? 1 : 0);
+console.log(fail ? fail + " failures" : `All ${cases.length} Ask Atlas cases passed`); process.exit(fail ? 1 : 0);

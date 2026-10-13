@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T16:05:09+00:00",
+  "fetchedAt": "2026-10-13T16:16:43+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -37,7 +37,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T16:05:09+00:00",
+  "fetchedAt": "2026-10-13T16:16:43+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -123,51 +123,51 @@
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1791905400,
-    "temp": 33,
-    "dewp": 23,
-    "wdir": 50,
-    "wspd": 6,
+    "obsTime": 1791907200,
+    "temp": 32,
+    "dewp": 22,
+    "wdir": 20,
+    "wspd": 7,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 131530Z 05006KT 3500 FU NSC 33/23 Q1012 NOSIG",
+    "rawOb": "METAR VABB 131600Z 02007KT 3500 FU NSC 32/22 Q1012 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1791905400,
+    "obsTime": 1791907200,
     "temp": 20,
     "dewp": 20,
-    "wdir": 170,
-    "wspd": 5,
+    "wdir": 160,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 1500
+      "base": 1000
      }
     ],
-    "rawOb": "METAR RJTT 131530Z 17005KT 9999 FEW015 20/20 Q1011 NOSIG",
+    "rawOb": "METAR RJTT 131600Z 16006KT 9999 FEW010 20/20 Q1011 NOSIG",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791905400,
+    "obsTime": 1791907200,
     "temp": 15,
-    "dewp": 14,
-    "wdir": 160,
-    "wspd": 17,
+    "dewp": 13,
+    "wdir": 170,
+    "wspd": 23,
     "wgst": null,
     "wxString": "-SHRA",
-    "cover": "OVC",
+    "cover": "BKN",
     "clouds": [
      {
       "cover": "SCT",
@@ -175,30 +175,30 @@
      },
      {
       "cover": "BKN",
-      "base": 2200
+      "base": 3300
      },
      {
-      "cover": "OVC",
-      "base": 3100
+      "cover": "BKN",
+      "base": 4200
      }
     ],
-    "rawOb": "SPECI YSSY 131530Z AUTO 16017KT 9999 -SHRA SCT016 BKN022 OVC031 15/14 Q1022 RESHRA",
+    "rawOb": "METAR YSSY 131600Z AUTO 17023KT 9999 -SHRA SCT016 BKN033 BKN042 15/13 Q1022 RESHRA",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1791903600,
-    "temp": 19,
-    "dewp": 9,
-    "wdir": 160,
-    "wspd": 14,
+    "obsTime": 1791907200,
+    "temp": 17,
+    "dewp": 10,
+    "wdir": 150,
+    "wspd": 15,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 131500Z 16014KT CAVOK 19/09 Q1017 NOSIG",
+    "rawOb": "METAR FACT 131600Z 15015KT CAVOK 17/10 Q1018 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
@@ -243,7 +243,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T16:05:09+00:00",
+  "fetchedAt": "2026-10-13T16:16:43+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
