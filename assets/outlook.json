@@ -1,11 +1,11 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-13T16:38:38+00:00",
+  "fetchedAt": "2026-10-13T19:26:09+00:00",
   "items": [
    {
     "id": "ep212026",
     "binNumber": "EP1",
-    "name": "Twenty-One-e",
+    "name": "Twenty-One-E",
     "classification": "TD",
     "intensity": "30",
     "pressure": "1006",
@@ -25,217 +25,212 @@
     "classification": "HU",
     "intensity": "80",
     "pressure": "977",
-    "latitudeNumeric": 20.3,
-    "longitudeNumeric": -107.3,
-    "movementDir": 270,
+    "latitudeNumeric": 20.2,
+    "longitudeNumeric": -107.4,
+    "movementDir": 260,
     "movementSpeed": 2,
-    "lastUpdate": "2026-10-13T15:00:00.000Z",
+    "lastUpdate": "2026-10-13T18:00:00.000Z",
     "advisory": "https://www.nhc.noaa.gov/text/MIATCPEP5.shtml",
     "graphics": "https://www.nhc.noaa.gov/graphics_ep5.shtml",
-    "cone": "cones/ep202026-025-5day.png"
+    "cone": "cones/ep202026-025a-5day.png"
    }
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-13T16:38:38+00:00",
+  "fetchedAt": "2026-10-13T19:26:09+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1791906660,
-    "temp": 20,
-    "dewp": 15,
-    "wdir": 130,
-    "wspd": 10,
-    "wgst": null,
+    "obsTime": 1791917460,
+    "temp": 19.4,
+    "dewp": 15.6,
+    "wdir": 180,
+    "wspd": 12,
+    "wgst": 18,
     "wxString": null,
     "cover": "SCT",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 2300
+      "base": 1600
      },
      {
       "cover": "FEW",
-      "base": 19000
+      "base": 3000
      },
      {
       "cover": "SCT",
-      "base": 25000
+      "base": 21000
      }
     ],
-    "rawOb": "METAR KJFK 131551Z 13010KT 10SM FEW023 FEW190 SCT250 20/15 A3000 RMK AO2 SLP158 T02000150 $",
+    "rawOb": "METAR KJFK 131851Z 18012G18KT 10SM FEW016 FEW030 SCT210 19/16 A2994 RMK AO2 SLP137 T01940156 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1791908400,
-    "temp": 19,
-    "dewp": 8,
+    "obsTime": 1791919200,
+    "temp": 15,
+    "dewp": 10,
     "wdir": 260,
-    "wspd": 19,
+    "wspd": 10,
     "wgst": null,
     "wxString": null,
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 4900
-     }
-    ],
-    "rawOb": "METAR EGLL 131620Z AUTO 26019KT 9999 FEW049 19/08 Q1022",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR EGLL 131920Z AUTO 26010KT 9999 NCD 15/10 Q1025",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1791909000,
-    "temp": 19,
-    "dewp": 17,
+    "obsTime": 1791918000,
+    "temp": 17,
+    "dewp": 13,
     "wdir": 300,
-    "wspd": 6,
+    "wspd": 5,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR LFPG 131630Z 30006KT CAVOK 19/17 Q1025 NOSIG",
+    "rawOb": "METAR LFPG 131900Z 30005KT CAVOK 17/13 Q1027 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1791909000,
+    "obsTime": 1791918000,
     "temp": 33,
     "dewp": 22,
-    "wdir": 20,
-    "wspd": 5,
+    "wdir": 60,
+    "wspd": 4,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 131630Z 02005KT 360V080 CAVOK 33/22 Q1014 NOSIG",
+    "rawOb": "METAR OMDB 131900Z 06004KT 010V110 CAVOK 33/22 Q1014 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1791909000,
-    "temp": 32,
+    "obsTime": 1791918000,
+    "temp": 31,
     "dewp": 21,
-    "wdir": 50,
-    "wspd": 4,
+    "wdir": 0,
+    "wspd": 0,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 131630Z 05004KT 3500 FU NSC 32/21 Q1012 NOSIG",
+    "rawOb": "METAR VABB 131900Z 00000KT 3000 FU NSC 31/21 Q1012 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1791907200,
-    "temp": 20,
+    "obsTime": 1791918000,
+    "temp": 22,
     "dewp": 20,
-    "wdir": 160,
-    "wspd": 6,
+    "wdir": 200,
+    "wspd": 11,
     "wgst": null,
     "wxString": null,
-    "cover": "FEW",
+    "cover": "SCT",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 1000
+      "base": 600
+     },
+     {
+      "cover": "SCT",
+      "base": 1500
      }
     ],
-    "rawOb": "METAR RJTT 131600Z 16006KT 9999 FEW010 20/20 Q1011 NOSIG",
+    "rawOb": "METAR RJTT 131900Z 20011KT 9999 FEW006 SCT015 22/20 Q1009 NOSIG",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1791909000,
+    "obsTime": 1791918000,
     "temp": 14,
-    "dewp": 12,
-    "wdir": 160,
-    "wspd": 20,
+    "dewp": 10,
+    "wdir": 170,
+    "wspd": 24,
     "wgst": null,
-    "wxString": "SHRA",
+    "wxString": "-SHRA",
     "cover": "BKN",
     "clouds": [
      {
       "cover": "BKN",
-      "base": 2100
+      "base": 2000
      },
      {
       "cover": "BKN",
-      "base": 2600
-     },
-     {
-      "cover": "BKN",
-      "base": 3300
+      "base": 4000
      }
     ],
-    "rawOb": "SPECI YSSY 131630Z AUTO 16020KT 9000 SHRA BKN021 BKN026 BKN033 14/12 Q1022",
+    "rawOb": "METAR YSSY 131900Z 17024KT 9999 -SHRA BKN020 BKN040 14/10 Q1023",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1791907200,
-    "temp": 17,
-    "dewp": 10,
-    "wdir": 150,
-    "wspd": 15,
+    "obsTime": 1791918000,
+    "temp": 15,
+    "dewp": 8,
+    "wdir": 180,
+    "wspd": 10,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 131600Z 15015KT CAVOK 17/10 Q1018 NOSIG",
+    "rawOb": "METAR FACT 131900Z 18010KT CAVOK 15/08 Q1018 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1791907200,
+    "obsTime": 1791918000,
     "temp": 23,
     "dewp": 17,
-    "wdir": 290,
-    "wspd": 9,
+    "wdir": 300,
+    "wspd": 8,
     "wgst": null,
-    "wxString": "-RA",
-    "cover": "CLR",
+    "wxString": null,
+    "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR SBGR 131600Z 29009KT 9999 -RA NSC 23/17 Q1016",
+    "rawOb": "METAR SBGR 131900Z 30008KT CAVOK 23/17 Q1014",
     "lat": -23.432,
     "lon": -46.469,
     "city": "São Paulo"
    },
    {
     "icaoId": "MMMX",
-    "obsTime": 1791907320,
-    "temp": 21,
+    "obsTime": 1791917220,
+    "temp": 23,
     "dewp": 11,
-    "wdir": 350,
-    "wspd": 6,
+    "wdir": 60,
+    "wspd": 8,
     "wgst": null,
     "wxString": null,
-    "cover": "SCT",
+    "cover": "FEW",
     "clouds": [
      {
-      "cover": "SCT",
+      "cover": "FEW",
       "base": 2000
      }
     ],
-    "rawOb": "SPECI MMMX 131602Z 35006KT 5SM SCT020 21/11 A3039 NOSIG RMK 8/100 HZY",
+    "rawOb": "METAR MMMX 131847Z 06008KT 5SM FEW020 23/11 A3032 NOSIG RMK 8/100 HZY",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -243,7 +238,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-13T16:38:38+00:00",
+  "fetchedAt": "2026-10-13T19:26:09+00:00",
   "items": [
    {
     "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
@@ -290,9 +285,9 @@
     "name": "Falcon 9 Block 5 | Bandwagon 5 (Dedicated Mid-Inclination Rideshare)",
     "net": "2026-10-19T10:30:00Z",
     "windowStart": "2026-10-19T10:30:00Z",
-    "windowEnd": "2026-10-19T12:13:00Z",
-    "status": "TBC",
-    "statusName": "To Be Confirmed",
+    "windowEnd": "2026-10-19T11:30:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
     "rocket": "Falcon 9 Block 5",
     "provider": "SpaceX",
     "mission": "Bandwagon 5 (Dedicated Mid-Inclination Rideshare)",
@@ -404,26 +399,6 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/vulcan_vc6l_image_20220406123130.jpg"
-   },
-   {
-    "id": "7bdc412b-c965-4517-a131-f57a01189803",
-    "name": "Ariane 64 Block 2 | Amazon Leo (LE-04)",
-    "net": "2026-10-31T00:00:00Z",
-    "windowStart": "2026-10-31T00:00:00Z",
-    "windowEnd": "2026-10-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Ariane 64 Block 2",
-    "provider": "Arianespace",
-    "mission": "Amazon Leo (LE-04)",
-    "orbit": "LEO",
-    "pad": "Ariane Launch Area 4",
-    "site": "Guiana Space Centre, French Guiana",
-    "lat": "5.256319",
-    "lon": "-52.786838",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_64_lifto_image_20260618063419.jpg"
    },
    {
     "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
@@ -546,24 +521,24 @@
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/soyuz_2.1b_image_20230802085331.jpg"
    },
    {
-    "id": "22e117bf-041c-49d5-9d09-7b180036e143",
-    "name": "Ariane 62 | Metop-SG B1",
+    "id": "7bdc412b-c965-4517-a131-f57a01189803",
+    "name": "Ariane 64 Block 2 | Amazon Leo (LE-04)",
     "net": "2026-11-30T00:00:00Z",
     "windowStart": "2026-11-30T00:00:00Z",
     "windowEnd": "2026-11-30T00:00:00Z",
     "status": "TBD",
     "statusName": "To Be Determined",
-    "rocket": "Ariane 62",
+    "rocket": "Ariane 64 Block 2",
     "provider": "Arianespace",
-    "mission": "Metop-SG B1",
-    "orbit": "SSO",
+    "mission": "Amazon Leo (LE-04)",
+    "orbit": "LEO",
     "pad": "Ariane Launch Area 4",
     "site": "Guiana Space Centre, French Guiana",
     "lat": "5.256319",
     "lon": "-52.786838",
     "probability": null,
     "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_62_lifto_image_20240711132056.jpeg"
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_64_lifto_image_20260618063419.jpg"
    },
    {
     "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
@@ -624,6 +599,26 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/pslv_image_20190224012254.jpeg"
+   },
+   {
+    "id": "22e117bf-041c-49d5-9d09-7b180036e143",
+    "name": "Ariane 62 | Metop-SG B1",
+    "net": "2026-12-31T00:00:00Z",
+    "windowStart": "2026-12-31T00:00:00Z",
+    "windowEnd": "2026-12-31T00:00:00Z",
+    "status": "TBD",
+    "statusName": "To Be Determined",
+    "rocket": "Ariane 62",
+    "provider": "Arianespace",
+    "mission": "Metop-SG B1",
+    "orbit": "SSO",
+    "pad": "Ariane Launch Area 4",
+    "site": "Guiana Space Centre, French Guiana",
+    "lat": "5.256319",
+    "lon": "-52.786838",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_62_lifto_image_20240711132056.jpeg"
    },
    {
     "id": "71df1dd0-d658-4762-b0bc-0fca6886aea7",
