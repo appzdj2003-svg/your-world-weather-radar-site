@@ -5,6 +5,7 @@ import json, re, html, datetime, urllib.parse, urllib.request, email.utils, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from guides import GUIDES
+import outlook as OUTLOOK
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://weather.yourworldapps.si/"
@@ -22,7 +23,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("features.html", "Features"), ("plan.html", "Alert Planner"), ("trip.html", "Trip Planner"), ("ask.html", "Ask Atlantis"),
+NAV = [("index.html", "Home"), ("features.html", "Features"), ("plan.html", "Alert Planner"), ("trip.html", "Trip Planner"), ("ask.html", "Ask Atlantis"), ("outlook.html", "Outlook"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -68,6 +69,54 @@ def hero(h1, lead="", kicker=None, extra=""):
 def cta(p, slug, text):
     return f'<div class="cta"><img src="{p}assets/icon-192.png" alt=""><div class="grow"><h3>{APP}</h3><p>{E(text)}</p></div>{play_btn(slug)}</div>'
 
+# ---------- World Weather Outlook ----------
+BASEMAP = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG:4326&BBOX=-180,-90,180,90&WIDTH=1440&HEIGHT=720&FORMAT=image/jpeg&LAYERS=BlueMarble_ShadedRelief_Bathymetry"
+PLAY_ICO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></svg>'
+def owo_map(lite=False):
+    return f'''<div class="owo-map" id="owo-map"{' data-lite="1"' if lite else ""}><img class="owo-base" src="{E(BASEMAP)}" alt="World map" width="1440" height="720">
+<div class="owo-frames"></div><div class="owo-pins"></div><div class="owo-scan" aria-hidden="true"></div>
+<div class="owo-live"><i></i>LIVE <span id="owo-time">Loading satellite…</span></div></div>
+<p class="owo-attr">Infrared satellite loop (cloud tops; colder, brighter colors mark stronger storms): GOES-East, GOES-West and Himawari via NASA GIBS. Europe, Africa and the Indian Ocean aren't covered by these satellites. Storm pins: NHC and GDACS.</p>'''
+def owo_briefing():
+    return f'''<div class="owo-brief"><button type="button" class="owo-play" id="owo-play">{PLAY_ICO}<span>Play live briefing</span></button>
+<p class="dim small">A 1-minute spoken rundown of the live data on this page. Your browser's own voice reads it aloud.</p><div class="owo-cap" id="owo-cap" hidden aria-live="polite"></div></div>'''
+TEASERS = [
+ ("🧠", "AI storm briefings", "NOW, 6–24H and 2D to 10D tabs, written for your exact spot. NOW is free; the longer windows are Premium.",
+  '<div class="tabs mini"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>5D</span><span>10D</span></div><i class="sk w90"></i><i class="sk w75"></i><i class="sk w85"></i><i class="sk w60"></i>'),
+ ("🌀", "Hurricane tracking", "The NHC forecast track and cone right on your radar, plus a HURRICANE briefing tab when a storm is active.",
+  '<svg class="cone" viewBox="0 0 200 90"><path d="M20 70 Q90 60 180 15 L190 40 Q100 80 20 74z" fill="rgba(255,255,255,.35)"/><path d="M20 72 Q95 62 185 27" stroke="#fff" stroke-width="2.5" fill="none" stroke-dasharray="5 5"/><circle cx="20" cy="72" r="6" fill="#F59E0B"/></svg>'),
+ ("🔥", "Hazard layers", "Fire, earthquake and volcano layers, plus marine, aviation and space overlays, on the same map.",
+  '<div class="chips"><span>🔥 Fire</span><span>🌋 Volcano</span><span>📳 Quakes</span><span>🌊 Marine</span><span>✈️ Aviation</span><span>🚀 Launches</span></div>'),
+ ("👥", "Close-One", "Pick someone and their place. When a storm hits there, the app drafts a text for you to send.",
+  '<div class="bubble">⚠️ Storm warning near Mom’s place<br><i class="sk w80"></i><i class="sk w55"></i></div>'),
+]
+def owo_teasers(slug):
+    cards = "".join(f'<div class="owo-tease"><div class="owo-prev" aria-hidden="true">{prev}<div class="owo-lock">🔒 Premium</div></div><h3>{i} {E(t)}</h3><p>{E(d)}</p></div>' for i, t, d, prev in TEASERS)
+    return f'''<section class="owo-prem"><span class="kicker">Taste of Premium</span><h2>This is the free sample. The app goes deeper.</h2>
+<p class="dim">Premium is ${PRICE_M}/month or ${PRICE_Y}/year through Google Play. The radar, alerts, cams and NOW briefing stay free.</p>
+<div class="owo-tgrid">{cards}</div><div class="btns" style="justify-content:center">{play_btn(slug, "primary glow", "outlook")}<a class="btn ghost-d" href="pricing.html">Compare Free and Premium</a></div></section>'''
+
+def outlook_page():
+    b = f'''<div class="owo">{owo_map()}{owo_briefing()}
+<div class="owo-stats-row"><div><b id="owo-storm-n">–</b><span>active tropical cyclones</span></div><div><b id="owo-alert-n">–</b><span>severe US alerts</span></div></div>
+<h2>🌀 Active tropical storms</h2><div class="owo-storms" id="owo-storms"><p class="owo-empty shimmer">Loading NHC and GDACS…</p></div>
+<p class="owo-attr">Sources: <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">NOAA National Hurricane Center</a> (Atlantic &amp; Pacific, refreshed with each site update; cone graphics by NHC) and <a href="https://www.gdacs.org/" target="_blank" rel="noopener">GDACS</a> (global, live; European Commission JRC &amp; UN OCHA). Always follow official advisories.</p>
+<h2>🚨 US severe weather alerts</h2><div id="owo-alerts" data-limit="5"><p class="owo-empty shimmer">Loading NWS alerts…</p></div>
+<p class="owo-attr">Source: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (api.weather.gov), live.</p>
+<h2>🚀 Today's launches</h2><div class="owo-launches" id="owo-launch"><p class="owo-empty shimmer">Loading the launch schedule…</p></div>
+<h2>🌍 Today around the world</h2><div class="owo-cities" id="owo-cities"><p class="owo-empty shimmer">Loading…</p></div>
+<p class="owo-attr"><span id="owo-cities-at">Airport observations (METAR).</span> Source: <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>.</p>
+{owo_teasers("outlook")}</div>'''
+    page("outlook.html", "World Weather Outlook", "Live world weather: an animated satellite loop, active hurricanes and typhoons, US severe weather alerts and conditions in major cities, from NOAA, NWS, NASA and GDACS.",
+         b, hero("World Weather Outlook", "Live storms, warnings and weather around the globe, updated as you watch.", "🌍 Live"), "0.9", scripts=("outlook.js",))
+
+def home_outlook():
+    return f'''<section class="owo owo-home"><span class="kicker">🌍 Live now</span><h2 style="margin-top:.2em">World Weather Outlook</h2>
+<p class="dim">What the planet's weather is doing right now: storms, warnings and cities.</p>{owo_map(lite=False)}
+<div class="owo-stats-row"><div><b id="owo-storm-n">–</b><span>active tropical cyclones</span></div><div><b id="owo-alert-n">–</b><span>severe US alerts</span></div></div>
+<div class="owo-storms" id="owo-storms" data-limit="2"><p class="owo-empty shimmer">Loading storms…</p></div>
+<div class="btns" style="justify-content:center"><a class="btn primary glow" href="outlook.html">See the full live Outlook →</a></div></section>'''
+
 # ---------- features (from the app source; keep in sync) ----------
 FEATURES = [
  ("📡", "Live radar", "free", "Rain in classic colors with snow kept light blue. Play the loop back and ahead, and add layers for lightning, hurricanes, fire, quakes and more."),
@@ -91,7 +140,7 @@ def home():
 <div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="plan.html">Plan alerts for a day out →</a></div>
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
 <div class="phone"><img src="assets/shot-home.jpg" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
-    b = f'''<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
+    b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
 <div class="tabs"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>3D</span><span>4D</span><span>5D</span><span>7D</span><span>10D</span></div>
 <p>Tap a tab and get a short, plain-English summary of that window. Built-in briefings are written on your phone from forecast data. With Premium you can download Gemma to write them on-device, or use your own AI provider key.</p>
@@ -108,7 +157,7 @@ def home():
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android", "applicationCategory": "WeatherApplication",
            "author": {"@type": "Organization", "name": "Your World Apps"}, "installUrl": PLAY, "url": SITE,
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", "Live radar, NWS weather alerts, AI briefing tabs, hurricane tracking, free weather cams and Off-Grid Safety satellite texting for Android.", b, h, "1.0", jsonld=ld)
+    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", "Live radar, NWS weather alerts, AI briefing tabs, hurricane tracking, free weather cams and Off-Grid Safety satellite texting for Android.", b, h, "1.0", jsonld=ld, scripts=("outlook.js",))
 
 def features():
     b = feature_cards() + f'''<h2>Also in the app</h2><ul>
@@ -281,5 +330,5 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
 if __name__ == "__main__":
-    home(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("plan.html", "plan"); planner("trip.html", "trip"); misc()
+    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("plan.html", "plan"); planner("trip.html", "trip"); misc()
     print(f"Built {len(PAGES)} pages")
