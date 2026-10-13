@@ -38,7 +38,7 @@
       $("prog").style.width = "100%";
       let tok; try { tok = await cfg.codec.encode(cfg.pack(st)); } catch (e) { box.innerHTML = `<p class="err">${E(e.message)}</p>`; return; }
       const url = cfg.codec.webUrl(tok), android = /Android/i.test(navigator.userAgent);
-      box.innerHTML = `<div class="step"><h2>${E(cfg.doneTitle)}</h2><div class="sum">${cfg.summary(st).map(([k, v]) => `<div><span class="dim">${E(k)}</span><b>${E(v)}</b></div>`).join("")}</div>
+      box.innerHTML = `<div class="step" id="plan-result"><h2>${E(cfg.doneTitle)} <button type="button" class="lsay" data-say="#plan-result" aria-label="Listen to this plan" title="Listen">🔊</button></h2><div class="sum">${cfg.summary(st).map(([k, v]) => `<div><span class="dim">${E(k)}</span><b>${E(v)}</b></div>`).join("")}</div>
         ${android ? `<div class="btns"><a class="btn primary" href="${E(cfg.codec.intentUrl(tok))}">Open in the app</a></div>` : `<p class="note" style="text-align:center;margin-top:18px">Scan with your Android phone to open it there.</p><div class="qr" id="qr"></div>`}
         <p class="note">Your link (everything is inside the link itself; nothing is uploaded):</p><div class="linkbox" id="lk">${E(url)}</div>
         <div class="btns"><a class="btn dark" href="${E(cfg.codec.PLAY)}" target="_blank" rel="noopener">Get the app on Google Play</a></div><div class="btns"><button class="btn" id="copy">Copy link</button>${navigator.share ? `<button class="btn" id="share">Share</button>` : ""}<button class="btn" id="again">Start over</button></div>

@@ -224,3 +224,21 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .atl-ic{width:24px;height:24px;border-radius:7px;display:inline-block;vertical-align:-6px;margin-right:7px}
 img.atl-av{background:none;border-radius:12px;box-shadow:0 4px 14px rgba(14,165,233,.3)}
 .atl-h1{display:flex;align-items:center;gap:16px}.atl-h1 img{width:clamp(52px,12vw,72px);height:auto;border-radius:18px;box-shadow:0 8px 28px rgba(14,165,233,.35)}
+/* ---------- Listen (guides) ---------- */
+.listen{position:sticky;top:0;z-index:20;margin:16px 0 18px;padding:10px 12px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(8px);box-shadow:var(--shadow)}
+.listen-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lbtn{min-height:44px;min-width:44px;padding:0 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--white);color:var(--slate);font-weight:800;font-size:.95rem;cursor:pointer}
+.lbtn.lplay{background:var(--amber);border-color:var(--amber)}.lbtn.lplay:hover{background:#FBBF24}
+.lbtn:disabled{opacity:.45;cursor:default}
+.lbtn:focus-visible,.listen select:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.listen select{min-height:44px;max-width:46vw;border-radius:12px;border:1.5px solid var(--line);background:var(--white);color:var(--slate);padding:0 10px;font-size:.92rem}
+.listen .lvwrap select{max-width:100%}.lstat{color:var(--mute);font-size:.82rem;margin-left:auto}
+.listen-cap{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:var(--slate);color:#fff;font-weight:600;font-size:.95rem;line-height:1.45}
+.listen-note{margin:6px 0 0;color:var(--mute);font-size:.78rem}
+.listen-on{background:var(--sky-l);box-shadow:-4px 0 0 var(--sky);border-radius:4px;transition:background .2s}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.lsay{margin-left:auto;border:1.5px solid var(--line);background:var(--white);border-radius:999px;width:32px;height:32px;display:inline-grid;place-items:center;font-size:.95rem;cursor:pointer;vertical-align:middle;padding:0}
+.msg b .lsay{margin-left:8px}.lsay.on{background:var(--amber);border-color:var(--amber);animation:owoBreath 1.8s ease-in-out infinite}
+.no-say .lsay{display:none}
+.lsay-bar{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;display:flex;gap:10px;align-items:center;max-width:720px;margin:0 auto;padding:10px 12px;border-radius:14px;background:var(--slate);box-shadow:0 10px 30px rgba(15,23,42,.35)}
+.lsay-cap{margin:0;flex:1;color:#fff;font-weight:600;font-size:.92rem;line-height:1.4}.lsay-bar .lbtn{flex:none}
