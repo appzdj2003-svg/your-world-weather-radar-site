@@ -135,7 +135,7 @@
       var q = queue[pos], u = new SpeechSynthesisUtterance(q.t);
       u.rate = +selR.value || 1; if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = LANG === "es" ? "es-US" : "en-US";
       u.onend = function () { if (g !== gen) return; pos++; speakNext(g); };
-      u.onerror = function (e) { if (g !== gen) return; if (e && (e.error === "interrupted" || e.error === "canceled")) return; pos++; speakNext(g); };
+      u.onerror = function (e) { if (g !== gen) return; if (e && (e.error === "interrupted" || e.error === "canceled")) return; if (voice && !voice.localService) { voice = null; speakNext(g); return; } pos++; speakNext(g); };
       mark(items[q.i].el); cap.hidden = false; cap.textContent = q.t; ui(); ss.speak(u);
     }
     /* Pause = cancel + remember position: native pause/resume is unreliable on iOS Safari and Chrome Android. */

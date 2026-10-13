@@ -1,0 +1,135 @@
+[
+ {
+  "key": "jacket",
+  "file": "assets/items/jacket.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a hooded waterproof rain jacket with taped seams, beaded raindrops on the fabric",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "rainsuit",
+  "file": "assets/items/rainsuit.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a matching two-piece rain suit, hooded jacket and rain pants laid out together",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "poncho",
+  "file": "assets/items/poncho.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a hooded rain poncho draped as if worn, rain beading off",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "umbrella",
+  "file": "assets/items/umbrella.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: an open compact windproof travel umbrella with a curved handle, rain falling",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "boots",
+  "file": "assets/items/boots.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a pair of waterproof rubber rain boots standing in a shallow puddle",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "drybag",
+  "file": "assets/items/drybag.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a roll-top waterproof dry bag with buckle and shoulder strap, wet with raindrops",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "radio",
+  "file": "assets/items/radio.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a tabletop NOAA-style emergency weather alert radio with telescoping antenna and speaker grille, blank display",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "crankradio",
+  "file": "assets/items/crankradio.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a compact hand-crank solar emergency radio with crank handle, small solar panel and built-in flashlight",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "station",
+  "file": "assets/items/station.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a home weather station sensor array on a mast with wind cups and wind vane, plus a small indoor display with blank screen",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "gauge",
+  "file": "assets/items/gauge.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a clear cylindrical rain gauge with measurement tick marks, partly filled with rainwater",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "thermo",
+  "file": "assets/items/thermo.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a small digital thermometer hygrometer with a blank screen on a shelf",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "lightning",
+  "file": "assets/items/lightning.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a small handheld lightning detector device, with a distant lightning bolt in storm clouds",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "anemo",
+  "file": "assets/items/anemo.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a handheld pocket anemometer weather meter with a small spinning impeller",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "headlamp",
+  "file": "assets/items/headlamp.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a waterproof LED headlamp with elastic strap, beam glowing",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "lantern",
+  "file": "assets/items/lantern.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a battery LED camping lantern glowing warmly in the dark",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "powerbank",
+  "file": "assets/items/powerbank.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a slim pocket USB power bank with a cable",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "powerstation",
+  "file": "assets/items/powerstation.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a portable power station with carry handle and outlets",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "kit",
+  "file": "assets/items/kit.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a 72-hour emergency preparedness backpack with water pouches, food bars and supplies",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "firstaid",
+  "file": "assets/items/firstaid.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a first aid kit case with a white cross, slightly open showing bandages",
+  "items": [],
+  "done": false
+ }
+]
