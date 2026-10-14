@@ -144,6 +144,18 @@ a{color:#7dd3fc}
 <p>Forecasts, radar, alerts and AI briefings are for information only. They aren't professional meteorological, marine, aviation or emergency advice. Always follow official National Weather Service and local emergency guidance.</p>
 <h2>Changes</h2>
 <p>If anything here changes, for example a new service or a new kind of data, we'll update this policy and the "Last updated" date, and update the Google Play Data safety section before the change ships.</p>
+<h2 id="ios">iPhone app (App Store)</h2>
+<p><strong>App:</strong> Your World Weather Radar for iPhone (bundle ID <code>com.yourworld.weatherradar</code>), published on Apple's App Store by Your World Apps. Everything above applies to the iPhone app too, except for the Android- and Google-specific parts. The differences:</p>
+<ul>
+<li><strong>Location.</strong> iOS asks for "While Using the App" location only. The iPhone app never requests background ("Always") location. If you say no, search for a city and the app works from that place. Apple's Core Location provides the fix, and Apple's geocoder turns it into a place name. Your coordinates are sent to the weather services listed above (for example NOAA/NWS, NHC, USGS, Open-Meteo, LibreWXR/RainViewer) and a rounded location to our cams server, only to fetch data for you. We don't store your location on our servers.</li>
+<li><strong>Purchases.</strong> Premium ("ywweather_premium", a monthly auto-renewing subscription with a 7-day free trial) is billed by Apple through StoreKit. We never see your payment details. Manage or cancel in iPhone Settings ▸ your name ▸ Subscriptions. Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">standard Terms of Use (EULA)</a> apply.</li>
+<li><strong>AI briefings.</strong> Optional. If you enter your own OpenAI, xAI or Anthropic API key, it's stored in the iOS Keychain on your phone, and a weather summary for your area is sent to that provider under your account. Without a key, briefings are built on your phone.</li>
+<li><strong>Off-Grid Safety and Close-One.</strong> Contacts you add are stored only on your phone. The app opens Apple's Messages composer with a draft. <strong>You</strong> tap Send. The app never sends texts or contacts emergency services. In an emergency, call 911.</li>
+<li><strong>Cams and YouTube.</strong> Live cams use our cams server as described above. YouTube streams play in an embedded player (youtube-nocookie.com) under <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.</li>
+<li><strong>Widget.</strong> The Home Screen widget reads the latest forecast that the app saved on your phone (an iOS App Group). It sends nothing to us.</li>
+<li><strong>No tracking.</strong> The iPhone app has no ads, no analytics SDKs, no accounts and no App Tracking Transparency prompt, because it doesn't track you. Apple services used: Core Location, StoreKit, WidgetKit, the App Store rating prompt and MessageUI (<a href="https://www.apple.com/legal/privacy/">Apple Privacy Policy</a>).</li>
+<li><strong>Deleting your data.</strong> Deleting the app removes everything it stored on your iPhone.</li>
+</ul>
 <h2>Contact</h2>
 <p>Your World Apps: <a href="mailto:support@yourworldapps.si"><strong>support@yourworldapps.si</strong></a></p>
 <p>Questions, privacy requests and data deletion requests all go to this address.</p>
