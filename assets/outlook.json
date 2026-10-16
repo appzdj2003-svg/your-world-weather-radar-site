@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-15T22:18:14+00:00",
+  "fetchedAt": "2026-10-16T01:22:27+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -9,14 +9,14 @@
     "classification": "HU",
     "intensity": "80",
     "pressure": "978",
-    "latitudeNumeric": 13.7,
-    "longitudeNumeric": -101.7,
+    "latitudeNumeric": 14,
+    "longitudeNumeric": -101.8,
     "movementDir": 345,
     "movementSpeed": 6,
-    "lastUpdate": "2026-10-15T21:00:00.000Z",
+    "lastUpdate": "2026-10-16T00:00:00.000Z",
     "advisory": "https://www.nhc.noaa.gov/text/MIATCPEP1.shtml",
     "graphics": "https://www.nhc.noaa.gov/graphics_ep1.shtml",
-    "cone": "cones/ep212026-010-5day.png"
+    "cone": "cones/ep212026-010a-5day.png"
    },
    {
     "id": "ep202026",
@@ -37,142 +37,15 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-15T22:18:14+00:00",
+  "fetchedAt": "2026-10-16T01:22:27+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1792101060,
-    "temp": 15.6,
-    "dewp": 8.9,
-    "wdir": 150,
-    "wspd": 7,
-    "wgst": null,
-    "wxString": null,
-    "cover": "SCT",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 5000
-     },
-     {
-      "cover": "FEW",
-      "base": 10000
-     },
-     {
-      "cover": "SCT",
-      "base": 25000
-     }
-    ],
-    "rawOb": "METAR KJFK 152151Z 15007KT 10SM FEW050 FEW100 SCT250 16/09 A3020 RMK AO2 SLP224 T01560089 $",
-    "lat": 40.6392,
-    "lon": -73.7639,
-    "city": "New York"
-   },
-   {
-    "icaoId": "EGLL",
-    "obsTime": 1792101000,
-    "temp": 16,
-    "dewp": 15,
-    "wdir": 210,
-    "wspd": 8,
-    "wgst": null,
-    "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "SCT",
-      "base": 1600
-     },
-     {
-      "cover": "BKN",
-      "base": 2300
-     },
-     {
-      "cover": "BKN",
-      "base": 4100
-     }
-    ],
-    "rawOb": "METAR EGLL 152150Z AUTO 21008KT 9999 SCT016 BKN023 BKN041 16/15 Q1019",
-    "lat": 51.477,
-    "lon": -0.461,
-    "city": "London"
-   },
-   {
-    "icaoId": "LFPG",
-    "obsTime": 1792101600,
-    "temp": 17,
-    "dewp": 13,
+    "obsTime": 1792111860,
+    "temp": 15,
+    "dewp": 9.4,
     "wdir": 150,
     "wspd": 6,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR LFPG 152200Z 15006KT CAVOK 17/13 Q1022 NOSIG",
-    "lat": 49.015,
-    "lon": 2.534,
-    "city": "Paris"
-   },
-   {
-    "icaoId": "OMDB",
-    "obsTime": 1792101600,
-    "temp": 32,
-    "dewp": 27,
-    "wdir": 20,
-    "wspd": 3,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR OMDB 152200Z 02003KT 340V090 CAVOK 32/27 Q1010 NOSIG",
-    "lat": 25.254,
-    "lon": 55.366,
-    "city": "Dubai"
-   },
-   {
-    "icaoId": "VABB",
-    "obsTime": 1792101600,
-    "temp": 30,
-    "dewp": 22,
-    "wdir": 150,
-    "wspd": 4,
-    "wgst": null,
-    "wxString": "FU",
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR VABB 152200Z 15004KT 3000 FU NSC 30/22 Q1009 NOSIG",
-    "lat": 19.1,
-    "lon": 72.859,
-    "city": "Mumbai"
-   },
-   {
-    "icaoId": "RJTT",
-    "obsTime": 1792101600,
-    "temp": 19,
-    "dewp": 14,
-    "wdir": 10,
-    "wspd": 9,
-    "wgst": null,
-    "wxString": null,
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 2000
-     }
-    ],
-    "rawOb": "METAR RJTT 152200Z 01009KT 9999 FEW020 19/14 Q1020 NOSIG",
-    "lat": 35.553,
-    "lon": 139.781,
-    "city": "Tokyo"
-   },
-   {
-    "icaoId": "YSSY",
-    "obsTime": 1792101600,
-    "temp": 19,
-    "dewp": 8,
-    "wdir": 90,
-    "wspd": 10,
     "wgst": null,
     "wxString": null,
     "cover": "BKN",
@@ -183,67 +56,203 @@
      },
      {
       "cover": "BKN",
-      "base": 7000
+      "base": 14000
+     },
+     {
+      "cover": "BKN",
+      "base": 25000
      }
     ],
-    "rawOb": "METAR YSSY 152200Z 09010KT 9999 FEW040 BKN070 19/08 Q1031",
+    "rawOb": "METAR KJFK 160051Z 15006KT 10SM FEW040 BKN140 BKN250 15/09 A3019 RMK AO2 SLP223 T01500094 $",
+    "lat": 40.6392,
+    "lon": -73.7639,
+    "city": "New York"
+   },
+   {
+    "icaoId": "EGLL",
+    "obsTime": 1792111800,
+    "temp": 14,
+    "dewp": 13,
+    "wdir": 220,
+    "wspd": 8,
+    "wgst": null,
+    "wxString": null,
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR EGLL 160050Z AUTO 22008KT 9999 NCD 14/13 Q1018",
+    "lat": 51.477,
+    "lon": -0.461,
+    "city": "London"
+   },
+   {
+    "icaoId": "LFPG",
+    "obsTime": 1792112400,
+    "temp": 15,
+    "dewp": 12,
+    "wdir": 170,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": null,
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR LFPG 160100Z 17004KT CAVOK 15/12 Q1021 NOSIG",
+    "lat": 49.015,
+    "lon": 2.534,
+    "city": "Paris"
+   },
+   {
+    "icaoId": "OMDB",
+    "obsTime": 1792112400,
+    "temp": 29,
+    "dewp": 27,
+    "wdir": 150,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": "HZ",
+    "cover": "SCT",
+    "clouds": [
+     {
+      "cover": "SCT",
+      "base": 1200
+     }
+    ],
+    "rawOb": "METAR OMDB 160100Z 15004KT 3000 HZ SCT012 29/27 Q1010 BECMG 1500 BR",
+    "lat": 25.254,
+    "lon": 55.366,
+    "city": "Dubai"
+   },
+   {
+    "icaoId": "VABB",
+    "obsTime": 1792112400,
+    "temp": 29,
+    "dewp": 21,
+    "wdir": 110,
+    "wspd": 3,
+    "wgst": null,
+    "wxString": "HZ",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR VABB 160100Z 11003KT 2500 HZ NSC 29/21 Q1010 NOSIG",
+    "lat": 19.1,
+    "lon": 72.859,
+    "city": "Mumbai"
+   },
+   {
+    "icaoId": "RJTT",
+    "obsTime": 1792112400,
+    "temp": 22,
+    "dewp": 14,
+    "wdir": 350,
+    "wspd": 5,
+    "wgst": null,
+    "wxString": null,
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 2000
+     }
+    ],
+    "rawOb": "METAR RJTT 160100Z 35005KT 9999 FEW020 BKN/// 22/14 Q1021 NOSIG",
+    "lat": 35.553,
+    "lon": 139.781,
+    "city": "Tokyo"
+   },
+   {
+    "icaoId": "YSSY",
+    "obsTime": 1792112400,
+    "temp": 21,
+    "dewp": 8,
+    "wdir": 110,
+    "wspd": 16,
+    "wgst": null,
+    "wxString": "VCSH",
+    "cover": "BKN",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 4000
+     },
+     {
+      "cover": "SCT",
+      "base": 5000
+     },
+     {
+      "cover": "BKN",
+      "base": 28000
+     }
+    ],
+    "rawOb": "METAR YSSY 160100Z 11016KT 9999 VCSH FEW040 SCT050 BKN280 21/08 Q1031",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1792101600,
-    "temp": 16,
-    "dewp": 12,
+    "obsTime": 1792112400,
+    "temp": 15,
+    "dewp": 11,
     "wdir": 350,
     "wspd": 9,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 152200Z 35009KT CAVOK 16/12 Q1016 NOSIG",
+    "rawOb": "METAR FACT 160100Z 35009KT CAVOK 15/11 Q1015 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1792101600,
-    "temp": 22,
-    "dewp": 19,
-    "wdir": 140,
-    "wspd": 4,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR SBGR 152200Z 14004KT 8000 NSC 22/19 Q1014",
-    "lat": -23.432,
-    "lon": -46.469,
-    "city": "São Paulo"
-   },
-   {
-    "icaoId": "MMMX",
-    "obsTime": 1792100760,
-    "temp": 23,
-    "dewp": 10,
-    "wdir": 60,
-    "wspd": 7,
+    "obsTime": 1792112400,
+    "temp": 21,
+    "dewp": 18,
+    "wdir": 110,
+    "wspd": 3,
     "wgst": null,
     "wxString": null,
     "cover": "BKN",
     "clouds": [
      {
       "cover": "SCT",
-      "base": 2000
+      "base": 1000
+     },
+     {
+      "cover": "BKN",
+      "base": 4500
      },
      {
       "cover": "BKN",
       "base": 8000
      }
     ],
-    "rawOb": "METAR MMMX 152146Z 06007KT 5SM SCT020TCU BKN080 23/10 A3017 NOSIG RMK 8/230 HZY PCPN NE",
+    "rawOb": "METAR SBGR 160100Z 11003KT 8000 SCT010 BKN045 BKN080 21/18 Q1016",
+    "lat": -23.432,
+    "lon": -46.469,
+    "city": "São Paulo"
+   },
+   {
+    "icaoId": "MMMX",
+    "obsTime": 1792113600,
+    "temp": 15,
+    "dewp": 12,
+    "wdir": 330,
+    "wspd": 6,
+    "wgst": null,
+    "wxString": "-RA",
+    "cover": "OVC",
+    "clouds": [
+     {
+      "cover": "BKN",
+      "base": 1500
+     },
+     {
+      "cover": "OVC",
+      "base": 7000
+     }
+    ],
+    "rawOb": "SPECI MMMX 160120Z 33006KT 5SM -RA BKN015CB OVC070 15/12 A3024 NOSIG RMK 8/96/ HZY STFRA TSE05",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -251,28 +260,8 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-15T22:18:14+00:00",
+  "fetchedAt": "2026-10-16T01:22:27+00:00",
   "items": [
-   {
-    "id": "df88cfbf-f504-4e11-8370-e33dd6280b5b",
-    "name": "Falcon 9 Block 5 | USSF-481",
-    "net": "2026-10-16T00:01:05Z",
-    "windowStart": "2026-10-15T23:44:00Z",
-    "windowEnd": "2026-10-16T03:44:00Z",
-    "status": "Go",
-    "statusName": "Go for Launch",
-    "rocket": "Falcon 9 Block 5",
-    "provider": "SpaceX",
-    "mission": "USSF-481",
-    "orbit": "PO",
-    "pad": "Space Launch Complex 4E",
-    "site": "Vandenberg SFB, CA, USA",
-    "lat": "34.632",
-    "lon": "-120.611",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_liftof_image_20260816171423.jpg"
-   },
    {
     "id": "3b430f81-0ff1-4d85-8a1a-cef0de326198",
     "name": "Falcon 9 Block 5 | Bandwagon 5 (Dedicated Mid-Inclination Rideshare)",
@@ -752,6 +741,26 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_heavy_image_20220129192819.jpeg"
+   },
+   {
+    "id": "0cf92611-82a8-4095-a0b4-dda2e74b1fff",
+    "name": "LVM-3 | GSAT-32 (GSAT-N3)",
+    "net": "2026-12-31T00:00:00Z",
+    "windowStart": "2026-12-31T00:00:00Z",
+    "windowEnd": "2026-12-31T00:00:00Z",
+    "status": "TBD",
+    "statusName": "To Be Determined",
+    "rocket": "Launch Vehicle Mark-3 (GSLV Mk III)",
+    "provider": "Indian Space Research Organization",
+    "mission": "GSAT-32 (GSAT-N3)",
+    "orbit": "GTO",
+    "pad": "Satish Dhawan Space Centre Second Launch Pad",
+    "site": "Satish Dhawan Space Centre, India",
+    "lat": "13.7199",
+    "lon": "80.2304",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/gslv2520mk2520iii_image_20190604000938.jpg"
    }
   ]
  }
