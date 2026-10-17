@@ -188,7 +188,7 @@ def privacy():
     src = (Path(__file__).parent / "privacy_source.html").read_text()
     inner = re.search(r"<body>(.*)</body>", src, re.S).group(1)
     inner = re.sub(r"<h1>.*?</h1>", "", inner, count=1, flags=re.S)
-    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The app itself has no analytics.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
+    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The Android app\'s optional, anonymous usage and crash reports (Google Firebase) are described above.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
     page("privacy.html", "Privacy Policy", "Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why.", b, hero("Privacy Policy", f"{APP} for Android and iPhone", "Privacy"), "0.4")
 
 def support():
