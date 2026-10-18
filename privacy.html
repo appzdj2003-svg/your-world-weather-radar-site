@@ -29,6 +29,7 @@
 </li><li><strong>Radar tile services</strong> (LibreWXR, RainViewer, or a radar host you enter yourself): map tiles around your location, which reveal the general area. This also runs in the background for rain and storm alerts. If you save a radar API key, it's saved only on your phone and sent only to the radar service you chose.
 </li></ul>
 <p>The app keeps refreshing alerts and rain/storm warnings in the background (about every 15 minutes, or continuously if you turn on Live storm watch) using your last saved location. Places you add for family members in Close-One (watch pins) are checked the same way. Other NOAA services (hurricane center, buoys, tides, climate indices, Aviation Weather Center, Great Lakes lab) are contacted with station IDs or a map area near you, not your exact coordinates.</p>
+<p><strong>Sun and space weather.</strong> The Sun screen and the optional solar alerts download public images and data from NASA's Solar Dynamics Observatory (sdo.gsfc.nasa.gov) and NOAA's Space Weather Prediction Center (services.swpc.noaa.gov, including GOES-19 CCOR-1 corona images). These requests don't include your location or any other personal data; like any website, those services see your IP address. A few small space-weather feeds are also checked in the background along with your other alerts. Aurora chances and eclipse times for your place are computed on your phone from your saved location, and that location isn't sent anywhere for them. Recent Sun images and space-weather data are cached on your phone.</p>
 <p><strong>Maps.</strong> Map tiles come from Esri (ArcGIS), CARTO, OpenSeaMap, and MapLibre (fonts). Tile requests show these services which part of the map you're looking at.</p>
 <p><strong>Optional overlays</strong> (only when you turn them on). These send the map center or your location, with a search radius, to the services that provide them:</p>
 <ul><li><strong>Aviation</strong>: adsb.fi, OpenSky Network, adsbdb, HexDB, airport-data.com.
@@ -90,7 +91,8 @@
 <p>Each of these services handles your data under its own privacy policy:</p>
 <ul><li><strong>Weather, forecast and hazards:</strong>
 <ul><li><a href="https://open-meteo.com/en/terms">Open-Meteo</a> (forecasts, geocoding, marine, air quality)
-</li><li><a href="https://www.weather.gov/privacy">NOAA / National Weather Service</a> (alerts, observations, hurricane center, buoys, tides, Great Lakes lab, Aviation Weather Center; see also <a href="https://www.noaa.gov/protecting-your-privacy">NOAA privacy</a>)
+</li><li><a href="https://www.weather.gov/privacy">NOAA / National Weather Service</a> (alerts, observations, hurricane center, buoys, tides, Great Lakes lab, Aviation Weather Center, Space Weather Prediction Center; see also <a href="https://www.noaa.gov/protecting-your-privacy">NOAA privacy</a>)
+</li><li><a href="https://www.nasa.gov/privacy/">NASA</a> Solar Dynamics Observatory (Sun images)
 </li><li><a href="https://www.usgs.gov/policies-and-notices">U.S. Geological Survey</a> (earthquakes, volcanoes, river cams)
 </li><li><a href="https://www.esri.com/en-us/privacy/overview">NIFC fire data on Esri ArcGIS</a>
 </li><li>Lightning mirror on <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a> / <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net">jsDelivr</a>
