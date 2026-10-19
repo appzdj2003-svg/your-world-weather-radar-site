@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-19T13:30:13+00:00",
+  "fetchedAt": "2026-10-19T19:26:59+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -9,214 +9,223 @@
     "classification": "TS",
     "intensity": "50",
     "pressure": "999",
-    "latitudeNumeric": 19.7,
-    "longitudeNumeric": -108,
-    "movementDir": 280,
-    "movementSpeed": 6,
-    "lastUpdate": "2026-10-19T09:00:00.000Z",
+    "latitudeNumeric": 19.5,
+    "longitudeNumeric": -108.5,
+    "movementDir": 250,
+    "movementSpeed": 7,
+    "lastUpdate": "2026-10-19T15:00:00.000Z",
     "advisory": "https://www.nhc.noaa.gov/text/MIATCPEP1.shtml",
     "graphics": "https://www.nhc.noaa.gov/graphics_ep1.shtml",
-    "cone": "cones/ep212026-024-5day.png"
+    "cone": "cones/ep212026-025-5day.png"
    }
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-19T13:30:13+00:00",
+  "fetchedAt": "2026-10-19T19:26:59+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1792414260,
-    "temp": 11.1,
-    "dewp": 4.4,
-    "wdir": 20,
-    "wspd": 5,
+    "obsTime": 1792435860,
+    "temp": 17.8,
+    "dewp": 1.7,
+    "wdir": 60,
+    "wspd": 11,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
+      "base": 10000
+     },
+     {
+      "cover": "FEW",
       "base": 25000
      }
     ],
-    "rawOb": "METAR KJFK 191251Z 02005KT 10SM FEW250 11/04 A3048 RMK AO2 SLP322 T01110044 $",
+    "rawOb": "METAR KJFK 191851Z 06011KT 10SM FEW100 FEW250 18/02 A3034 RMK AO2 SLP275 T01780017 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1792416000,
-    "temp": 14,
-    "dewp": 6,
-    "wdir": 120,
-    "wspd": 9,
+    "obsTime": 1792437600,
+    "temp": 10,
+    "dewp": 7,
+    "wdir": 100,
+    "wspd": 3,
     "wgst": null,
     "wxString": null,
-    "cover": "OVC",
+    "cover": "BKN",
     "clouds": [
      {
-      "cover": "OVC",
-      "base": 3900
+      "cover": "BKN",
+      "base": 2300
+     },
+     {
+      "cover": "BKN",
+      "base": 4500
      }
     ],
-    "rawOb": "METAR EGLL 191320Z AUTO 12009KT 9999 OVC039 14/06 Q1024",
+    "rawOb": "METAR EGLL 191920Z AUTO 10003KT 9999 BKN023 BKN045 10/07 Q1022",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1792414800,
-    "temp": 11,
-    "dewp": 10,
-    "wdir": 40,
-    "wspd": 10,
-    "wgst": null,
-    "wxString": "-RA",
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 600
-     },
-     {
-      "cover": "SCT",
-      "base": 1600
-     },
-     {
-      "cover": "BKN",
-      "base": 3300
-     }
-    ],
-    "rawOb": "METAR LFPG 191300Z 04010KT 020V110 8000 -RA FEW006 SCT016 BKN033 11/10 Q1022 NOSIG",
-    "lat": 49.015,
-    "lon": 2.534,
-    "city": "Paris"
-   },
-   {
-    "icaoId": "OMDB",
-    "obsTime": 1792416600,
-    "temp": 34,
-    "dewp": 20,
-    "wdir": 10,
-    "wspd": 9,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR OMDB 191330Z 01009KT 350V050 CAVOK 34/20 Q1011 NOSIG",
-    "lat": 25.254,
-    "lon": 55.366,
-    "city": "Dubai"
-   },
-   {
-    "icaoId": "VABB",
-    "obsTime": 1792414800,
-    "temp": 34,
-    "dewp": 23,
-    "wdir": 330,
-    "wspd": 8,
-    "wgst": null,
-    "wxString": "FU",
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR VABB 191300Z 33008KT 3000 FU NSC 34/23 Q1010 NOSIG",
-    "lat": 19.1,
-    "lon": 72.859,
-    "city": "Mumbai"
-   },
-   {
-    "icaoId": "RJTT",
-    "obsTime": 1792414800,
-    "temp": 24,
-    "dewp": 18,
-    "wdir": 220,
-    "wspd": 11,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR RJTT 191300Z 22011KT CAVOK 24/18 Q1019 NOSIG",
-    "lat": 35.553,
-    "lon": 139.781,
-    "city": "Tokyo"
-   },
-   {
-    "icaoId": "YSSY",
-    "obsTime": 1792414800,
-    "temp": 19,
-    "dewp": 14,
-    "wdir": 20,
-    "wspd": 11,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR YSSY 191300Z AUTO 02011KT 9999 // NCD 19/14 Q1026",
-    "lat": -33.946,
-    "lon": 151.173,
-    "city": "Sydney"
-   },
-   {
-    "icaoId": "FACT",
-    "obsTime": 1792414800,
-    "temp": 17,
-    "dewp": 7,
-    "wdir": 190,
-    "wspd": 7,
-    "wgst": null,
-    "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "BKN",
-      "base": 4000
-     }
-    ],
-    "rawOb": "METAR FACT 191300Z 19007KT 140V220 9999 BKN040 17/07 Q1021 NOSIG",
-    "lat": -33.965,
-    "lon": 18.602,
-    "city": "Cape Town"
-   },
-   {
-    "icaoId": "SBGR",
-    "obsTime": 1792414800,
-    "temp": 18,
-    "dewp": 12,
-    "wdir": 100,
-    "wspd": 5,
-    "wgst": null,
-    "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "BKN",
-      "base": 2600
-     }
-    ],
-    "rawOb": "METAR SBGR 191300Z 10005KT 9999 BKN026 18/12 Q1020",
-    "lat": -23.432,
-    "lon": -46.469,
-    "city": "São Paulo"
-   },
-   {
-    "icaoId": "MMMX",
-    "obsTime": 1792414200,
+    "obsTime": 1792436400,
     "temp": 13,
-    "dewp": 9,
-    "wdir": 70,
-    "wspd": 6,
+    "dewp": 10,
+    "wdir": 80,
+    "wspd": 7,
     "wgst": null,
     "wxString": null,
     "cover": "OVC",
     "clouds": [
      {
       "cover": "OVC",
-      "base": 2000
+      "base": 1300
      }
     ],
-    "rawOb": "METAR MMMX 191250Z 07006KT 6SM OVC020 13/09 A3039 NOSIG RMK 8/5// HZY LWR ST ADN BR 1ST 4TH QUAD",
+    "rawOb": "METAR LFPG 191900Z 08007KT 9999 OVC013 13/10 Q1019 NOSIG",
+    "lat": 49.015,
+    "lon": 2.534,
+    "city": "Paris"
+   },
+   {
+    "icaoId": "OMDB",
+    "obsTime": 1792436400,
+    "temp": 32,
+    "dewp": 21,
+    "wdir": 90,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": null,
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR OMDB 191900Z 09004KT CAVOK 32/21 Q1013 NOSIG",
+    "lat": 25.254,
+    "lon": 55.366,
+    "city": "Dubai"
+   },
+   {
+    "icaoId": "VABB",
+    "obsTime": 1792436400,
+    "temp": 31,
+    "dewp": 26,
+    "wdir": 240,
+    "wspd": 6,
+    "wgst": null,
+    "wxString": "HZ",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR VABB 191900Z 24006KT 3000 HZ NSC 31/26 Q1012 NOSIG",
+    "lat": 19.1,
+    "lon": 72.859,
+    "city": "Mumbai"
+   },
+   {
+    "icaoId": "RJTT",
+    "obsTime": 1792436400,
+    "temp": 22,
+    "dewp": 16,
+    "wdir": 20,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": null,
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR RJTT 191900Z 02004KT CAVOK 22/16 Q1017 NOSIG",
+    "lat": 35.553,
+    "lon": 139.781,
+    "city": "Tokyo"
+   },
+   {
+    "icaoId": "YSSY",
+    "obsTime": 1792436400,
+    "temp": 15,
+    "dewp": 12,
+    "wdir": 270,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": null,
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 2500
+     }
+    ],
+    "rawOb": "METAR YSSY 191900Z 27004KT 9999 FEW025 15/12 Q1025",
+    "lat": -33.946,
+    "lon": 151.173,
+    "city": "Sydney"
+   },
+   {
+    "icaoId": "FACT",
+    "obsTime": 1792436400,
+    "temp": 12,
+    "dewp": 7,
+    "wdir": 160,
+    "wspd": 4,
+    "wgst": null,
+    "wxString": null,
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 4500
+     }
+    ],
+    "rawOb": "METAR FACT 191900Z 16004KT 9999 FEW045 12/07 Q1022 NOSIG",
+    "lat": -33.965,
+    "lon": 18.602,
+    "city": "Cape Town"
+   },
+   {
+    "icaoId": "SBGR",
+    "obsTime": 1792436400,
+    "temp": 20,
+    "dewp": 13,
+    "wdir": 170,
+    "wspd": 8,
+    "wgst": null,
+    "wxString": null,
+    "cover": "SCT",
+    "clouds": [
+     {
+      "cover": "SCT",
+      "base": 3000
+     }
+    ],
+    "rawOb": "METAR SBGR 191900Z 17008KT 9999 SCT030 20/13 Q1017",
+    "lat": -23.432,
+    "lon": -46.469,
+    "city": "São Paulo"
+   },
+   {
+    "icaoId": "MMMX",
+    "obsTime": 1792435380,
+    "temp": 19,
+    "dewp": 11,
+    "wdir": 0,
+    "wspd": 0,
+    "wgst": null,
+    "wxString": null,
+    "cover": "BKN",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 2000
+     },
+     {
+      "cover": "BKN",
+      "base": 8000
+     }
+    ],
+    "rawOb": "METAR MMMX 191843Z 00000KT 5SM FEW020 BKN080 19/11 A3037 NOSIG RMK 8/830 HZY MDT CU 3RD QUAD",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -224,7 +233,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-19T13:30:13+00:00",
+  "fetchedAt": "2026-10-19T19:26:59+00:00",
   "items": [
    {
     "id": "69ebbcd2-b257-4070-9ef9-21e7d1f8a883",
@@ -262,7 +271,7 @@
     "site": "Cape Canaveral SFS, FL, USA",
     "lat": "28.56194122",
     "lon": "-80.57735736",
-    "probability": 85,
+    "probability": 90,
     "weatherConcerns": "Liftoff Winds",
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_liftof_image_20251102082912.jpg"
    },
@@ -407,6 +416,26 @@
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon2520925_image_20221009234147.png"
    },
    {
+    "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
+    "name": "Falcon 9 Block 5 | Starlink Group 15-18",
+    "net": "2026-10-28T04:31:00Z",
+    "windowStart": "2026-10-28T04:31:00Z",
+    "windowEnd": "2026-10-28T08:31:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
+    "rocket": "Falcon 9 Block 5",
+    "provider": "SpaceX",
+    "mission": "Starlink Group 15-18",
+    "orbit": "LEO",
+    "pad": "Space Launch Complex 4E",
+    "site": "Vandenberg SFB, CA, USA",
+    "lat": "34.632",
+    "lon": "-120.611",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon2520925_image_20221009234147.png"
+   },
+   {
     "id": "ef9850ad-1096-425b-9d27-f7bbd186e61a",
     "name": "Vulcan VC6L | Amazon Leo (LV-01)",
     "net": "2026-10-29T00:00:00Z",
@@ -485,6 +514,26 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/sslv_image_20220912001724.jpeg"
+   },
+   {
+    "id": "3cdb9dee-b5cb-406c-bbd1-06a219930fb7",
+    "name": "Falcon 9 Block 5 | Starlink Group 15-21",
+    "net": "2026-11-01T05:11:00Z",
+    "windowStart": "2026-11-01T05:11:00Z",
+    "windowEnd": "2026-11-01T09:11:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
+    "rocket": "Falcon 9 Block 5",
+    "provider": "SpaceX",
+    "mission": "Starlink Group 15-21",
+    "orbit": "LEO",
+    "pad": "Space Launch Complex 4E",
+    "site": "Vandenberg SFB, CA, USA",
+    "lat": "34.632",
+    "lon": "-120.611",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon2520925_image_20221009234147.png"
    },
    {
     "id": "426bd2a5-02dd-4fbd-9f4d-2b8439c3a1ff",
@@ -685,46 +734,6 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg"
-   },
-   {
-    "id": "ce1317de-ec94-4479-9b28-38ebf11f13ae",
-    "name": "Falcon 9 Block 5 | Telesat Lightspeed 1",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Falcon 9 Block 5",
-    "provider": "SpaceX",
-    "mission": "Telesat Lightspeed 1",
-    "orbit": "LEO",
-    "pad": "Unknown Pad",
-    "site": "Cape Canaveral SFS, FL, USA",
-    "lat": "28.458",
-    "lon": "-80.528",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg"
-   },
-   {
-    "id": "d3bd7fb2-fac6-49fc-ae52-cee07d2fde67",
-    "name": "Falcon Heavy | Griffin Mission One",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Falcon Heavy",
-    "provider": "SpaceX",
-    "mission": "Griffin Mission One",
-    "orbit": "LO",
-    "pad": "Launch Complex 39A",
-    "site": "Kennedy Space Center, FL, USA",
-    "lat": "28.60822681",
-    "lon": "-80.60428186",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_heavy_image_20220129192819.jpeg"
    }
   ]
  }
