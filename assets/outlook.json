@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-19T22:20:23+00:00",
+  "fetchedAt": "2026-10-20T01:20:49+00:00",
   "items": [
    {
     "id": "ep212026",
@@ -21,206 +21,197 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-19T22:20:23+00:00",
+  "fetchedAt": "2026-10-20T01:20:49+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1792446660,
-    "temp": 16.1,
-    "dewp": 3.9,
+    "obsTime": 1792457460,
+    "temp": 11.7,
+    "dewp": 5,
     "wdir": 10,
-    "wspd": 6,
+    "wspd": 4,
     "wgst": null,
     "wxString": null,
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 12000
-     },
-     {
-      "cover": "FEW",
-      "base": 25000
-     }
-    ],
-    "rawOb": "METAR KJFK 192151Z 01006KT 10SM FEW120 FEW250 16/04 A3030 RMK AO2 SLP260 T01610039 $",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR KJFK 200051Z 01004KT 10SM CLR 12/05 A3026 RMK AO2 SLP247 T01170050 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1792446600,
+    "obsTime": 1792457400,
     "temp": 11,
-    "dewp": 10,
-    "wdir": 40,
+    "dewp": 11,
+    "wdir": 20,
     "wspd": 4,
     "wgst": null,
-    "wxString": "-RA -DZ",
+    "wxString": "-RA",
     "cover": "OVC",
     "clouds": [
      {
-      "cover": "SCT",
-      "base": 1200
-     },
-     {
       "cover": "OVC",
-      "base": 1700
+      "base": 1000
      }
     ],
-    "rawOb": "METAR EGLL 192150Z 04004KT 360V070 5000 -RADZ SCT012 OVC017 11/10 Q1020",
+    "rawOb": "METAR EGLL 200050Z AUTO 02004KT 7000 -RA OVC010 11/11 Q1017",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1792447200,
+    "obsTime": 1792458000,
     "temp": 12,
     "dewp": 10,
-    "wdir": 60,
-    "wspd": 10,
+    "wdir": 80,
+    "wspd": 9,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR LFPG 192200Z 06010KT 8000 NSC 12/10 Q1016 NOSIG",
+    "rawOb": "METAR LFPG 200100Z 08009KT 8000 NSC 12/10 Q1013 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1792447200,
-    "temp": 31,
-    "dewp": 21,
-    "wdir": 80,
-    "wspd": 4,
+    "obsTime": 1792458000,
+    "temp": 30,
+    "dewp": 22,
+    "wdir": 120,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 192200Z 08004KT CAVOK 31/21 Q1012 NOSIG",
+    "rawOb": "METAR OMDB 200100Z 12006KT CAVOK 30/22 Q1013 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1792447200,
-    "temp": 30,
-    "dewp": 25,
-    "wdir": 0,
-    "wspd": 0,
+    "obsTime": 1792458000,
+    "temp": 29,
+    "dewp": 26,
+    "wdir": 150,
+    "wspd": 3,
     "wgst": null,
     "wxString": "BR",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 192200Z 00000KT 2500 BR NSC 30/25 Q1011 NOSIG",
+    "rawOb": "METAR VABB 200100Z 15003KT 1700 BR NSC 29/26 Q1012 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1792447200,
-    "temp": 22,
-    "dewp": 17,
-    "wdir": 220,
-    "wspd": 17,
+    "obsTime": 1792458000,
+    "temp": 26,
+    "dewp": 23,
+    "wdir": 210,
+    "wspd": 18,
     "wgst": null,
-    "wxString": null,
-    "cover": "FEW",
+    "wxString": "-SHRA",
+    "cover": "BKN",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 2000
+      "cover": "SCT",
+      "base": 1500
+     },
+     {
+      "cover": "BKN",
+      "base": 5000
+     },
+     {
+      "cover": "BKN",
+      "base": 10000
      }
     ],
-    "rawOb": "METAR RJTT 192200Z 22017KT 9999 FEW020 BKN/// 22/17 Q1017 NOSIG",
+    "rawOb": "METAR RJTT 200100Z 21018KT 9999 -SHRA SCT015 BKN050 BKN100 26/23 Q1017 TEMPO 22020G32KT",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1792447200,
-    "temp": 21,
-    "dewp": 13,
-    "wdir": 20,
-    "wspd": 12,
+    "obsTime": 1792458000,
+    "temp": 23,
+    "dewp": 12,
+    "wdir": 40,
+    "wspd": 13,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 2700
+      "base": 4000
      }
     ],
-    "rawOb": "METAR YSSY 192200Z 02012KT 9999 FEW027 21/13 Q1027",
+    "rawOb": "METAR YSSY 200100Z 04013KT 9999 FEW040 23/12 Q1026",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1792447200,
-    "temp": 10,
+    "obsTime": 1792458000,
+    "temp": 8,
     "dewp": 6,
-    "wdir": "VRB",
+    "wdir": 70,
     "wspd": 3,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 192200Z VRB03KT CAVOK 10/06 Q1021 NOSIG",
+    "rawOb": "METAR FACT 200100Z 07003KT CAVOK 08/06 Q1018 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1792447200,
-    "temp": 16,
+    "obsTime": 1792458000,
+    "temp": 15,
     "dewp": 13,
-    "wdir": 170,
+    "wdir": 110,
     "wspd": 8,
     "wgst": null,
     "wxString": null,
-    "cover": "OVC",
+    "cover": "BKN",
     "clouds": [
      {
-      "cover": "OVC",
-      "base": 1600
+      "cover": "BKN",
+      "base": 800
      }
     ],
-    "rawOb": "METAR SBGR 192200Z 17008KT 9999 OVC016 16/13 Q1019",
+    "rawOb": "METAR SBGR 200100Z 11008KT 9999 BKN008 15/13 Q1020",
     "lat": -23.432,
     "lon": -46.469,
     "city": "São Paulo"
    },
    {
     "icaoId": "MMMX",
-    "obsTime": 1792446000,
-    "temp": 23,
+    "obsTime": 1792456800,
+    "temp": 20,
     "dewp": 10,
-    "wdir": 230,
-    "wspd": 3,
+    "wdir": 340,
+    "wspd": 8,
     "wgst": null,
     "wxString": null,
-    "cover": "SCT",
+    "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
       "base": 2000
-     },
-     {
-      "cover": "SCT",
-      "base": 8000
      }
     ],
-    "rawOb": "METAR MMMX 192140Z 23003KT 8SM FEW020 SCT080 23/10 A3026 NOSIG RMK 8/130 HZY ISOL CI",
+    "rawOb": "METAR MMMX 200040Z 34008KT 10SM FEW020 20/10 A3028 NOSIG RMK 8/400 HZY AC",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -228,7 +219,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-19T22:20:23+00:00",
+  "fetchedAt": "2026-10-20T01:20:49+00:00",
   "items": [
    {
     "id": "3b430f81-0ff1-4d85-8a1a-cef0de326198",
@@ -253,7 +244,7 @@
    {
     "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
     "name": "Falcon 9 Block 5 | Starlink Group 15-15",
-    "net": "2026-10-20T22:14:00Z",
+    "net": "2026-10-20T23:09:23Z",
     "windowStart": "2026-10-20T22:14:00Z",
     "windowEnd": "2026-10-21T02:14:00Z",
     "status": "Go",
@@ -293,19 +284,19 @@
    {
     "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
     "name": "Electron | We're Not Hawking Around (3x HawkEye 360)",
-    "net": "2026-10-21T05:00:00Z",
-    "windowStart": "2026-10-21T05:00:00Z",
+    "net": "2026-10-21T07:00:00Z",
+    "windowStart": "2026-10-21T07:00:00Z",
     "windowEnd": "2026-10-21T08:45:00Z",
-    "status": "TBC",
-    "statusName": "To Be Confirmed",
+    "status": "Go",
+    "statusName": "Go for Launch",
     "rocket": "Electron",
     "provider": "Rocket Lab",
     "mission": "We're Not Hawking Around (3x HawkEye 360)",
     "orbit": "SSO",
-    "pad": "Unknown Pad",
+    "pad": "Rocket Lab Launch Complex 1A",
     "site": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-    "lat": "-39.260881",
-    "lon": "177.865826",
+    "lat": "-39.262833",
+    "lon": "177.864469",
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/electron_image_20190705175640.jpeg"
