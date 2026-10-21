@@ -26,5 +26,24 @@
       });
     }
   }
+  // YouTube click-to-load: nothing is requested from YouTube until the visitor taps; then a youtube-nocookie iframe replaces the thumbnail.
+  function initYT() {
+    var list = document.querySelectorAll ? document.querySelectorAll("[data-yt]") : [];
+    Array.prototype.forEach.call(list, function (a) {
+      a.addEventListener("click", function (e) {
+        var id = a.getAttribute("data-yt");
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+        e.preventDefault();
+        var f = document.createElement("iframe");
+        f.src = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&playsinline=1&rel=0";
+        f.title = a.getAttribute("data-yt-title") || "YouTube video";
+        f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+        f.setAttribute("allowfullscreen", ""); f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+        f.className = "yt-frame";
+        a.parentNode.replaceChild(f, a);
+      });
+    });
+  }
+  var _init = init; init = function () { _init(); initYT(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

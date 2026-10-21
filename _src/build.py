@@ -6,12 +6,39 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from guides import GUIDES
 import outlook as OUTLOOK
+import ogcards as OG
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://weather.yourworldapps.si/"
 PKG = "com.yourworld.weatheranalyzer"
 PLAY = f"https://play.google.com/store/apps/details?id={PKG}"
 APP = "Your World Weather Radar"
+YOUTUBE = "https://www.youtube.com/channel/UCv_HP3UU30nKawvJ0AgHL3A"   # "Your World Apps" (@yourworldapps)
+HUB = "https://yourworldapps.si/"
+ORG = {"@type": "Organization", "name": "Your World Apps", "url": HUB, "logo": SITE + "assets/icon-512.png", "sameAs": [YOUTUBE, HUB]}
+# Per-page social cards (1200x630), rendered by _src/ogcards.py from real app screenshots / gear photos. Keyed by page path.
+OG_SPECS = {
+ "index.html": dict(kicker="Free rain ETA", title="Know when rain hits your spot", sub="Live radar, storm tracks and weather alerts for Android", visual=["shot-home.jpg", "shot-radar.jpg"]),
+ "outlook.html": dict(kicker="Live now", title="The whole planet's weather, live", sub="Satellite loop, hurricanes and typhoons, US alerts and the Sun", visual=["shot-radar.jpg"]),
+ "features.html": dict(kicker="Features", title="What's free and what's Premium", sub="Rain ETA, radar, alerts, AI briefings, cams and more", visual=["shot-alerts.jpg", "shot-home.jpg"]),
+ "pricing.html": dict(kicker="Pricing", title="Free to download. Premium from $4.99/mo", sub="$47.99/yr. 7-day free trial for new subscribers", visual=["shot-home.jpg"]),
+ "alert-planner/index.html": dict(kicker="Alert Planner", title="Plan alerts for a day out", sub="Place, activity and dates in one link for your phone", visual=["shot-alerts.jpg"]),
+ "trip-planner/index.html": dict(kicker="Trip Planner", title="Weather for your whole trip", sub="Destination, dates and how you're traveling", visual=["shot-radar.jpg"]),
+ "ask.html": dict(kicker="Ask Atlas", title="Weather safety answers in plain English", sub="Sourced from NWS and NOAA guides", visual=["shot-home.jpg"]),
+ "gear/index.html": dict(kicker="Weather gear", title="Gear for when the weather turns", sub="Radios, rain gear, power and lights for storm days", visual=["shot-alerts.jpg", "shot-radar.jpg"]),
+ "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["shot-radar.jpg"]),
+ "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play", visual=["shot-home.jpg", "shot-alerts.jpg"]),
+}
+OG_IMG = {}  # path -> "og/<slug>.jpg", filled by build_og()
+def build_og():
+    from guides import GUIDES as _G
+    specs = dict(OG_SPECS)
+    for i, g in enumerate(_G):
+        specs[f"guides/{g['slug']}.html"] = dict(kicker="Weather guide", title=g["short"], sub="Sourced from the NWS and NOAA", visual=[("shot-radar.jpg", "shot-alerts.jpg", "shot-home.jpg")[i % 3]])
+    slugs = {path: (re.sub(r"[^a-z0-9]+", "-", path.replace(".html", "").replace("/index", "")).strip("-") or "home") for path in specs}
+    made = OG.build({slugs[p]: specs[p] for p in specs})
+    for p in specs:
+        if slugs[p] in made: OG_IMG[p] = made[slugs[p]]
 PRICE_M, PRICE_Y = "4.99", "47.99"          # must match Google Play exactly
 TRIAL = f"Premium: 7-day free trial for new subscribers, then ${PRICE_M}/mo or ${PRICE_Y}/yr. Cancel anytime in Google Play."
 def trial_line(cls="trial"): return f'<p class="{cls}"><span aria-hidden="true">🎁</span> {E(TRIAL)}</p>'
@@ -48,12 +75,13 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
     bar = "" if not playbar else f'<div class="playbar" id="playbar" role="region" aria-label="Get the app"><img src="{p}assets/icon-192.png" width="36" height="36" alt=""><div class="pb-t"><b>{APP}</b><span>Free rain ETA &amp; live radar</span></div><a class="btn primary" href="{E(play_ref(slug, "stickybar"))}" target="_blank" rel="noopener">{PLAY_SVG}Get it on Google Play</a><button type="button" class="pb-x" aria-label="Dismiss">&times;</button></div>\n'
 
     full = title if APP in title else f"{title} | {APP}"
+    ogi = OG_IMG.get(path, "og-image.png")
     doc = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{E(full)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{url}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="{APP}"><meta property="og:title" content="{E(full)}">
-<meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/{V('og-image.png')}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{SITE}assets/{V('og-image.png')}"><meta name="theme-color" content="#0F172A">
+<meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/{V(ogi)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{E(full)}"><meta name="twitter:description" content="{E(desc)}"><meta name="twitter:image" content="{SITE}assets/{V(ogi)}"><meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{p}assets/favicon.png"><link rel="apple-touch-icon" href="{p}assets/icon-192.png">
 <link rel="stylesheet" href="{p}assets/{V('site.css')}">{head_extra}<noscript><style>.top .nav{{display:flex!important;overflow-x:auto}}.menu-btn{{display:none!important}}</style></noscript>{lds}<script>window.YW_ATLAS="/assets/{V('atlas.svg')}"</script><script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head><body>
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a>{menu}</div></header>
@@ -61,7 +89,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <footer><div class="wrap"><div class="cols">
 <div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
-<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li></ul></div>
+<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li><li><a href="{YOUTUBE}" target="_blank" rel="noopener">Watch on YouTube</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
 {bar}{sc}</body></html>'''
     doc = re.sub(r'href="' + re.escape(PLAY) + '"', f'href="{E(play_ref(slug, "inline"))}"', doc)
@@ -107,10 +135,19 @@ def owo_teasers(slug):
 SUN_CSS = '<style>.sun-sec{margin:34px 0 8px;padding:22px 18px;border-radius:24px;background:#030508;color:#DCE8F0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}.sun-sec h2{color:#2EE6D6;margin:0 0 4px;font-family:inherit;letter-spacing:.06em}.sun-sec .sun-lead{color:#7A8B99;margin:0 0 16px;font-size:.9rem}.sun-sec a{color:#2EE6D6}.sun-sec p,.sun-sec li,.sun-sec dd{color:#C9D6E0}.sun-sec .sun-foot,.sun-sec .sun-attr,.sun-sec .sun-lead,.sun-sec .sun-empty{color:#8A9BA9}.sun-sec .sun-lock,.sun-sec .sun-safe{color:#E8A317}.sun-top{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:14px;align-items:start}.sun-disk{margin:0;background:#000;border-radius:16px;overflow:hidden;border:1px solid #1C3344}.sun-disk img{display:block;width:100%;height:auto;aspect-ratio:1}.sun-noimg{aspect-ratio:1;display:grid;place-items:center;color:#7A8B99;font-size:.85rem}.sun-disk figcaption{font-size:.72rem;color:#7A8B99;padding:7px 10px}.sun-disk figcaption i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF4D5E;margin-right:6px;vertical-align:1px}.sun-disk figcaption i.off{background:#7A8B99}.sun-card{background:#0C131C;border:1px solid #1C3344;border-radius:10px;padding:12px}.sun-card h3{margin:0 0 10px;font:700 .78rem/1.2 inherit;letter-spacing:.14em;color:#2EE6D6;display:flex;justify-content:space-between;gap:8px}.sun-card h3 span{font-weight:400;letter-spacing:0;color:#7A8B99;font-size:.68rem}.sun-now{border-color:rgba(46,230,214,.45)}.sun-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sun-box{border:1px solid;border-radius:8px;padding:8px;text-align:center;display:grid;gap:2px}.sun-box b{font-size:1.35rem}.sun-box small{font-size:.6rem;letter-spacing:.1em;color:#7A8B99}.sun-box span{font-size:.72rem}.sun-box.ok{border-color:#22E07A;color:#22E07A;background:rgba(34,224,122,.07)}.sun-box.mid{border-color:#E8A317;color:#E8A317;background:rgba(232,163,23,.08)}.sun-box.hi{border-color:#FF3B4E;color:#FF3B4E;background:rgba(255,59,78,.08)}.sun-card dl{display:grid;grid-template-columns:70px 1fr;gap:4px 8px;margin:12px 0 0;font-size:.8rem}.sun-card dt{color:#7A8B99}.sun-card dd{margin:0}.sun-plain{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:5px;font-size:.78rem;color:#B8C7D3}.sun-plain b{color:#2EE6D6;margin-right:4px}.sun-foot{font-size:.68rem;color:#7A8B99;margin:10px 0 0}.sun-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px;align-items:start}.sun-next{border-color:rgba(232,163,23,.45)}.sun-next h3{color:#E8A317}.sun-days{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.sun-day{border:1px solid #1C3344;border-radius:8px;padding:7px;display:grid;gap:2px;text-align:center}.sun-day.on{border-color:#E8A317}.sun-day small{font-size:.62rem;color:#7A8B99}.sun-day b{font-size:.9rem}.sun-day i{font-style:normal;font-weight:700;font-size:.8rem}.sun-day span{font-size:.58rem;color:#7A8B99}.sun-day i.ok{color:#22E07A}.sun-day i.mid{color:#E8A317}.sun-day i.hi{color:#FF3B4E}.sun-aur{border-color:rgba(34,224,122,.45)}.sun-aur h3{color:#22E07A}.sun-aur p{font-size:.8rem;margin:0 0 8px}.sun-lock{color:#E8A317}.sun-ecls{border-color:rgba(179,157,219,.45)}.sun-ecls h3{color:#B39DDB}.sun-ecl{display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid #1C3344;text-decoration:none;color:#DCE8F0;font-size:.78rem}.sun-ecl:first-of-type{border-top:0}.sun-ecl small{font-size:.62rem;color:#7A8B99}.sun-ecl b{display:block;font-size:.9rem}.sun-ecl b.solar{color:#E8A317}.sun-ecl em{font-style:normal;font-size:.68rem;color:#7A8B99}.sun-ecl .k{font-size:.7rem;text-align:right}.sun-safe{color:#E8A317;font-size:.7rem;margin:8px 0 0}.sun-cta{margin-top:14px;border:1px solid rgba(46,230,214,.35);border-radius:12px;padding:16px;background:linear-gradient(180deg,#070B10,#0C131C)}.sun-cta h3{margin:0 0 6px;color:#DCE8F0;font-family:inherit}.sun-cta p{margin:0 0 10px;font-size:.8rem;color:#B8C7D3}.sun-cta ul{margin:0 0 12px;padding-left:18px;font-size:.8rem;display:grid;gap:3px}.sun-cta li::marker{content:"🔒 "}.sun-cta .btn{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.sun-attr{font-size:.68rem;color:#7A8B99;margin:12px 0 0}.sun-empty{color:#7A8B99}@media(max-width:720px){.sun-top{grid-template-columns:1fr}.sun-disk{max-width:340px;margin:0 auto;width:100%}}</style>'
 SUN_SEC = '\n<section class="sun-sec" id="sun" aria-labelledby="sun-h"><h2 id="sun-h">☀️ Sun Outlook</h2><p class="sun-lead">Today\'s Sun and the space weather it\'s sending our way, from the same NOAA and NASA feeds as the app\'s Sun tab.</p>\n<div id="owo-sun"><p class="owo-empty shimmer">Loading the Sun…</p></div>\n<div class="sun-cta"><h3>See the full Sun tab in Your World Weather Radar</h3><p>Free in the app: the live Sun with active regions, space weather now, the next 3 days, eclipses visible from your location, alerts for strong (G3+) geomagnetic storms and a reminder the day before an eclipse. Premium adds:</p>\n<ul><li>A 6-hour Sun loop</li><li>Extra layers: visible light, magnetic field, corona and AIA 193</li><li>The live Sky radar animation</li><li>Aurora chance at your location, with where to look</li><li>More solar alerts: radio blackouts, radiation storms, aurora at your location and extra eclipse reminders</li></ul>\n<div class="btns">{btn}</div></div>\n<p class="sun-attr">Sun data: <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> and <a href="https://sdo.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA SDO</a> (Sun image: NASA/SDO and the AIA science team). Eclipse dates: <a href="https://eclipse.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA eclipse catalog</a> (Espenak &amp; Meeus). Refreshed with each site update. Informational only, not an official warning: for alerts, follow <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a>.</p></section>\n'
 
+YT_SHORT = ("T2bragifDqc", "The whole planet's weather in 25 seconds")
+def yt_short():
+    vid, t = YT_SHORT
+    return f'''<section class="yt-wrap" aria-label="Video"><a class="yt-facade" href="https://www.youtube.com/shorts/{vid}" data-yt="{vid}" data-yt-title="{E(t)}" target="_blank" rel="noopener" aria-label="Play video: {E(t)}">
+<img src="assets/{V(f'yt-{vid}.jpg')}" width="360" height="640" alt="" loading="lazy"><span class="yt-play" aria-hidden="true"></span></a>
+<div class="yt-txt"><span class="kicker">▶ Short</span><h2>{E(t)}</h2><p class="dim">A 25-second look at the planet's weather from our YouTube channel. Nothing loads from YouTube until you tap play.</p>
+<p><a href="{YOUTUBE}" target="_blank" rel="noopener">More on our YouTube channel →</a></p></div></section>'''
+
 def outlook_page():
     sun = SUN_SEC.replace("{btn}", play_btn("outlook", "primary glow", "sun", "See the Sun tab on Google Play"))
     b = f'''<div class="owo">{owo_map()}{owo_briefing()}
 <div class="owo-stats-row"><div><b id="owo-storm-n">–</b><span>active tropical cyclones</span></div><div><b id="owo-alert-n">–</b><span>severe US alerts</span></div></div>
+{yt_short()}
 <h2>🌀 Active tropical storms</h2><div class="owo-storms" id="owo-storms"><p class="owo-empty shimmer">Loading NHC, JTWC and GDACS…</p></div>
 <p class="owo-attr">Sources: <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">NOAA National Hurricane Center</a> (Atlantic &amp; Pacific, refreshed with each site update; cone graphics by NHC) and <a href="https://www.gdacs.org/" target="_blank" rel="noopener">GDACS</a> (global, live; European Commission JRC &amp; UN OCHA). Typhoon data: <a href="https://www.metoc.navy.mil/jtwc/jtwc.html" target="_blank" rel="noopener">JTWC (US Navy)</a>, public domain (Western Pacific, Indian Ocean and Southern Hemisphere; refreshed with each site update). JTWC shading is the 34-kt wind area, not a cone of uncertainty. Not an official local warning: always follow official advisories and your local weather service.</p>
 <h2>🚨 US severe weather alerts</h2><div id="owo-alerts" data-limit="5"><p class="owo-empty shimmer">Loading NWS alerts…</p></div>
@@ -155,6 +192,7 @@ TAG = {"free": '<span class="tag free">Free</span>', "prem": '<span class="tag p
 def feature_cards():
     return '<div class="grid">' + "".join(f'<div class="card"><div class="ico">{i}</div><h3>{E(t)} {TAG[k]}</h3><p>{E(d)}</p></div>' for i, t, k, d in FEATURES) + "</div>"
 
+HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Know when rain hits your spot.</h1>
@@ -178,9 +216,11 @@ def home():
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
 {hunt_promo()}{cta("", "home", "Free on Google Play. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year.")}'''
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android", "applicationCategory": "WeatherApplication",
-           "author": {"@type": "Organization", "name": "Your World Apps"}, "installUrl": PLAY, "url": SITE,
-           "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", "Live radar, NWS weather alerts, AI briefing tabs, hurricane tracking, free weather cams and Off-Grid Safety satellite texting for Android.", b, h, "1.0", jsonld=ld, scripts=("outlook.js",))
+           "author": ORG, "installUrl": PLAY, "url": SITE,
+           "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]},
+          dict({"@context": "https://schema.org"}, **ORG),
+          {"@context": "https://schema.org", "@type": "WebSite", "name": APP, "url": SITE, "publisher": ORG}]
+    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js",))
 
 def features():
     b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
@@ -425,5 +465,5 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
 if __name__ == "__main__":
-    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); misc()
     print(f"Built {len(PAGES)} pages")
