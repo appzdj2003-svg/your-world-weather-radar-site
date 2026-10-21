@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-21T16:26:23+00:00",
+  "fetchedAt": "2026-10-21T16:32:56+00:00",
   "items": [
    {
     "id": "ep222026",
@@ -21,7 +21,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-21T16:26:23+00:00",
+  "fetchedAt": "2026-10-21T16:32:56+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -87,32 +87,32 @@
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1792598400,
+    "obsTime": 1792600200,
     "temp": 33,
     "dewp": 21,
-    "wdir": 330,
-    "wspd": 5,
+    "wdir": 360,
+    "wspd": 3,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 211600Z 33005KT CAVOK 33/21 Q1013 NOSIG",
+    "rawOb": "METAR OMDB 211630Z 36003KT 270V070 CAVOK 33/21 Q1013 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1792598400,
+    "obsTime": 1792600200,
     "temp": 33,
     "dewp": 21,
-    "wdir": 70,
+    "wdir": 40,
     "wspd": 5,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 211600Z 07005KT 3000 FU NSC 33/21 Q1012 NOSIG",
+    "rawOb": "METAR VABB 211630Z 04005KT 2500 FU NSC 33/21 Q1012 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
@@ -237,7 +237,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-21T16:26:23+00:00",
+  "fetchedAt": "2026-10-21T16:32:56+00:00",
   "items": [
    {
     "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
@@ -742,7 +742,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-21T16:26:23+00:00",
+  "fetchedAt": "2026-10-21T16:32:56+00:00",
   "items": [
    {
     "pid": "wp2926",
@@ -755,7 +755,7 @@
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-21T16:26:23+00:00",
+  "fetchedAt": "2026-10-21T16:32:56+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -798,10 +798,10 @@
     }
    },
    "wind": {
-    "speed": 475.0,
-    "bz": -1.0,
+    "speed": 460.0,
+    "bz": -2.0,
     "bt": 9.0,
-    "at": "2026-10-21T16:15:00Z"
+    "at": "2026-10-21T16:22:00Z"
    },
    "flare": {
     "current": "B5.5",
