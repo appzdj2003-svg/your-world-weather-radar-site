@@ -1,10 +1,10 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-21T13:29:28+00:00",
+  "fetchedAt": "2026-10-21T13:35:56+00:00",
   "items": []
  },
  "metar": {
-  "fetchedAt": "2026-10-21T13:29:28+00:00",
+  "fetchedAt": "2026-10-21T13:35:56+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -62,25 +62,25 @@
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1792587600,
-    "temp": 11,
+    "obsTime": 1792589400,
+    "temp": 13,
     "dewp": 8,
     "wdir": 250,
-    "wspd": 16,
+    "wspd": 15,
     "wgst": null,
-    "wxString": "-SHRA",
-    "cover": "BKN",
+    "wxString": "VCSH",
+    "cover": "SCT",
     "clouds": [
      {
-      "cover": "SCT",
+      "cover": "FEW",
       "base": 3300
      },
      {
-      "cover": "BKN",
+      "cover": "SCT",
       "base": 4600
      }
     ],
-    "rawOb": "METAR LFPG 211300Z 25016KT 9999 -SHRA SCT033CB BKN046 11/08 Q1009 TEMPO 2000 -TSRA SCT030CB",
+    "rawOb": "METAR LFPG 211330Z 25015KT 9999 VCSH FEW033CB SCT046TCU 13/08 Q1009 TEMPO 2000 -TSRA SCT030CB",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
@@ -103,16 +103,16 @@
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1792587600,
+    "obsTime": 1792589400,
     "temp": 33,
     "dewp": 22,
-    "wdir": 310,
+    "wdir": 320,
     "wspd": 6,
     "wgst": null,
     "wxString": "FU",
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR VABB 211300Z 31006KT 3000 FU NSC 33/22 Q1010 NOSIG",
+    "rawOb": "METAR VABB 211330Z 32006KT 3000 FU NSC 33/22 Q1010 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
@@ -229,7 +229,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-21T13:29:28+00:00",
+  "fetchedAt": "2026-10-21T13:35:56+00:00",
   "items": [
    {
     "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
@@ -734,7 +734,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-21T13:29:28+00:00",
+  "fetchedAt": "2026-10-21T13:35:56+00:00",
   "items": [
    {
     "pid": "wp2926",
@@ -747,7 +747,7 @@
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-21T13:29:28+00:00",
+  "fetchedAt": "2026-10-21T13:35:56+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -790,13 +790,13 @@
     }
    },
    "wind": {
-    "speed": 452.0,
-    "bz": -1.0,
+    "speed": 457.0,
+    "bz": -2.0,
     "bt": 10.0,
-    "at": "2026-10-21T13:21:00Z"
+    "at": "2026-10-21T13:24:00Z"
    },
    "flare": {
-    "current": "B5.9",
+    "current": "B5.8",
     "max": "C1.3",
     "maxAt": "2026-10-21T10:58:00Z"
    },
