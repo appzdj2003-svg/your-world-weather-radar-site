@@ -250,3 +250,51 @@ img.atl-av{background:none;border-radius:12px;box-shadow:0 4px 14px rgba(14,165,
 .tgi img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.tgi span{padding:7px 9px 9px;font-size:.82rem;line-height:1.3}.tgi b{display:block;font-size:.88rem}
 .tgear .note{margin:10px 0 0}
 .pcard[id]{scroll-margin-top:90px}.pcard:target{outline:3px solid var(--amber);outline-offset:2px}
+/* ---- mobile menu toggle + sticky Play bar (mobile only; desktop unchanged) ---- */
+.menu-btn{display:none}
+.playbar{display:none}
+.trial{font-size:.9rem;font-weight:600;color:var(--slate-3);margin:10px 0 0}
+.trial.on-dark{color:#FDE68A}
+.trial-box{margin:24px 0 4px;padding:14px 16px;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:14px;background:var(--white)}
+.trial-box .trial{margin:0;color:var(--slate)}
+.trial-box p.small{margin:.4em 0 0}
+@media (max-width:860px){
+.menu-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto;font:700 .9rem/1 inherit;color:var(--slate);background:var(--white);border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer}
+.menu-btn .mb-i,.menu-btn .mb-i::before,.menu-btn .mb-i::after{display:block;width:16px;height:2px;background:currentColor;border-radius:2px;position:relative;transition:transform .15s}
+.menu-btn .mb-i::before,.menu-btn .mb-i::after{content:"";position:absolute;left:0}
+.menu-btn .mb-i::before{top:-5px}.menu-btn .mb-i::after{top:5px}
+.menu-btn[aria-expanded=true] .mb-i{background:transparent}
+.menu-btn[aria-expanded=true] .mb-i::before{transform:translateY(5px) rotate(45deg)}
+.menu-btn[aria-expanded=true] .mb-i::after{transform:translateY(-5px) rotate(-45deg)}
+.top .nav{display:none}
+.top .nav.open{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;margin:0;padding:4px 0 12px;overflow:visible;max-height:calc(100vh - 70px);overflow-y:auto}
+.top .nav.open a{text-align:center;white-space:normal}
+.playbar:not([hidden]){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;align-items:center;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(15,23,42,.97);color:#fff;box-shadow:0 -8px 24px rgba(2,6,23,.35)}
+.playbar img{width:36px;height:36px;border-radius:9px;flex:none}
+.playbar .pb-t{flex:1;min-width:0;display:grid;line-height:1.2}
+.playbar .pb-t b{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.playbar .pb-t span{font-size:.72rem;color:#CBD5E1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.playbar .btn{padding:10px 12px;font-size:.82rem;gap:6px;flex:none}
+.playbar .btn svg{width:16px;height:16px}
+.playbar .pb-x{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:1.2rem;line-height:1;cursor:pointer}
+body:has(.playbar:not([hidden])){padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:860px){.top .wrap{flex-wrap:wrap;column-gap:8px}.brand{min-width:0}}
+@media (max-width:440px){.menu-btn{padding:9px 11px}.menu-btn .mb-t{display:none}.brand{font-size:.95rem;gap:8px}.playbar .pb-t{display:none}.playbar .btn{flex:1;justify-content:center}}
+@media print{.playbar,.menu-btn{display:none!important}}
+/* ---- /go/ bio landing page ---- */
+.go-hero .wrap{text-align:center;padding:36px 20px 34px;max-width:560px}
+.go-hero h1{font-size:1.9rem;margin:.35em 0 .2em}
+.go-hero .lead{margin:0 auto 18px;font-size:1.05rem}
+.go-ico{border-radius:18px;box-shadow:0 10px 30px rgba(2,6,23,.45)}
+.go-play{width:100%;max-width:420px;justify-content:center;font-size:1.1rem;padding:16px 20px;border-radius:14px}
+.go-free{color:#94A3B8!important;margin:8px 0 0}
+.go-list{list-style:none;padding:0;margin:24px auto;max-width:560px;display:grid;gap:10px}
+.go-list li{display:grid;gap:2px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--white)}
+.go-list span{color:var(--slate-3);font-size:.92rem}
+.go-shots{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;margin:0 auto;max-width:980px}
+.go-shot{flex:0 0 min(62vw,240px);scroll-snap-align:center;margin:0;text-align:center}
+.go-shot img{width:100%;height:auto;border-radius:20px;border:5px solid var(--slate);box-shadow:var(--shadow)}
+.go-shot figcaption{font-size:.82rem;color:var(--slate-3);margin-top:6px}
+@media(min-width:760px){.go-shots{justify-content:center}}
+.go-again{text-align:center;margin:20px auto 10px;max-width:560px}

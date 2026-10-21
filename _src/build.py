@@ -13,6 +13,8 @@ PKG = "com.yourworld.weatheranalyzer"
 PLAY = f"https://play.google.com/store/apps/details?id={PKG}"
 APP = "Your World Weather Radar"
 PRICE_M, PRICE_Y = "4.99", "47.99"          # must match Google Play exactly
+TRIAL = f"Premium: 7-day free trial for new subscribers, then ${PRICE_M}/mo or ${PRICE_Y}/yr. Cancel anytime in Google Play."
+def trial_line(cls="trial"): return f'<p class="{cls}"><span aria-hidden="true">🎁</span> {E(TRIAL)}</p>'
 AMZ_TAG = "yourworldapps-20"
 SUPPORT, PRIVACY_MAIL = "support@yourworldapps.si", "support@yourworldapps.si"
 E = lambda s: html.escape(s, quote=True)
@@ -34,14 +36,17 @@ def play_ref(slug, sec):
 def play_btn(slug, cls="primary", sec="cta", label="Get it on Google Play"):
     return f'<a class="btn {cls}" href="{E(play_ref(slug, sec))}" target="_blank" rel="noopener">{PLAY_SVG}{label}</a>'
 
-def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None, slug=None):
+def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None, slug=None, minimal=False, playbar=True, head_extra="", sitemap=True):
     depth = path.count("/"); p = "../" * depth
     url = SITE + ("" if path == "index.html" else path.replace("index.html", ""))
     cur = path.split("/")[0] + "/" if "/" in path else path
     nav = "".join(f'<a href="{p}{"" if h=="index.html" else h}"{" aria-current=page" if h==cur else ""}>{t}</a>' for h, t in NAV).replace('href=""', 'href="./"')
     slug = slug or (re.sub(r"[^a-z0-9]+", "-", path.replace(".html", "").replace("/index", "")).strip("-") or "home")
     lds = "".join(f'<script type="application/ld+json">{json.dumps(j, ensure_ascii=False)}</script>' for j in (jsonld or []))
-    sc = "".join(f'<script src="{p}assets/{V(s)}"></script>' for s in scripts)
+    sc = "".join(f'<script src="{p}assets/{V(s)}"></script>' for s in scripts + ("site-ui.js",))
+    menu = "" if minimal else f'<button type="button" class="menu-btn" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu"><span class="mb-i" aria-hidden="true"></span><span class="mb-t">Menu</span></button><nav class="nav" id="main-nav" aria-label="Main">{nav}</nav>'
+    bar = "" if not playbar else f'<div class="playbar" id="playbar" role="region" aria-label="Get the app"><img src="{p}assets/icon-192.png" width="36" height="36" alt=""><div class="pb-t"><b>{APP}</b><span>Free rain ETA &amp; live radar</span></div><a class="btn primary" href="{E(play_ref(slug, "stickybar"))}" target="_blank" rel="noopener">{PLAY_SVG}Get it on Google Play</a><button type="button" class="pb-x" aria-label="Dismiss">&times;</button></div>\n'
+
     full = title if APP in title else f"{title} | {APP}"
     doc = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -50,18 +55,18 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/{V('og-image.png')}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{SITE}assets/{V('og-image.png')}"><meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{p}assets/favicon.png"><link rel="apple-touch-icon" href="{p}assets/icon-192.png">
-<link rel="stylesheet" href="{p}assets/{V('site.css')}">{lds}<script>window.YW_ATLAS="/assets/{V('atlas.svg')}"</script><script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head><body>
-<header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a><nav class="nav" aria-label="Main">{nav}</nav></div></header>
+<link rel="stylesheet" href="{p}assets/{V('site.css')}">{head_extra}<noscript><style>.top .nav{{display:flex!important;overflow-x:auto}}.menu-btn{{display:none!important}}</style></noscript>{lds}<script>window.YW_ATLAS="/assets/{V('atlas.svg')}"</script><script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head><body>
+<header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a>{menu}</div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
 <div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
 <div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
-{sc}</body></html>'''
+{bar}{sc}</body></html>'''
     doc = re.sub(r'href="' + re.escape(PLAY) + '"', f'href="{E(play_ref(slug, "inline"))}"', doc)
     out = ROOT / path; out.parent.mkdir(parents=True, exist_ok=True); out.write_text(doc)
-    if path != "404.html": PAGES.append((url, prio))
+    if path != "404.html" and sitemap: PAGES.append((url, prio))
 
 def hero(h1, lead="", kicker=None, extra=""):
     return f'<section class="hero"><div class="wrap">{f"<span class=kicker>{E(kicker)}</span>" if kicker else ""}<h1>{E(h1)}</h1>{f"<p class=lead>{lead}</p>" if lead else ""}{extra}</div></section>'
@@ -135,6 +140,7 @@ def hunt_promo():
 
 # ---------- features (from the app source; keep in sync) ----------
 FEATURES = [
+ ("☔", "Rain ETA", "free", "An early heads-up on when rain should reach your exact spot, worked out from live radar, with an optional notification. Included free."),
  ("📡", "Live radar", "free", "Rain in classic colors with snow kept light blue. Play the loop back and ahead, and add layers for lightning, hurricanes, fire, quakes and more."),
  ("🚨", "Weather alerts", "free", "National Weather Service alerts as compact cards, with rain and storm notifications in the background."),
  ("🧠", "AI Briefing tabs", "mix", "A short briefing for each window: NOW, 6–24H and day tabs from 2D to 10D. NOW is free; the longer windows are Premium."),
@@ -151,9 +157,10 @@ def feature_cards():
 
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
-<h1>See the storm before it reaches you.</h1>
-<p class="lead">Live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
+<h1>Know when rain hits your spot.</h1>
+<p class="lead">A free rain ETA for your exact location, plus live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
 <div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
+{trial_line("trial on-dark")}
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
     b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
@@ -176,10 +183,10 @@ def home():
     page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", "Live radar, NWS weather alerts, AI briefing tabs, hurricane tracking, free weather cams and Off-Grid Safety satellite texting for Android.", b, h, "1.0", jsonld=ld, scripts=("outlook.js",))
 
 def features():
-    b = feature_cards() + f'''<h2>Also in the app</h2><ul>
+    b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
 <li>Forecasts from several weather models, with how much they agree</li><li>Marine data: water temperature, waves, buoys and NOAA tides (Premium)</li>
 <li>Aviation, boating and space overlays, including rocket launches (Premium)</li><li>Fire, earthquake and volcano layers (Premium)</li></ul>
-<div class="callout">Forecasts and alerts are informational only. They aren't official emergency, marine or aviation advice. Follow the NWS and local officials.</div>{cta("", "features", "Get the free app on Google Play.")}'''
+<div class="callout">Forecasts and alerts are informational only. They aren't official emergency, marine or aviation advice. Follow the NWS and local officials.</div>{cta("", "features", "Get the free app on Google Play. " + TRIAL)}'''
     page("features.html", "Features", "Every feature in Your World Weather Radar: radar, alerts, AI briefings, Gemma on-device AI, hurricane tracking, weather cams, Off-Grid Safety and Lite mode.", b, hero("Features", "What's free, what's Premium, and how each part works.", "The app"), "0.8")
 
 def pricing():
@@ -375,6 +382,42 @@ def ask():
     page("ask.html", "Ask Atlas", "Ask Atlas: quick weather safety answers from NWS and NOAA sourced guides, plus one-sentence forecast and trip planning.", b,
          hero_atlas("Ask Atlas", "Weather safety answers and one-line planning, sourced from the NWS and NOAA.", "Ask"), "0.7", scripts=("codec-core.js", "quickparse.js", "askdata.js", "ask.js", "voice.js", "listen.js"))
 
+# ---------- /go/ social bio landing page (+ /tiktok/ and /facebook/ aliases) ----------
+# ?src= is whitelisted; it becomes the Play install referrer (utm_source=<src>&utm_medium=social&utm_campaign=bio) and is
+# copied into the page URL as UTMs before Plausible loads, so the visit is attributed to the platform.
+GO_SRCS = ("tiktok", "facebook", "reddit", "x", "youtube", "instagram")
+GO_ALIASES = ("tiktok", "facebook")
+def go_page():
+    fallback = play_ref("go", "bio")
+    head = ('<script>(function(){var W=' + json.dumps(list(GO_SRCS)) + ',q=new URLSearchParams(location.search),s=(q.get("src")||q.get("utm_source")||"").toLowerCase();'
+            'if(W.indexOf(s)<0)return;window.YW_GO_SRC=s;if(q.get("utm_source")!==s||q.has("src")){q.delete("src");q.set("utm_source",s);q.set("utm_medium","social");q.set("utm_campaign","bio");'
+            'try{history.replaceState(null,"",location.pathname+"?"+q.toString()+location.hash)}catch(e){}}})();</script>')
+    shots = "".join(f'<figure class="go-shot"><img src="../assets/{V(f)}" width="300" height="533" alt="{E(a)}" loading="{l}"><figcaption>{E(c)}</figcaption></figure>'
+                    for f, a, c, l in (("shot-home.jpg", "Your World Weather Radar home screen", "Your spot at a glance", "eager"),
+                                       ("shot-radar.jpg", "Radar screen", "Live radar with storm layers", "lazy"),
+                                       ("shot-alerts.jpg", "Alerts screen", "NWS alerts as compact cards", "lazy")))
+    big = f'<a class="btn primary go-play" data-go-play href="{E(fallback)}" target="_blank" rel="noopener">{PLAY_SVG}Get it on Google Play</a>'
+    h = f'''<section class="hero go-hero"><div class="wrap"><img class="go-ico" src="../assets/icon-192.png" width="72" height="72" alt="">
+<h1>{APP}</h1><p class="lead">Know when rain hits your spot. Free rain ETA, live radar, storm tracks and weather alerts for Android.</p>
+{big}{trial_line("trial on-dark")}<p class="small go-free">Free to download. Rain ETA, radar and alerts are included free.</p></div></section>'''
+    b = f'''<ul class="go-list"><li><b>☔ Rain ETA</b><span>An early heads-up on when rain should reach your exact location.</span></li>
+<li><b>📡 Live radar &amp; storm tracks</b><span>Scrub the radar loop, and follow NHC hurricane and JTWC typhoon tracks on our live Outlook.</span></li>
+<li><b>🚨 Weather alerts</b><span>National Weather Service alerts as compact cards, with rain and storm notifications.</span></li></ul>
+<div class="go-shots">{shots}</div>
+<div class="go-again">{big}{trial_line("trial")}</div>
+<p class="dim small" style="text-align:center"><a href="../">Visit the full website</a> · <a href="../outlook.html">Live storm Outlook</a> · <a href="../pricing.html">Pricing</a></p>
+<script>(function(){{var s=window.YW_GO_SRC;if(!s)return;var u="{PLAY}&referrer="+encodeURIComponent("utm_source="+s+"&utm_medium=social&utm_campaign=bio");
+document.querySelectorAll("[data-go-play]").forEach(function(a){{a.href=u}})}})();</script>'''
+    page("go/index.html", f"Get {APP} on Google Play", "Know when rain hits your spot: free rain ETA, live radar, storm tracks and NWS alerts for Android.", b, h, "0.5",
+         slug="go", minimal=True, playbar=False, head_extra=head, sitemap=False)
+    for a in GO_ALIASES:
+        (ROOT / a).mkdir(exist_ok=True)
+        (ROOT / a / "index.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{APP}</title><link rel="canonical" href="{SITE}go/"><meta name="robots" content="noindex">
+<script>var q=new URLSearchParams(location.search);q.set("src","{a}");location.replace("/go/?"+q.toString()+location.hash);</script>
+<noscript><meta http-equiv="refresh" content="0;url=/go/?src={a}"></noscript></head>
+<body style="font-family:system-ui;padding:24px"><p><a href="/go/?src={a}">Get {APP} on Google Play</a></p></body></html>''')
+
 def misc():
     page("404.html", "Page not found", "Page not found.", f'<p style="margin-top:24px">That page isn\'t here. <a href="/">Go home</a>.</p>', hero("Page not found"))
     sm = "".join(f"<url><loc>{u}</loc><lastmod>{datetime.date.today()}</lastmod><priority>{p}</priority></url>" for u, p in PAGES)
@@ -382,5 +425,5 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
 if __name__ == "__main__":
-    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); misc()
+    OUTLOOK.build(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); misc()
     print(f"Built {len(PAGES)} pages")
