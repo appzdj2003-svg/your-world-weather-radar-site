@@ -64,6 +64,26 @@ def play_ref(slug, sec):
 def play_btn(slug, cls="primary", sec="cta", label="Get it on Google Play"):
     return f'<a class="btn {cls}" href="{E(play_ref(slug, sec))}" target="_blank" rel="noopener">{PLAY_SVG}{label}</a>'
 
+# ---------- Google Analytics 4 (website only) with Consent Mode v2 ----------
+# Ads storage is always denied (no ads). Analytics storage defaults to denied for the EEA, UK and Switzerland (by Google's IP
+# region) and granted elsewhere. Visitors whose device time zone looks European see a banner (site-ui.js) and gtag.js doesn't
+# load for them until they tap Allow. A saved choice (localStorage) wins everywhere; "No thanks" means gtag.js never loads.
+GA_ID = "G-BDB2EH3W4Z"
+GA_REGIONS = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "GB", "CH"]
+GA_HEAD = ('<script>(function(){var w=window,d=document,ID="' + GA_ID + '",K="yw-analytics-consent",c=null,tz="",on=false;'
+    'w.dataLayer=w.dataLayer||[];function g(){dataLayer.push(arguments)}w.gtag=g;'
+    'try{c=localStorage.getItem(K)}catch(e){}if(c!=="granted"&&c!=="denied")c=null;'
+    'try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""}catch(e){}'
+    'var eu=/^Europe\\//.test(tz)||/^(Atlantic\\/(Canary|Madeira|Azores|Reykjavik|Faroe)|Arctic\\/Longyearbyen)$/.test(tz);'
+    'var A={ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",wait_for_update:500};'
+    'g("consent","default",Object.assign({analytics_storage:"denied",region:' + json.dumps(GA_REGIONS).replace(" ", "") + '},A));'
+    'g("consent","default",Object.assign({analytics_storage:"granted"},A));'
+    'if(c)g("consent","update",{analytics_storage:c});'
+    'function load(){if(on)return;on=true;g("js",new Date());g("config",ID);var s=d.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+ID;d.head.appendChild(s)}'
+    'w.YW_GA={eu:eu,choice:c,set:function(v){this.choice=v;try{localStorage.setItem(K,v)}catch(e){}g("consent","update",{analytics_storage:v});'
+    'if(v==="granted")load();else d.cookie.split(";").forEach(function(x){var n=x.split("=")[0].trim();if(/^_ga/.test(n))["",";domain=.yourworldapps.si",";domain="+location.hostname].forEach(function(m){d.cookie=n+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"+m})})}};'
+    'if(c==="granted"||(!c&&!eu))load()})();</script>')
+
 def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None, slug=None, minimal=False, playbar=True, head_extra="", sitemap=True):
     depth = path.count("/"); p = "../" * depth
     url = SITE + ("" if path == "index.html" else path.replace("index.html", ""))
@@ -84,13 +104,13 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{SITE}assets/{V(ogi)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{E(full)}"><meta name="twitter:description" content="{E(desc)}"><meta name="twitter:image" content="{SITE}assets/{V(ogi)}"><meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{p}assets/favicon.png"><link rel="apple-touch-icon" href="{p}assets/icon-192.png">
-<link rel="stylesheet" href="{p}assets/{V('site.css')}">{head_extra}<noscript><style>.top .nav{{display:flex!important;overflow-x:auto}}.menu-btn{{display:none!important}}</style></noscript>{lds}<script>window.YW_ATLAS="/assets/{V('atlas.svg')}"</script><script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head><body>
+<link rel="stylesheet" href="{p}assets/{V('site.css')}">{head_extra}<noscript><style>.top .nav{{display:flex!important;overflow-x:auto}}.menu-btn{{display:none!important}}</style></noscript>{lds}<script>window.YW_ATLAS="/assets/{V('atlas.svg')}"</script>{GA_HEAD}</head><body>
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a>{menu}</div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
 <div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li><li><a href="{p}launches/">Rocket launches</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
-<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li><li><a href="{YOUTUBE}" target="_blank" rel="noopener">Watch on YouTube</a></li></ul></div>
+<div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}privacy.html#website" data-cookie-settings>Cookie settings</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li><li><a href="{YOUTUBE}" target="_blank" rel="noopener">Watch on YouTube</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
 {bar}{sc}</body></html>'''
     doc = re.sub(r'href="' + re.escape(PLAY) + '"', f'href="{E(play_ref(slug, "inline"))}"', doc)
@@ -242,7 +262,7 @@ def privacy():
     src = (Path(__file__).parent / "privacy_source.html").read_text()
     inner = re.search(r"<body>(.*)</body>", src, re.S).group(1)
     inner = re.sub(r"<h1>.*?</h1>", "", inner, count=1, flags=re.S)
-    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The live Outlook (on the home page and the Outlook page) loads some data straight from public sources in your browser: satellite imagery and the world map from NASA GIBS and EUMETSAT, storm events from GDACS and US alerts from the National Weather Service, so those services receive your IP address, as with any website you visit. Hurricane data from the National Hurricane Center, typhoon and cyclone warnings from the U.S. Navy&#39;s Joint Typhoon Warning Center (JTWC), airport observations, the launch schedule, and the Sun Outlook&#39;s NOAA Space Weather Prediction Center data and NASA Solar Dynamics Observatory Sun image are fetched by our site every few hours and served from this site, so viewing them doesn&#39;t contact those agencies. The Sun Outlook&#39;s eclipse dates are a fixed list from NASA&#39;s eclipse catalog, built into the page. The Outlook page includes a YouTube video. Nothing is loaded from YouTube until you tap play. When you do, the video loads from YouTube in privacy-enhanced mode (youtube-nocookie.com), so YouTube receives your IP address and may set cookies or similar storage under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&#39;s privacy policy</a>. The Android app\'s optional, anonymous usage and crash reports (Google Firebase) are described above.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
+    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2 id="website">This website</h2><p>This website (not the app) uses <strong>Google Analytics 4</strong> to count visits and clicks, including taps on the Google Play link. It sets first-party cookies (<code>_ga</code> and <code>_ga_*</code>) to tell new visits from returning ones. Google processes this data for us under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&#39;s privacy policy</a>, including your IP address and browser details, as with any website you visit. We don&#39;t use it for ads or ad personalization: ad storage and ad signals are always turned off. Visitors in the EU, the UK and Switzerland are asked first: if your device is set to a European time zone, you see a short banner and Google Analytics doesn&#39;t load until you tap Allow, and if Google places you in those countries, it sets no analytics cookies unless you allow them (Google may still receive basic visit counts without cookies). You can change your choice at any time with the <a href="#website" data-cookie-settings>Cookie settings</a> link in the footer; choosing No thanks stops Google Analytics from loading and removes its cookies. You can also use Google&#39;s <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">opt-out browser add-on</a>.</p><p>The live Outlook (on the home page and the Outlook page) loads some data straight from public sources in your browser: satellite imagery and the world map from NASA GIBS and EUMETSAT, storm events from GDACS and US alerts from the National Weather Service, so those services receive your IP address, as with any website you visit. Hurricane data from the National Hurricane Center, typhoon and cyclone warnings from the U.S. Navy&#39;s Joint Typhoon Warning Center (JTWC), airport observations, the launch schedule, and the Sun Outlook&#39;s NOAA Space Weather Prediction Center data and NASA Solar Dynamics Observatory Sun image are fetched by our site every few hours and served from this site, so viewing them doesn&#39;t contact those agencies. The Sun Outlook&#39;s eclipse dates are a fixed list from NASA&#39;s eclipse catalog, built into the page. The Outlook page includes a YouTube video. Nothing is loaded from YouTube until you tap play. When you do, the video loads from YouTube in privacy-enhanced mode (youtube-nocookie.com), so YouTube receives your IP address and may set cookies or similar storage under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&#39;s privacy policy</a>. The Android app\'s optional, anonymous usage and crash reports (Google Firebase) are described above.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
     page("privacy.html", "Privacy Policy", "Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why.", b, hero("Privacy Policy", f"{APP} for Android and iPhone", "Privacy"), "0.4")
 
 def support():
@@ -390,8 +410,7 @@ def legacy_planners():
     for old, new, t in (("plan.html", "alert-planner/", "Forecast & Alert Planner"), ("trip.html", "trip-planner/", "Weather Trip Planner")):
         (ROOT / old).write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{E(t)} | {APP}</title><link rel="canonical" href="{SITE}{new}"><meta name="robots" content="noindex">
-<script>location.replace("/{new}" + location.search + location.hash);</script>
-<script defer data-domain="weather.yourworldapps.si" src="https://plausible.io/js/script.outbound-links.js"></script></head>
+<script>location.replace("/{new}" + location.search + location.hash);</script></head>
 <body style="font-family:system-ui;padding:24px"><p>The {E(t)} has moved: <a href="/{new}">{SITE}{new}</a></p></body></html>''')
 
 def planner(path, kind):
@@ -426,7 +445,7 @@ def ask():
 
 # ---------- /go/ social bio landing page (+ /tiktok/ and /facebook/ aliases) ----------
 # ?src= is whitelisted; it becomes the Play install referrer (utm_source=<src>&utm_medium=social&utm_campaign=bio) and is
-# copied into the page URL as UTMs before Plausible loads, so the visit is attributed to the platform.
+# copied into the page URL as UTMs before Google Analytics is configured, so the visit is attributed to the platform.
 GO_SRCS = ("tiktok", "facebook", "reddit", "x", "youtube", "instagram")
 GO_ALIASES = ("tiktok", "facebook")
 def go_page():

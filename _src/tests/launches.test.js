@@ -32,7 +32,7 @@ assert.strictEqual(L.padWx({ temp: null }), null);
 assert.strictEqual(L.padWx({ temp: 20, wxString: "+TSRA", cover: "BKN" }).cond, "Heavy thunderstorm");
 // built page
 const html = fs.readFileSync(path.join(ROOT, "launches/index.html"), "utf8");
-for (const id of ['id="ln-hero"', 'id="ln-list"', 'id="pad-weather"', 'id="ln-app-h"', "The Space Devs", "check the launch provider", "plausible.io/js/script", "launches.js", "teaser.js", "utm_campaign%3Dapp-pitch"])
+for (const id of ['id="ln-hero"', 'id="ln-list"', 'id="pad-weather"', 'id="ln-app-h"', "The Space Devs", "check the launch provider", "G-BDB2EH3W4Z", "launches.js", "teaser.js", "utm_campaign%3Dapp-pitch"])
   assert.ok(html.includes(id), "launches page has " + id);
 assert.ok(!/launch\.yourworldapps\.si/.test(html), "Launch Deck site is never linked");
 assert.ok(!/ll\.thespacedevs\.com|api\.open-meteo|open-meteo/i.test(html + fs.readFileSync(path.join(ROOT, "assets/launches.js"), "utf8")), "no third-party API in the page or script");

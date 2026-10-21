@@ -44,6 +44,40 @@
       });
     });
   }
-  var _init = init; init = function () { _init(); initYT(); };
+  // Analytics consent banner (Google Analytics, see the YW_GA snippet in <head>). Shown only to visitors whose device time zone
+  // looks European and who haven't chosen yet; "Cookie settings" in the footer reopens it for anyone. No network call is made to decide.
+  function initConsent() {
+    var G = window.YW_GA; if (!G) return;
+    var box = null;
+    function place() {
+      if (!box || box.hidden) return;
+      var bar = document.getElementById("playbar"), h = 0;
+      if (bar && !bar.hidden) h = bar.getBoundingClientRect().height; // stack above the sticky Play bar on mobile
+      box.style.bottom = (h ? h + 8 : 12) + "px";
+    }
+    function show(focus) {
+      if (!box) {
+        box = document.createElement("div");
+        box.className = "ckb"; box.setAttribute("role", "region"); box.setAttribute("aria-label", "Analytics cookies");
+        box.innerHTML = '<p id="ckb-t">We use Google Analytics cookies to count visits. Allow? <a href="/privacy.html#website">Privacy policy</a></p>' +
+          '<div class="ckb-b"><button type="button" class="btn primary" data-v="granted">Allow</button><button type="button" class="btn ghost" data-v="denied">No thanks</button></div>';
+        box.addEventListener("click", function (e) {
+          var b = e.target.closest && e.target.closest("button[data-v]"); if (!b) return;
+          G.set(b.getAttribute("data-v")); box.hidden = true;
+        });
+        document.body.appendChild(box);
+        var bar = document.getElementById("playbar"), x = bar && bar.querySelector(".pb-x");
+        if (x) x.addEventListener("click", function () { setTimeout(place, 0); });
+        window.addEventListener("resize", place);
+      }
+      box.hidden = false; place();
+      if (focus) { var f = box.querySelector("button"); if (f) f.focus(); }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("[data-cookie-settings]"), function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); show(true); });
+    });
+    if (G.eu && !G.choice) show(false);
+  }
+  var _init = init; init = function () { _init(); initYT(); initConsent(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
