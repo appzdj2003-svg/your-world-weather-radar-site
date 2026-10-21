@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": [
    {
     "id": "ep222026",
@@ -21,45 +21,50 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1792597860,
-    "temp": 15,
-    "dewp": 2.2,
-    "wdir": 20,
-    "wspd": 17,
-    "wgst": 25,
+    "obsTime": 1792601460,
+    "temp": 16.7,
+    "dewp": 1.7,
+    "wdir": 30,
+    "wspd": 18,
+    "wgst": 26,
     "wxString": null,
     "cover": "BKN",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 4000
+      "base": 20000
      },
      {
       "cover": "BKN",
       "base": 25000
      }
     ],
-    "rawOb": "METAR KJFK 211551Z 02017G25KT 10SM FEW040 BKN250 15/02 A3020 RMK AO2 PK WND 02028/1501 SLP228 T01500022 $",
+    "rawOb": "METAR KJFK 211651Z 03018G26KT 10SM FEW200 BKN250 17/02 A3017 RMK AO2 PK WND 03027/1600 SLP217 T01670017 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1792599600,
-    "temp": 11,
-    "dewp": 5,
+    "obsTime": 1792601400,
+    "temp": 10,
+    "dewp": 4,
     "wdir": 270,
-    "wspd": 17,
+    "wspd": 16,
     "wgst": null,
     "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR EGLL 211620Z AUTO 27017KT 9999 NCD 11/05 Q1005",
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 4100
+     }
+    ],
+    "rawOb": "METAR EGLL 211650Z AUTO 27016KT 9999 FEW041 10/04 Q1006 RESHRA",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
@@ -241,7 +246,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": [
    {
     "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
@@ -821,7 +826,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": [
    {
     "pid": "wp2926",
@@ -834,7 +839,7 @@
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -877,13 +882,13 @@
     }
    },
    "wind": {
-    "speed": 457.0,
-    "bz": -3.0,
-    "bt": 9.0,
-    "at": "2026-10-21T16:36:00Z"
+    "speed": 477.0,
+    "bz": -7.0,
+    "bt": 10.0,
+    "at": "2026-10-21T16:50:00Z"
    },
    "flare": {
-    "current": "B5.6",
+    "current": "B5.8",
     "max": "C1.3",
     "maxAt": "2026-10-21T10:58:00Z"
    },
@@ -894,7 +899,7 @@
   }
  },
  "pads": {
-  "fetchedAt": "2026-10-21T16:45:20+00:00",
+  "fetchedAt": "2026-10-21T16:57:13+00:00",
   "items": [
    {
     "icaoId": "KXMR",
@@ -956,22 +961,17 @@
    },
    {
     "icaoId": "KBRO",
-    "obsTime": 1792597980,
-    "temp": 27.2,
-    "dewp": 21.7,
-    "wdir": 350,
-    "wspd": 5,
+    "obsTime": 1792601580,
+    "temp": 29.4,
+    "dewp": 22.2,
+    "wdir": 360,
+    "wspd": 8,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "BKN",
-      "base": 4100
-     }
-    ],
-    "rawOb": "METAR KBRO 211553Z 35005KT 10SM BKN041 27/22 A3011 RMK AO2 SLP195 T02720217",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR KBRO 211653Z 36008KT 10SM CLR 29/22 A3011 RMK AO2 SLP195 T02940222",
     "lat": 25.9146,
     "lon": -97.4231,
     "pad": "starbase",
