@@ -209,7 +209,52 @@ function jtwcMiniMap(st) {
 /* Snapshot items -> storm cards; warnings older than 24 h are dropped. */
 function parseJtwc(items, now) { const t = now || Date.now();
   return (items || []).map(i => { try { return parseTcw(i.tcw, i.pid); } catch (e) { return null; } }).filter(j => j && t - j.fixMs < 24 * 3600e3).map(jtwcToStorm); }
-const api = { parseTcw, parseJtwc, jtwcToStorm, mergeStorms3, windAreaRings, hourOf, hourlySlots, parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
+/* ---- Sun Outlook: NOAA SWPC space weather + NASA SDO image, from the build-time snapshot (outlook.json "sun"). Same scale
+   rules and words as the app's Sun tab. Eclipses: a static list from NASA's eclipse catalog (Espenak & Meeus), greatest eclipse in UT. */
+const SUN_LVL = ["quiet", "minor", "moderate", "strong", "severe", "extreme"];
+const sunWord = (k, n) => n ? SUN_LVL[n] : k === "r" ? "no blackout" : k === "s" ? "none" : "quiet";
+const gFromKp = kp => kp == null ? 0 : kp >= 8.67 ? 5 : kp >= 7.67 ? 4 : kp >= 6.67 ? 3 : kp >= 5.67 ? 2 : kp >= 4.67 ? 1 : 0;
+const kpTxt = kp => kp == null ? "–" : Number.isInteger(kp) ? String(kp) : kp.toFixed(1);
+const ECLIPSES = [
+  ["2027-02-06T16:00Z", "solar", "Annular", "https://eclipse.gsfc.nasa.gov/OH/OH2027.html"],
+  ["2027-02-20T23:13Z", "lunar", "Penumbral", "https://eclipse.gsfc.nasa.gov/OH/OH2027.html"],
+  ["2027-07-18T16:03Z", "lunar", "Penumbral", "https://eclipse.gsfc.nasa.gov/OH/OH2027.html"],
+  ["2027-08-02T10:07Z", "solar", "Total", "https://eclipse.gsfc.nasa.gov/OH/OH2027.html", "up to 6 min 23 s of totality"],
+  ["2027-08-17T07:14Z", "lunar", "Penumbral", "https://eclipse.gsfc.nasa.gov/OH/OH2027.html"],
+  ["2028-01-12T04:13Z", "lunar", "Partial", "https://eclipse.gsfc.nasa.gov/OH/OH2028.html"],
+  ["2028-01-26T15:08Z", "solar", "Annular", "https://eclipse.gsfc.nasa.gov/OH/OH2028.html"],
+  ["2028-07-06T18:20Z", "lunar", "Partial", "https://eclipse.gsfc.nasa.gov/OH/OH2028.html"],
+  ["2028-07-22T02:55Z", "solar", "Total", "https://eclipse.gsfc.nasa.gov/OH/OH2028.html", "up to 5 min 10 s of totality"],
+  ["2028-12-31T16:52Z", "lunar", "Total", "https://eclipse.gsfc.nasa.gov/OH/OH2028.html"]];
+function nextEclipses(now, n) {
+  const t = now || Date.now();
+  return ECLIPSES.map(([at, type, kind, link, note]) => ({ at, ms: Date.parse(at), type, kind, link, note: note || "" }))
+    .filter(e => e.ms >= t - 6 * 3600e3).slice(0, n || 4);
+}
+/* Snapshot -> view model. Stale (>12 h) data and images are hidden, never shown as current. */
+function parseSun(sun, now) {
+  const t = now || Date.now();
+  if (!sun || !sun.items || !sun.fetchedAt || !(t - Date.parse(sun.fetchedAt) < 12 * 3600e3)) return null;
+  const it = sun.items, sc = it.scales || {}, kp = it.kp || {};
+  const kpFresh = kp.nowAt && t - Date.parse(kp.nowAt) <= 4 * 3600e3;
+  const g = Math.max(sc.g || 0, kpFresh ? gFromKp(kp.now) : 0);
+  const days = (sc.days || []).filter(d => d && d.date).map(d => { const k = kp.byDate ? kp.byDate[d.date] : null;
+    return { date: d.date, kp: k == null ? null : k, g: Math.max(d.g || 0, gFromKp(k)), r1: d.r1, r3: d.r3, s1: d.s1 }; });
+  const img = it.image && it.image.data && it.image.at && t - Date.parse(it.image.at) < 12 * 3600e3 ? it.image : null;
+  return { fetchedAt: sun.fetchedAt, g, r: sc.r || 0, s: sc.s || 0, kpNow: kpFresh ? kp.now : null, kpAt: kp.nowAt, kpNext: kp.next24h != null ? kp.next24h : null,
+    wind: it.wind || null, flare: it.flare || null, days, image: img, eclipses: nextEclipses(t, 4) };
+}
+/* Plain-words aurora reach for a Kp, from NOAA's space weather scale descriptions (typical, not a promise). */
+function auroraWords(kp) {
+  const g = gFromKp(kp);
+  return ["Aurora mostly stays near the poles: far-northern Canada, Alaska, Iceland and northern Scandinavia, and far-southern skies.",
+    "Minor storm level: aurora may be seen at high latitudes, about as far south as northern Michigan and Maine in the US.",
+    "Moderate storm level: aurora may reach as far south as New York and Idaho in the US.",
+    "Strong storm level: aurora may reach as far south as Illinois and Oregon in the US.",
+    "Severe storm level: aurora may reach as far south as Alabama and northern California in the US.",
+    "Extreme storm level: aurora may reach as far south as Florida and southern Texas in the US."][g];
+}
+const api = { parseSun, nextEclipses, auroraWords, gFromKp, parseTcw, parseJtwc, jtwcToStorm, mergeStorms3, windAreaRings, hourOf, hourlySlots, parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
 if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
 root.YWOutlook = api;
 
@@ -283,6 +328,35 @@ function renderStorms(list, note) {
 <p class="owo-src">${s.src === "JTWC" ? "JTWC (US Navy) · 1-min winds" : s.src}${s.alert ? " · " + E(s.alert) + " impact alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
 </a>${s.cone ? `<a class="owo-cone" href="${E(s.cone)}" target="_blank" rel="noopener" title="Open full-size NHC cone"><img src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.parentNode.remove()"><span>🔍 Tap to enlarge</span></a>` : s.jtwc ? jtwcMiniMap(s) : ""}</div>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
 }
+function renderSun(v) {
+  const out = $("owo-sun"); if (!out) return;
+  if (!v) { out.innerHTML = `<p class="owo-empty sun-empty">Sun data isn't available right now. See <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a>.</p>`; return; }
+  const lc = n => n >= 3 ? "hi" : n >= 1 ? "mid" : "ok", tm = iso => new Date(iso).toLocaleString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  const box = (k, n, label) => `<div class="sun-box ${lc(n)}"><b>${k.toUpperCase()}${n}</b><small>${label}</small><span>${sunWord(k, n)}</span></div>`;
+  const gTxt = v.g >= 3 ? "Strong geomagnetic storm: aurora far from the poles; power grids, satellites and GPS may be affected." : v.g >= 1 ? "Geomagnetic storm: aurora may reach farther from the poles than usual. Little effect on power or GPS at this level." : "Earth's magnetic field is quiet.";
+  const rTxt = v.r ? "A solar flare is disrupting HF radio on the sunlit side of Earth; GPS may be less accurate." : "No radio blackouts from solar flares right now.";
+  const sTxt = v.s ? "No risk on the ground. Can affect polar flights, HF radio and satellites." : "No solar radiation storm.";
+  const w = v.wind, f = v.flare, rows = [];
+  if (v.kpNow != null) rows.push(["Kp", `${kpTxt(v.kpNow)} ${sunWord("g", gFromKp(v.kpNow))} (last 3 h)`]);
+  if (w && (w.speed != null || w.bz != null)) rows.push(["WIND", [w.speed != null ? Math.round(w.speed) + " km/s" : "", w.bz != null ? `Bz ${w.bz >= 0 ? "+" : ""}${Math.round(w.bz)} nT ${w.bz >= 0 ? "north" : "south"}` : ""].filter(Boolean).join(" · ")]);
+  if (f && (f.current || f.max)) rows.push(["X-RAY", [f.current ? f.current + " now" : "", f.max && f.maxAt ? `${f.max} at ${tm(f.maxAt)}` : ""].filter(Boolean).join(" · ")]);
+  const day = d => { const dt = new Date(d.date + "T12:00:00Z");
+    return `<div class="sun-day${d.g ? " on" : ""}"><small>${dt.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase()} ${dt.getUTCDate()}</small><b>Kp ${kpTxt(d.kp)}</b><i class="${lc(d.g)}">G${d.g}</i><span>R1+ ${d.r1 == null ? "–" : Math.round(d.r1) + "%"} · S1 ${d.s1 == null ? "–" : Math.round(d.s1) + "%"}</span></div>`; };
+  const anySolar = v.eclipses.some(e => e.type === "solar"), anyLunar = v.eclipses.some(e => e.type === "lunar");
+  const ecl = v.eclipses.map(e => `<a class="sun-ecl" href="${E(e.link)}" target="_blank" rel="noopener"><small>${e.type.toUpperCase()}</small><span><b class="${e.type}">${new Date(e.ms).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}</b><em>greatest ${tm(e.at)}${e.note ? " · " + E(e.note) : ""}</em></span><span class="k">${e.kind === "Penumbral" ? "Penumbral · faint" : e.kind}</span></a>`).join("");
+  out.innerHTML = `<div class="sun-top"><figure class="sun-disk">${v.image ? `<img src="${v.image.data}" width="320" height="320" alt="The Sun in extreme ultraviolet (NASA SDO/AIA 304)">` : `<div class="sun-noimg">Sun image unavailable.</div>`}
+<figcaption><i class="${v.image ? "" : "off"}"></i>LIVE · SDO/AIA 304${v.image ? " · " + E(tm(v.image.at)) : ""}</figcaption></figure>
+<div class="sun-card sun-now"><h3>SPACE WEATHER NOW<span>NOAA SWPC</span></h3><div class="sun-boxes">${box("g", v.g, "GEOMAG")}${box("r", v.r, "RADIO")}${box("s", v.s, "RADIATION")}</div>
+${rows.length ? `<dl>${rows.map(([k, x]) => `<dt>${k}</dt><dd>${E(x)}</dd>`).join("")}</dl>` : ""}
+<ul class="sun-plain"><li><b>G</b> ${gTxt}</li><li><b>R</b> ${rTxt}</li><li><b>S</b> ${sTxt}</li></ul>
+<p class="sun-foot">NOAA SWPC · updated ${E(tm(v.fetchedAt))}</p></div></div>
+<div class="sun-row">${v.days.length ? `<div class="sun-card sun-next"><h3>NEXT 3 DAYS<span>UTC days</span></h3><div class="sun-days">${v.days.map(day).join("")}</div><p class="sun-foot">Forecasts can shift by hours.</p></div>` : ""}
+<div class="sun-card sun-aur"><h3>AURORA CHANCE</h3><p>Highest Kp expected in the next 24 h: <b>${kpTxt(v.kpNext)}</b>. ${v.kpNext != null ? E(auroraWords(v.kpNext)) : ""} Best odds far north (far south in the Southern Hemisphere), low on the horizon, on a dark, clear night.</p>
+<p class="sun-lock">🔒 Aurora chance at your location · Premium in the app</p><p class="sun-foot">Rough guide from the NOAA Kp forecast. Not a promise; forecasts can change quickly.</p></div>
+<div class="sun-card sun-ecls"><h3>ECLIPSES<span>NASA</span></h3>${ecl || `<p>See <a href="https://eclipse.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA's eclipse site</a>.</p>`}
+${anySolar ? `<p class="sun-safe">Never look at the Sun without certified ISO 12312-2 eclipse glasses, even during a partial eclipse.</p>` : ""}${anyLunar ? `<p class="sun-foot">Lunar eclipses are safe to watch with the naked eye.</p>` : ""}
+<p class="sun-foot">Worldwide dates; each eclipse is visible only from part of the Earth. The app works out which ones you can see from your location.</p></div></div>`;
+}
 function renderAlerts(a) {
   const out = $("owo-alerts"), n0 = $("owo-alert-n"); if (n0 && a) n0.textContent = a.count; if (!out) return;
   if (!a) { out.innerHTML = `<p class="owo-empty">NWS alerts didn't load. See <a href="https://www.weather.gov/" target="_blank" rel="noopener">weather.gov</a>.</p>`; return; }
@@ -336,6 +410,7 @@ function start() {
     renderStorms(state.storms, !fresh && g ? "NHC details refresh with each site update; showing the live GDACS list." : "");
     state.cities = ((s.metar && s.metar.items) || []).map(parseMetar).filter(Boolean);
     renderCities(state.cities, s.metar && s.metar.fetchedAt);
+    renderSun(parseSun(s.sun));
     const lf = s.launches && Date.now() - Date.parse(s.launches.fetchedAt) < 36 * 3600e3;
     state.launches = lf ? parseLaunches(s.launches.items) : null; renderLaunches(state.launches, lf && s.launches.fetchedAt);
   });

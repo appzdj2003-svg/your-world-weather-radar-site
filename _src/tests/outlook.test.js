@@ -67,3 +67,19 @@ console.log("All Your World Weather Radar Outlook tests passed");
   assert.deepStrictEqual(O.mergeStorms3([], j, [{ src: "GDACS", name: "Champi", lat: 17.2, lon: 131.9 }]).map(s => s.src), ["JTWC", "JTWC"], "GDACS duplicate dropped");
   assert.ok(/Super Typhoon Champi in the Western Pacific/.test(O.briefingScript({ storms: j }).join(" ")));
   console.log("JTWC snapshot parser tests passed"); }
+{ const t = Date.parse("2026-10-21T02:10:00Z");
+  const sun = { fetchedAt: "2026-10-21T02:09:00+00:00", items: { scales: { g: 0, r: 0, s: 0, days: [{ date: "2026-10-21", g: 1, r1: 25, r3: 5, s1: 5 }, { date: "2026-10-22", g: 0, r1: 25, r3: 5, s1: 5 }] },
+    kp: { now: 4.67, nowAt: "2026-10-21T00:00:00+00:00", next24h: 4.67, byDate: { "2026-10-21": 4.67, "2026-10-22": 5.67 } },
+    wind: { speed: 380, bz: -3 }, flare: { current: "B6.3", max: "B7.5", maxAt: "2026-10-21T01:10:00Z" }, image: { at: "2026-10-21T02:04:06+00:00", data: "data:image/jpeg;base64,AA" } } };
+  const v = O.parseSun(sun, t);
+  assert.deepStrictEqual([v.g, v.r, v.s, v.kpNow], [1, 0, 0, 4.67], "observed G from fresh Kp (app rule)");
+  assert.deepStrictEqual(v.days.map(d => d.g), [1, 2], "day G = max(scales, G from predicted Kp)");
+  assert.ok(v.image);
+  assert.strictEqual(O.parseSun(sun, t + 13 * 3600e3), null, "stale (>12 h) Sun data hidden");
+  const old = JSON.parse(JSON.stringify(sun)); old.items.image.at = "2026-10-20T12:00:00+00:00"; assert.strictEqual(O.parseSun(old, t).image, null, "stale image hidden");
+  assert.strictEqual(O.parseSun(sun, t + 5 * 3600e3).g, 0, "Kp older than 4 h not used for observed G");
+  assert.deepStrictEqual([O.gFromKp(4.66), O.gFromKp(4.67), O.gFromKp(8.67)], [0, 1, 5]);
+  assert.deepStrictEqual(O.nextEclipses(t, 3).map(e => e.at), ["2027-02-06T16:00Z", "2027-02-20T23:13Z", "2027-07-18T16:03Z"]);
+  assert.strictEqual(O.nextEclipses(Date.parse("2027-08-02T12:00Z"), 1)[0].kind, "Total", "eclipse still listed a few hours after greatest");
+  assert.ok(/New York/.test(O.auroraWords(6)) && /poles/.test(O.auroraWords(2)));
+  console.log("Sun Outlook tests passed"); }

@@ -1,5 +1,5 @@
 """Build-time snapshot for the Your World Weather Radar Outlook: NHC CurrentStorms.json + cone images, JTWC (US Navy) typhoon and
-cyclone warnings, METAR city observations from aviationweather.gov and LL2 launches. Served from our site, so visitors' browsers
+cyclone warnings, NOAA SWPC space weather + a NASA SDO Sun image, METAR city observations from aviationweather.gov and LL2 launches. Served from our site, so visitors' browsers
 don't contact these agencies. Writes assets/outlook.json; keeps the old data for a feed if it fails."""
 import json, re, time, datetime, urllib.request
 from pathlib import Path
@@ -71,6 +71,84 @@ def jtwc():
     if active and not out and failed: raise RuntimeError("all JTWC .tcw fetches failed")
     return out
 
+SWPC = "https://services.swpc.noaa.gov"
+SDO_304 = "https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0304.jpg"
+
+def _num(v, lo, hi):
+    try: v = float(v)
+    except (TypeError, ValueError): return None
+    return v if lo <= v <= hi else None
+
+def sun_image(prev):
+    """Today's Sun (NASA SDO/AIA 304, public domain): cropped like the app's FLARES layer, 320 px JPEG (~13 KB), embedded
+    in outlook.json so visitors load it from our site. Refetched only when the saved one is 5 h+ old, to keep the repo light."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+    if prev and prev.get("data") and prev.get("at"):
+        try:
+            if now - datetime.datetime.fromisoformat(prev["at"]) < datetime.timedelta(hours=5): return prev
+        except ValueError: pass
+    import io, base64, email.utils
+    from PIL import Image
+    r = urllib.request.urlopen(urllib.request.Request(SDO_304, headers=UA), timeout=25)
+    if not r.headers.get("Content-Type", "").startswith("image/"): raise ValueError("not an image")
+    raw = r.read(2_500_000)
+    lm = r.headers.get("Last-Modified")
+    at = email.utils.parsedate_to_datetime(lm).astimezone(datetime.timezone.utc) if lm else now
+    im = Image.open(io.BytesIO(raw)).convert("RGB"); w, h = im.size; half = 0.3926 * 1.17
+    im = im.crop((round((0.5 - half) * w), round((0.5 - half) * h), round((0.5 + half) * w), round((0.5 + half) * h))).resize((320, 320), Image.LANCZOS)
+    b = io.BytesIO(); im.save(b, "JPEG", quality=72, optimize=True, progressive=True)
+    return {"at": at.isoformat(timespec="seconds"), "data": "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()}
+
+def sun():
+    """Space weather from NOAA SWPC (same feeds and rules as the app's Sun tab) + the SDO image. Each part keeps its old value
+    if its fetch fails; raises (keeping the whole old block) only when the scales and Kp feeds both fail."""
+    try: old = json.loads((ROOT / "assets" / "outlook.json").read_text()).get("sun", {}).get("items", {}) or {}
+    except Exception: old = {}
+    out, ok = dict(old), 0
+    now = datetime.datetime.now(datetime.timezone.utc)
+    try:
+        d = json.loads(get(SWPC + "/products/noaa-scales.json")); z = d.get("0") or {}
+        sc = lambda x: int(_num(x, 0, 5) or 0)
+        out["scales"] = {"g": sc((z.get("G") or {}).get("Scale")), "r": sc((z.get("R") or {}).get("Scale")), "s": sc((z.get("S") or {}).get("Scale")),
+            "days": [{"date": (d.get(k) or {}).get("DateStamp"), "g": sc(((d.get(k) or {}).get("G") or {}).get("Scale")),
+                      "r1": _num(((d.get(k) or {}).get("R") or {}).get("MinorProb"), 0, 100), "r3": _num(((d.get(k) or {}).get("R") or {}).get("MajorProb"), 0, 100),
+                      "s1": _num(((d.get(k) or {}).get("S") or {}).get("Prob"), 0, 100)} for k in ("1", "2", "3") if d.get(k)]}
+        ok += 1
+    except Exception as e: print("outlook: sun scales failed:", e)
+    try:
+        rows = json.loads(get(SWPC + "/products/noaa-planetary-k-index-forecast.json"))
+        obs, fc = [], []
+        for r in rows:
+            if not isinstance(r, dict): continue
+            kp = _num(r.get("kp", r.get("Kp")), 0, 9.5)
+            try: t = datetime.datetime.fromisoformat(str(r.get("time_tag")).replace("Z", "")).replace(tzinfo=datetime.timezone.utc)
+            except ValueError: continue
+            if kp is None: continue
+            kind = str(r.get("observed", "")).lower()
+            (obs if kind == "observed" or (kind == "estimated" and t <= now) else fc).append((t, kp))
+        obs.sort(); fc.sort()
+        k = {"now": obs[-1][1] if obs else None, "nowAt": obs[-1][0].isoformat() if obs else None,
+             "max24h": max([v for t, v in obs if now - t <= datetime.timedelta(hours=24)], default=None),
+             "next24h": max([v for t, v in fc if t <= now + datetime.timedelta(hours=24)], default=None), "byDate": {}}
+        for t, v in fc: k["byDate"][t.date().isoformat()] = max(v, k["byDate"].get(t.date().isoformat(), 0))
+        out["kp"] = k; ok += 1
+    except Exception as e: print("outlook: sun kp failed:", e)
+    try:
+        a = (json.loads(get(SWPC + "/products/summary/solar-wind-speed.json")) or [{}])[0]
+        b = (json.loads(get(SWPC + "/products/summary/solar-wind-mag-field.json")) or [{}])[0]
+        sp, bz = _num(a.get("proton_speed"), 100, 3500), _num(b.get("bz_gsm"), -500, 500)
+        if sp is not None or bz is not None: out["wind"] = {"speed": sp, "bz": bz, "bt": _num(b.get("bt"), 0, 500), "at": a.get("time_tag") or b.get("time_tag")}
+    except Exception as e: print("outlook: sun wind failed:", e)
+    try:
+        f = (json.loads(get(SWPC + "/json/goes/primary/xray-flares-latest.json")) or [{}])[0]
+        cls = lambda c: c if isinstance(c, str) and re.fullmatch(r"[ABCMX]\d+(\.\d+)?", c) else None
+        out["flare"] = {"current": cls(f.get("current_class")), "max": cls(f.get("max_class")), "maxAt": f.get("max_time")}
+    except Exception as e: print("outlook: sun flare failed:", e)
+    try: out["image"] = sun_image(old.get("image"))
+    except Exception as e: print("outlook: sun image failed, keeping cached:", e)
+    if not ok: raise RuntimeError("SWPC scales and Kp both failed")
+    return out
+
 def metar():
     ids = ",".join(c for c, _ in CITIES); names = dict(CITIES)
     rows = json.loads(get(f"https://aviationweather.gov/api/data/metar?ids={ids}&format=json"))
@@ -97,7 +175,7 @@ def build():
     old = json.loads(f.read_text()) if f.exists() else {}
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     new = dict(old)
-    for key, fn in (("nhc", nhc), ("jtwc", jtwc), ("metar", metar), ("launches", launches)):
+    for key, fn in (("nhc", nhc), ("jtwc", jtwc), ("sun", sun), ("metar", metar), ("launches", launches)):
         try: new[key] = {"fetchedAt": now, "items": fn()}
         except Exception as e: print(f"outlook: {key} fetch failed, keeping cached:", e)
     f.write_text(json.dumps(new, ensure_ascii=False, indent=1))
