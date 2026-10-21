@@ -1,5 +1,5 @@
 """Build-time snapshot for the Your World Weather Radar Outlook: NHC CurrentStorms.json + cone images, JTWC (US Navy) typhoon and
-cyclone warnings, NOAA SWPC space weather + a NASA SDO Sun image, METAR city observations from aviationweather.gov and LL2 launches. Served from our site, so visitors' browsers
+cyclone warnings, NOAA SWPC space weather + a NASA SDO Sun image, METAR city and launch-pad observations from aviationweather.gov and LL2 launches. Served from our site, so visitors' browsers
 don't contact these agencies. Writes assets/outlook.json; keeps the old data for a feed if it fails."""
 import json, re, time, datetime, urllib.request
 from pathlib import Path
@@ -156,6 +156,24 @@ def metar():
     by = {r["icaoId"]: {**{k: r.get(k) for k in keep}, "city": names.get(r["icaoId"])} for r in rows if r.get("icaoId") in names}
     return [by[c] for c, _ in CITIES if c in by]
 
+# Main US launch sites -> nearest NOAA/NWS airport weather station (METAR via aviationweather.gov, public domain, the same
+# feed as the city cards). One extra request per build. "match" = words in LL2's site name that map a launch to its pad weather.
+PADS = [("cape", "Cape Canaveral & Kennedy, FL", ("KXMR", "KTTS"), "Cape Canaveral SFS Skid Strip", ("Cape Canaveral", "Kennedy Space Center")),
+        ("vandenberg", "Vandenberg SFB, CA", ("KVBG",), "Vandenberg airfield", ("Vandenberg",)),
+        ("starbase", "Starbase, TX", ("KBRO",), "Brownsville airport, about 35 km west of the pad", ("Starbase", "Boca Chica")),
+        ("wallops", "Wallops Island, VA", ("KWAL",), "Wallops Flight Facility airfield", ("Wallops", "Mid-Atlantic Regional Spaceport"))]
+
+def pads():
+    ids = ",".join(i for _, _, st, _, _ in PADS for i in st)
+    rows = {r["icaoId"]: r for r in json.loads(get(f"https://aviationweather.gov/api/data/metar?ids={ids}&format=json")) if r.get("icaoId")}
+    keep = ("icaoId", "obsTime", "temp", "dewp", "wdir", "wspd", "wgst", "visib", "wxString", "cover", "clouds", "rawOb", "lat", "lon")
+    out = []
+    for key, name, st, where, match in PADS:
+        r = next((rows[i] for i in st if i in rows and rows[i].get("temp") is not None), None)
+        if r: out.append({**{k: r.get(k) for k in keep}, "pad": key, "city": name, "station": where, "match": list(match)})
+    if not out: raise RuntimeError("no pad observations")
+    return out
+
 def launches():
     """Launch Library 2 (The Space Devs), same source the app's space overlay uses. One call per build (free tier: 15/hour)."""
     d = json.loads(get("https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=25&mode=detailed&hide_recent_previous=true"))
@@ -167,7 +185,9 @@ def launches():
                     "rocket": ((l.get("rocket") or {}).get("configuration") or {}).get("full_name") or ((l.get("rocket") or {}).get("configuration") or {}).get("name"),
                     "provider": (l.get("launch_service_provider") or {}).get("name"), "mission": m.get("name"), "orbit": (m.get("orbit") or {}).get("abbrev"),
                     "pad": pad.get("name"), "site": loc.get("name"), "lat": pad.get("latitude"), "lon": pad.get("longitude"),
-                    "probability": l.get("probability"), "weatherConcerns": l.get("weather_concerns"), "image": l.get("image")})
+                    "probability": l.get("probability"), "weatherConcerns": l.get("weather_concerns"), "image": l.get("image"),
+                    "precision": (l.get("net_precision") or {}).get("abbrev"), "country": loc.get("country_code"),
+                    "providerType": (l.get("launch_service_provider") or {}).get("type")})
     return out
 
 def build():
@@ -175,7 +195,7 @@ def build():
     old = json.loads(f.read_text()) if f.exists() else {}
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     new = dict(old)
-    for key, fn in (("nhc", nhc), ("jtwc", jtwc), ("sun", sun), ("metar", metar), ("launches", launches)):
+    for key, fn in (("nhc", nhc), ("jtwc", jtwc), ("sun", sun), ("metar", metar), ("pads", pads), ("launches", launches)):
         try: new[key] = {"fetchedAt": now, "items": fn()}
         except Exception as e: print(f"outlook: {key} fetch failed, keeping cached:", e)
     f.write_text(json.dumps(new, ensure_ascii=False, indent=1))

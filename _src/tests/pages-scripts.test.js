@@ -2,7 +2,7 @@
 // (catches duplicate top-level const/let across files, which broke the Trip Planner once).
 const fs = require("fs"), path = require("path"), vm = require("vm"), assert = require("assert");
 const ROOT = path.join(__dirname, "../..");
-const pages = ["index.html", "ask.html", "outlook.html", "alert-planner/index.html", "trip-planner/index.html", "guides/watch-vs-warning.html"];
+const pages = ["index.html", "ask.html", "outlook.html", "launches/index.html", "alert-planner/index.html", "trip-planner/index.html", "guides/watch-vs-warning.html"];
 let n = 0;
 for (const p of pages) {
   const html = fs.readFileSync(path.join(ROOT, p), "utf8");

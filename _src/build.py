@@ -27,6 +27,7 @@ OG_SPECS = {
  "ask.html": dict(kicker="Ask Atlas", title="Weather safety answers in plain English", sub="Sourced from NWS and NOAA guides", visual=["shot-home.jpg"]),
  "gear/index.html": dict(kicker="Weather gear", title="Gear for when the weather turns", sub="Radios, rain gear, power and lights for storm days", visual=["app-hurricane.jpg", "app-radar.jpg"]),
  "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["app-radar.jpg"]),
+ "launches/index.html": dict(kicker="Rocket launches", title="Next launch countdown and schedule", sub="Upcoming launches worldwide and weather at the main US launch sites", visual=["launch-teaser.jpg"]),
  "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play", visual=["shot-home.jpg", "app-hurricane.jpg"]),
 }
 OG_IMG = {}  # path -> "og/<slug>.jpg", filled by build_og()
@@ -52,7 +53,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"),
+NAV = [("index.html", "Home"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -87,7 +88,7 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
 <header class="top"><div class="wrap"><a class="brand" href="{p or './'}"><img src="{p}assets/icon-192.png" width="34" height="34" alt="">{APP}</a>{menu}</div></header>
 <main>{hero or ""}<div class="wrap">{body}</div></main>
 <footer><div class="wrap"><div class="cols">
-<div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li></ul></div>
+<div><h4>{APP}</h4><ul><li><a href="{E(play_ref(slug,"footer"))}" target="_blank" rel="noopener">Get it on Google Play</a></li><li><a href="{p}features.html">Features</a></li><li><a href="{p}pricing.html">Pricing</a></li><li><a href="{p}alert-planner/">Forecast &amp; Alert Planner</a></li><li><a href="{p}trip-planner/">Weather Trip Planner</a></li><li><a href="{p}launches/">Rocket launches</a></li></ul></div>
 <div><h4>Weather guides</h4><ul>{"".join(f'<li><a href="{p}guides/{g["slug"]}.html">{E(g["short"])}</a></li>' for g in GUIDES)}</ul></div>
 <div><h4>More</h4><ul><li><a href="{p}gear/">Weather gear</a></li><li><a href="{p}support.html">Support</a></li><li><a href="{p}privacy.html">Privacy policy</a></li><li><a href="{p}affiliate-disclosure.html">Affiliate disclosure</a></li><li><a href="https://hunt.yourworldapps.si/" target="_blank" rel="noopener">Sister app: Your World Hunt</a></li><li><a href="{YOUTUBE}" target="_blank" rel="noopener">Watch on YouTube</a></li></ul></div>
 </div><p class="fine">Forecasts and alerts are informational only, not official emergency, marine or aviation advice. Follow the National Weather Service and local officials. As an Amazon Associate I earn from qualifying purchases. &copy; {datetime.date.today().year} Your World Apps. Google Play is a trademark of Google LLC.</p></div></footer>
@@ -153,7 +154,8 @@ def outlook_page():
 <h2>🚨 US severe weather alerts</h2><div id="owo-alerts" data-limit="5"><p class="owo-empty shimmer">Loading NWS alerts…</p></div>
 <p class="owo-attr">Source: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (api.weather.gov), live.</p>
 {SUN_CSS}{sun}
-<h2>🚀 Today's launches</h2><div class="owo-launches" id="owo-launch"><p class="owo-empty shimmer">Loading the launch schedule…</p></div>
+<h2 id="launches">🚀 Today's launches</h2><div class="owo-launches" id="owo-launch"><p class="owo-empty shimmer">Loading the launch schedule…</p></div>
+<p class="ln-all"><a class="btn dark" href="launches/">See all launches, countdowns and pad weather →</a></p>
 <h2>🌍 Today around the world</h2><div class="owo-cities" id="owo-cities"><p class="owo-empty shimmer">Loading…</p></div>
 <p class="owo-attr"><span id="owo-cities-at">Airport observations (METAR).</span> Source: <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>.</p>
 {owo_teasers("outlook")}</div>'''
@@ -201,7 +203,7 @@ def home():
 {trial_line("trial on-dark")}
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own, no ad tracking, and we never sell your data. Optional anonymous crash and usage reports can be turned off in Settings.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
-    b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
+    b = f'''{sun_feature()}{ftl_home()}{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
 <div class="tabs"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>3D</span><span>4D</span><span>5D</span><span>7D</span><span>10D</span></div>
 <p>Tap a tab and get a short, plain-English summary of that window. Built-in briefings are written on your phone from forecast data. With Premium you can download Gemma to write them on-device, or use your own AI provider key.</p>
@@ -220,7 +222,7 @@ def home():
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]},
           dict({"@context": "https://schema.org"}, **ORG),
           {"@context": "https://schema.org", "@type": "WebSite", "name": APP, "url": SITE, "publisher": ORG}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js",))
+    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS())
 
 def features():
     b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
@@ -464,6 +466,90 @@ def misc():
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>\n')
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 
+
+# ---------- Sun feature + FEEL THE LAUNCH teaser (home) and the /launches/ page ----------
+# Free vs Premium below is checked against the app source (keep in sync):
+#  - Rocket launches on the radar map = the Space overlays: RadarOverlayPrefs.freeTierOnly() sets spaceLaunches=false and
+#    hasPremiumOverlays() includes anySpace, so pins, countdowns and launch cards are Premium.
+#  - Launch push alerts (T-1 h reminder + liftoff) are Premium (SysSheet ROCKET LAUNCHES toggle is locked for free users).
+#  - The FEEL THE LAUNCH button on a launch card has no entitlement check of its own (LaunchDeckLink.kt), so it is NOT
+#    labeled Premium here. The Launch Deck site itself is never linked from this website.
+def SHOW_CSS(p="/"): return f'<link rel="stylesheet" href="{p}assets/{V("launches.css")}">'
+
+def sun_feature():
+    return f'''<section class="sunf" aria-labelledby="sunf-h"><div class="sunf-shot"><img src="assets/{V('app-sun.jpg')}" width="540" height="1080" alt="The Sun tab in Your World Weather Radar: today's Sun from NASA SDO and space weather now from NOAA" loading="lazy"></div>
+<div class="sunf-t"><span class="kicker">☀️ New: the Sun tab</span><h2 id="sunf-h">Today's Sun, in plain words</h2>
+<p>See the live Sun from NASA's Solar Dynamics Observatory with its active regions marked, and NOAA's solar storm, radio blackout and radiation levels explained in plain words, plus the next 3 days, the aurora outlook and eclipses you can see from where you are.</p>
+<ul class="sunf-l"><li><span class="tag free">Free</span> Live Sun image, space weather now, the next 3 days, eclipses visible from your location, and alerts for strong (G3+) geomagnetic storms</li>
+<li><span class="tag prem">Premium</span> A 6-hour Sun loop, extra layers (visible light, magnetic field, corona), the live Sky radar animation and aurora chance at your location</li></ul>
+<div class="btns"><a class="btn dark" href="outlook.html#sun">See today's Sun →</a>{play_btn("home", "primary", "sun", "Get the Sun tab")}</div>
+<p class="dim small">Sun data from NOAA SWPC and NASA SDO. Informational only, not an official space weather warning.</p></div></section>'''
+
+def ftl_video(p, slug, sec):
+    poster = f"{p}assets/{V('launch-teaser.jpg')}"
+    webm = f'<source src="{p}assets/{V("launch-teaser.webm")}" type="video/webm">' if (ROOT / "assets/launch-teaser.webm").exists() else ""
+    return f'''<div class="ftl"><video muted playsinline preload="none" poster="{poster}" width="540" height="960" aria-label="FEEL THE LAUNCH: a 15-second simulated practice run, countdown to liftoff">{webm}<source src="{p}assets/{V("launch-teaser.mp4")}" type="video/mp4"></video>
+<button type="button" class="ftl-play" aria-label="Play the 15-second teaser"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></svg></button>
+<div class="ftl-end" hidden><b>FEEL THE LAUNCH</b><p>Countdown, liftoff, inside and outside views, in 3D.</p>{play_btn(slug, "primary glow ftl-cta", sec, "Feel the full launch: get the app")}<button type="button" class="ftl-again">↺ Watch again</button></div></div>'''
+
+def ftl_home():
+    return f'''<section class="ftlh" aria-labelledby="ftlh-h">{ftl_video("", "home", "feel-the-launch")}
+<div class="ftlh-t"><span class="kicker">🚀 Rocket launches</span><h2 id="ftlh-h">Feel the launch</h2>
+<p>Tap <b>FEEL THE LAUNCH</b> on a launch card in the app and an immersive 3D view of that launch opens in your browser: the countdown, liftoff and climb, from outside or inside the rocket. A practice run lets you try it any time.</p>
+<p class="dim small">The clip is a simulated practice run, not footage of a real launch.</p>
+<div class="btns"><a class="btn dark" href="launches/">See upcoming launches →</a></div></div></section>'''
+
+def _static_launches():
+    """Build-time fallback (no-JS and search engines): the snapshot's next launches as plain text. assets/launches.js replaces it."""
+    try: items = json.loads((ROOT / "assets/outlook.json").read_text())["launches"]["items"]
+    except Exception: return "", ""
+    now = datetime.datetime.now(datetime.timezone.utc); rows = []
+    for l in items:
+        try: t = datetime.datetime.fromisoformat(l["net"].replace("Z", "+00:00"))
+        except Exception: continue
+        if t < now - datetime.timedelta(hours=2) and l.get("status") not in ("Success", "Failure"): continue
+        rows.append((t, l))
+    if not rows: return "", ""
+    t0, n = rows[0]
+    hero = f'<div class="ln-next"><span class="ln-stat">{E(n.get("statusName") or n.get("status") or "")}</span><h2 class="ln-mission">{E(n.get("mission") or n.get("name") or "")}</h2><p class="ln-when">{t0:%a %b %-d, %H:%M} UTC</p><p>{E(n.get("rocket") or "")} · {E(n.get("provider") or "")}<br>{E(n.get("pad") or "")}, {E(n.get("site") or "")}</p></div>'
+    lst = "".join(f'<article class="ln-card"><div class="ln-cb"><h3>{E(l.get("mission") or l.get("name") or "")}</h3><p>{t:%b %-d, %H:%M} UTC · {E(l.get("rocket") or "")} · {E(l.get("provider") or "")}</p><p class="dim">{E(l.get("site") or "")}</p></div></article>' for t, l in rows[1:25])
+    return hero, lst
+
+TIPS = [
+ ("⏱️", "Times slip. Check before you go", "Launch times move often, and scrubs on the day are common. Check the launch provider's website or social accounts for the latest time before you head out."),
+ ("🌅", "Twilight launches put on the best show", "Shortly after sunset or before sunrise, sunlight can still hit the exhaust plume high up while the sky is dark where you are, which can make it glow. It depends on the time and the sky."),
+ ("🔭", "Distance and the sound delay", "You can see a launch from far away when the sky is clear, but the rocket looks small. Binoculars help. If you're close enough to hear it, the rumble arrives seconds after liftoff."),
+ ("🏖️", "Florida's Space Coast", "Around Cape Canaveral and Kennedy, people watch from public parks, beaches and riverfronts in places like Titusville, Cocoa Beach and Port Canaveral. Kennedy Space Center Visitor Complex sells viewing tickets for some launches."),
+ ("🌉", "Vandenberg and Starbase", "Vandenberg launches are often visible from many parts of Southern California when the sky is clear. Near Starbase, the road and beach close for launches; follow the local closure notices."),
+ ("🚧", "Respect closures", "Stay out of closed roads, beaches and restricted areas, and don't fly drones near launch sites. If you can't be there, the provider's webcast is the best seat."),
+]
+
+def launches_page():
+    hero_s, list_s = _static_launches()
+    tips = "".join(f'<div class="ln-tip"><span aria-hidden="true">{i}</span><h3>{E(t)}</h3><p>{E(d)}</p></div>' for i, t, d in TIPS)
+    h = f'''<section class="hero ln-hero"><div class="wrap"><span class="kicker">🚀 Rocket launches</span><h1>Next launch</h1>
+<div id="ln-hero">{hero_s or '<p class="ln-empty">Loading the launch schedule…</p>'}</div><p class="ln-age" id="ln-age">Times from the latest schedule snapshot.</p></div></section>'''
+    b = f'''<section aria-labelledby="ln-up-h"><h2 id="ln-up-h">Upcoming launches</h2><p class="dim">The next launches around the world, with live countdowns. Times are targets and often change.</p>
+<div class="ln-filters" id="ln-filters"></div><div class="ln-list" id="ln-list">{list_s}</div></section>
+<section id="pad-weather" aria-labelledby="ln-pw-h"><h2 id="ln-pw-h">🌤️ Weather at the main US launch sites</h2><p class="dim">Latest observations from the airfield nearest each launch site. This is the weather right now, not a launch weather forecast.</p>
+<div class="ln-pads" id="ln-pads"><p class="ln-empty">Loading pad weather…</p></div>
+<p class="owo-attr"><span id="ln-pads-at"></span>Observations (METAR): <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>. The go/no-go weather call for a launch comes from the launch provider and range weather officers, not from this page.</p></section>
+<section aria-labelledby="ln-tips-h"><h2 id="ln-tips-h">🔭 Watching a launch</h2><div class="ln-tips">{tips}</div></section>
+<section class="ln-app" aria-labelledby="ln-app-h"><span class="kicker">In the app</span><h2 id="ln-app-h">Launches in {APP}</h2>
+<div class="ln-appgrid">{ftl_video("../", "launches", "feel-the-launch")}
+<div class="ln-feats"><div class="ln-feat"><h3>🚀 Rocket launches on the radar map <span class="tag prem">Premium</span></h3><p>Part of the space overlays: pad pins with a T−0 countdown, and the ascent arc once the rocket lifts off. Tap a pad for its launch card.</p></div>
+<div class="ln-feat"><h3>🔔 Launch alerts <span class="tag prem">Premium</span></h3><p>A reminder an hour before liftoff, and an alert when the launch is in flight.</p></div>
+<div class="ln-feat"><h3>🎢 FEEL THE LAUNCH</h3><p>A button on each launch card. It opens an immersive 3D view of that launch in your browser: the countdown, liftoff and climb, from outside or inside the rocket, with a practice run you can try any time.</p></div>
+<p class="dim small">Launch cards are on the radar map, which shows launches with the Premium space overlays. Premium is ${PRICE_M}/month or ${PRICE_Y}/year, with a 7-day free trial for new subscribers.</p>
+<div class="btns">{play_btn("launches", "primary glow", "app-pitch")}<a class="btn" href="../pricing.html">Compare Free and Premium</a></div></div></div></section>
+<p class="owo-attr ln-credit">Launch data: <a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener">Launch Library 2 by The Space Devs</a>, refreshed with each site update (about every 3 hours). Times change often and launches can slip or scrub without notice: check the launch provider for official times and information. Countdowns run in your browser from the snapshot and don't update by themselves when a launch moves. Launch-weather odds appear only when an official launch weather forecast is published.</p>'''
+    ld = [{"@context": "https://schema.org", "@type": "WebPage", "name": "Rocket launches: next launch countdown, schedule and pad weather", "url": SITE + "launches/",
+           "isPartOf": {"@type": "WebSite", "name": APP, "url": SITE}}]
+    page("launches/index.html", "Rocket Launches: Next Launch Countdown, Schedule & Pad Weather",
+         "Countdown to the next rocket launch, the upcoming launch schedule worldwide, weather at the main US launch sites and tips for watching a launch.",
+         b, h, "0.8", scripts=("launches.js", "teaser.js"), jsonld=ld, head_extra=SHOW_CSS("../"))
+
+
 if __name__ == "__main__":
-    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); misc()
     print(f"Built {len(PAGES)} pages")
