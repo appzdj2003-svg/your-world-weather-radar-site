@@ -18,23 +18,23 @@ HUB = "https://yourworldapps.si/"
 ORG = {"@type": "Organization", "name": "Your World Apps", "url": HUB, "logo": SITE + "assets/icon-512.png", "sameAs": [YOUTUBE, HUB]}
 # Per-page social cards (1200x630), rendered by _src/ogcards.py from real app screenshots / gear photos. Keyed by page path.
 OG_SPECS = {
- "index.html": dict(kicker="Free rain ETA", title="Know when rain hits your spot", sub="Live radar, storm tracks and weather alerts for Android", visual=["shot-home.jpg", "shot-radar.jpg"]),
- "outlook.html": dict(kicker="Live now", title="The whole planet's weather, live", sub="Satellite loop, hurricanes and typhoons, US alerts and the Sun", visual=["shot-radar.jpg"]),
- "features.html": dict(kicker="Features", title="What's free and what's Premium", sub="Rain ETA, radar, alerts, AI briefings, cams and more", visual=["shot-alerts.jpg", "shot-home.jpg"]),
+ "index.html": dict(kicker="Free rain ETA", title="Know when rain hits your spot", sub="Live radar, storm tracks and weather alerts for Android", visual=["shot-home.jpg", "app-radar.jpg"]),
+ "outlook.html": dict(kicker="Live now", title="The whole planet's weather, live", sub="Satellite loop, hurricanes and typhoons, US alerts and the Sun", visual=["app-radar.jpg"]),
+ "features.html": dict(kicker="Features", title="What's free and what's Premium", sub="Rain ETA, radar, alerts, AI briefings, cams and more", visual=["app-hurricane.jpg", "shot-home.jpg"]),
  "pricing.html": dict(kicker="Pricing", title="Free to download. Premium from $4.99/mo", sub="$47.99/yr. 7-day free trial for new subscribers", visual=["shot-home.jpg"]),
- "alert-planner/index.html": dict(kicker="Alert Planner", title="Plan alerts for a day out", sub="Place, activity and dates in one link for your phone", visual=["shot-alerts.jpg"]),
- "trip-planner/index.html": dict(kicker="Trip Planner", title="Weather for your whole trip", sub="Destination, dates and how you're traveling", visual=["shot-radar.jpg"]),
+ "alert-planner/index.html": dict(kicker="Alert Planner", title="Plan alerts for a day out", sub="Place, activity and dates in one link for your phone", visual=["app-hurricane.jpg"]),
+ "trip-planner/index.html": dict(kicker="Trip Planner", title="Weather for your whole trip", sub="Destination, dates and how you're traveling", visual=["app-radar.jpg"]),
  "ask.html": dict(kicker="Ask Atlas", title="Weather safety answers in plain English", sub="Sourced from NWS and NOAA guides", visual=["shot-home.jpg"]),
- "gear/index.html": dict(kicker="Weather gear", title="Gear for when the weather turns", sub="Radios, rain gear, power and lights for storm days", visual=["shot-alerts.jpg", "shot-radar.jpg"]),
- "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["shot-radar.jpg"]),
- "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play", visual=["shot-home.jpg", "shot-alerts.jpg"]),
+ "gear/index.html": dict(kicker="Weather gear", title="Gear for when the weather turns", sub="Radios, rain gear, power and lights for storm days", visual=["app-hurricane.jpg", "app-radar.jpg"]),
+ "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["app-radar.jpg"]),
+ "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play", visual=["shot-home.jpg", "app-hurricane.jpg"]),
 }
 OG_IMG = {}  # path -> "og/<slug>.jpg", filled by build_og()
 def build_og():
     from guides import GUIDES as _G
     specs = dict(OG_SPECS)
     for i, g in enumerate(_G):
-        specs[f"guides/{g['slug']}.html"] = dict(kicker="Weather guide", title=g["short"], sub="Sourced from the NWS and NOAA", visual=[("shot-radar.jpg", "shot-alerts.jpg", "shot-home.jpg")[i % 3]])
+        specs[f"guides/{g['slug']}.html"] = dict(kicker="Weather guide", title=g["short"], sub="Sourced from the NWS and NOAA", visual=[("app-radar.jpg", "app-hurricane.jpg", "shot-home.jpg")[i % 3]])
     slugs = {path: (re.sub(r"[^a-z0-9]+", "-", path.replace(".html", "").replace("/index", "")).strip("-") or "home") for path in specs}
     made = OG.build({slugs[p]: specs[p] for p in specs})
     for p in specs:
@@ -240,7 +240,7 @@ def privacy():
     src = (Path(__file__).parent / "privacy_source.html").read_text()
     inner = re.search(r"<body>(.*)</body>", src, re.S).group(1)
     inner = re.sub(r"<h1>.*?</h1>", "", inner, count=1, flags=re.S)
-    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The live Outlook (on the home page and the Outlook page) loads some data straight from public sources in your browser: satellite imagery and the world map from NASA GIBS and EUMETSAT, storm events from GDACS and US alerts from the National Weather Service, so those services receive your IP address, as with any website you visit. Hurricane data from the National Hurricane Center, typhoon and cyclone warnings from the U.S. Navy&#39;s Joint Typhoon Warning Center (JTWC), airport observations, the launch schedule, and the Sun Outlook&#39;s NOAA Space Weather Prediction Center data and NASA Solar Dynamics Observatory Sun image are fetched by our site every few hours and served from this site, so viewing them doesn&#39;t contact those agencies. The Sun Outlook&#39;s eclipse dates are a fixed list from NASA&#39;s eclipse catalog, built into the page. The Android app\'s optional, anonymous usage and crash reports (Google Firebase) are described above.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
+    b = '<div class="article" style="margin-top:24px">' + inner + f'<h2>This website</h2><p>This website uses <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Analytics</a> to count page visits and clicks on outbound links. It uses no cookies, doesn\'t track you across sites, and stores no personal data; visits are counted in aggregate only. The live Outlook (on the home page and the Outlook page) loads some data straight from public sources in your browser: satellite imagery and the world map from NASA GIBS and EUMETSAT, storm events from GDACS and US alerts from the National Weather Service, so those services receive your IP address, as with any website you visit. Hurricane data from the National Hurricane Center, typhoon and cyclone warnings from the U.S. Navy&#39;s Joint Typhoon Warning Center (JTWC), airport observations, the launch schedule, and the Sun Outlook&#39;s NOAA Space Weather Prediction Center data and NASA Solar Dynamics Observatory Sun image are fetched by our site every few hours and served from this site, so viewing them doesn&#39;t contact those agencies. The Sun Outlook&#39;s eclipse dates are a fixed list from NASA&#39;s eclipse catalog, built into the page. The Outlook page includes a YouTube video. Nothing is loaded from YouTube until you tap play. When you do, the video loads from YouTube in privacy-enhanced mode (youtube-nocookie.com), so YouTube receives your IP address and may set cookies or similar storage under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&#39;s privacy policy</a>. The Android app\'s optional, anonymous usage and crash reports (Google Firebase) are described above.</p><p class="dim small">The app policy above mirrors the policy shown inside the app. Questions or deletion requests: <a href="mailto:{PRIVACY_MAIL}">{PRIVACY_MAIL}</a>.</p></div>'
     page("privacy.html", "Privacy Policy", "Privacy policy for Your World Weather Radar: what leaves your phone, who receives it, and why.", b, hero("Privacy Policy", f"{APP} for Android and iPhone", "Privacy"), "0.4")
 
 def support():
@@ -433,9 +433,9 @@ def go_page():
             'if(W.indexOf(s)<0)return;window.YW_GO_SRC=s;if(q.get("utm_source")!==s||q.has("src")){q.delete("src");q.set("utm_source",s);q.set("utm_medium","social");q.set("utm_campaign","bio");'
             'try{history.replaceState(null,"",location.pathname+"?"+q.toString()+location.hash)}catch(e){}}})();</script>')
     shots = "".join(f'<figure class="go-shot"><img src="../assets/{V(f)}" width="300" height="533" alt="{E(a)}" loading="{l}"><figcaption>{E(c)}</figcaption></figure>'
-                    for f, a, c, l in (("shot-home.jpg", "Your World Weather Radar home screen", "Your spot at a glance", "eager"),
-                                       ("shot-radar.jpg", "Radar screen", "Live radar with storm layers", "lazy"),
-                                       ("shot-alerts.jpg", "Alerts screen", "NWS alerts as compact cards", "lazy")))
+                    for f, a, c, l in (("shot-home.jpg", "Your World Weather Radar home screen with a rain ETA", "Rain ETA for your spot", "eager"),
+                                       ("app-radar.jpg", "Radar screen with live rain", "Live radar you can scrub", "lazy"),
+                                       ("app-hurricane.jpg", "Hurricane track on the radar", "Hurricane tracks (Premium)", "lazy")))
     big = f'<a class="btn primary go-play" data-go-play href="{E(fallback)}" target="_blank" rel="noopener">{PLAY_SVG}Get it on Google Play</a>'
     h = f'''<section class="hero go-hero"><div class="wrap"><img class="go-ico" src="../assets/icon-192.png" width="72" height="72" alt="">
 <h1>{APP}</h1><p class="lead">Know when rain hits your spot. Free rain ETA, live radar, storm tracks and weather alerts for Android.</p>
