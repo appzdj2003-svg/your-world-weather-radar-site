@@ -1,4 +1,4 @@
-/* Your World Weather Radar Outlook: live feeds (NWS, GDACS, NASA GIBS) + build-time snapshot (NHC, METAR) in assets/outlook.json.
+/* Your World Weather Radar Outlook: live feeds (NWS, GDACS, NASA GIBS, EUMETView) + build-time snapshot (NHC, JTWC, METAR, launches) in assets/outlook.json.
    Real data only: when a feed fails, the section says so instead of guessing. */
 (function (root) {
 "use strict";
@@ -97,7 +97,7 @@ function briefingScript(d) {
       L.push(`In the tropics, ${st.length === 1 ? "one active system is" : st.length + " active systems are"} on the map.`);
       st.slice(0, 2).forEach(s => {
         let x = `${s.type === "Hurricane" && s.cat ? "Category " + s.cat + " Hurricane" : s.type} ${s.name}`;
-        x += s.basin ? ` in the ${s.basin}` : s.where ? ` near ${s.where}` : "";
+        x += s.basin ? ` in the ${s.basin.split(" · ")[0]}` : s.where ? ` near ${s.where}` : "";
         if (s.mph) x += `, with maximum sustained winds near ${s.mph} miles per hour`;
         if (s.move) x += `, moving ${sayMove(s.move)}`;
         L.push(x + ".");
@@ -125,13 +125,99 @@ function briefingScript(d) {
   L.push("Want this for your own backyard? Your World Weather Radar writes AI storm briefings for your exact location, from right now out to ten days.");
   return L;
 }
-const api = { hourOf, hourlySlots, parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
+
+/* ---- JTWC (US Navy Joint Typhoon Warning Center), public domain. Build-time snapshot in outlook.json (see _src/outlook.py). ----
+   RSS lists active warnings; each storm's .tcw has the coded forecast (T000..T120: lat/lon, 1-min max wind kt,
+   34/50/64-kt quadrant radii in nm) plus the past track. JTWC publishes wind radii, NOT a cone of uncertainty. */
+const JTWC = "https://www.metoc.navy.mil/jtwc/";
+const JBASIN = { WP: "Western Pacific", IO: "North Indian Ocean", SH: "Southern Hemisphere", EP: "Eastern Pacific", CP: "Central Pacific" };
+function jll(a, ns, o, ew) { const y = +a / 10 * (ns === "S" ? -1 : 1), x = +o / 10 * (ew === "W" ? -1 : 1); return (isNaN(y) || isNaN(x)) ? null : [y, x]; }
+function jclass(basin, kt) { if (kt == null) return "Tropical Cyclone";
+  if (basin === "WP") return kt < 34 ? "Tropical Depression" : kt < 64 ? "Tropical Storm" : kt < 130 ? "Typhoon" : "Super Typhoon";
+  if (basin === "EP" || basin === "CP") return kt < 34 ? "Tropical Depression" : kt < 64 ? "Tropical Storm" : "Hurricane";
+  return kt < 34 ? "Tropical Depression" : "Tropical Cyclone"; }
+function parseTcw(txt, pid) {
+  const t = String(txt || ""); const h = /^(\d{10})\s+(\d{2}[A-Z])\s+(\S+)\s+(\d{1,3})\s+\d+\s+(\d{3})\s+(\d{1,3})\b/m.exec(t); if (!h) return null;
+  const d = h[1], fixMs = Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8), +d.slice(8, 10));
+  const basin = pid.slice(0, 2).toUpperCase(), fixes = [], seen = {};
+  t.replace(/^T(\d{3})\s+(\d{1,3})([NS])\s+(\d{1,4})([EW])\s+(\d{1,3})(.*)$/gm, (_, tau, a, ns, o, ew, w, rest) => {
+    const ll = jll(a, ns, o, ew); if (!ll || seen[tau]) return ""; seen[tau] = 1; const radii = {};
+    rest.replace(/R0?(34|50|64)((?:\s+\d{1,3}\s+(?:NE|SE|SW|NW)\s+QD)+)/g, (__, kt, qs) => { const q = [0, 0, 0, 0];
+      qs.replace(/(\d{1,3})\s+(NE|SE|SW|NW)\s+QD/g, (___, v, k) => { q[["NE", "SE", "SW", "NW"].indexOf(k)] = +v; return ""; });
+      if (q.some(v => v > 0)) radii[kt] = q; return ""; });
+    fixes.push({ tau: +tau, lat: ll[0], lon: ll[1], kt: +w || null, radii }); return ""; });
+  fixes.sort((a, b) => a.tau - b.tau); if (!fixes.length || fixes[0].tau !== 0) return null;
+  const past = [], ps = {};
+  t.replace(/^\d{2}(\d{2})(\d{2})(\d{2})(\d{2})\s+(\d{1,3})([NS])\s*(\d{1,4})([EW])\s+(\d{1,3})\s*$/gm, (_, yy, mm, dd, hh, a, ns, o, ew, w) => {
+    const k = yy + mm + dd + hh, ll = jll(a, ns, o, ew); if (ll && !ps[k]) { ps[k] = 1; past.push({ k, lat: ll[0], lon: ll[1], kt: +w || null }); } return ""; });
+  past.sort((a, b) => a.k < b.k ? -1 : 1);
+  const subj = (/SUBJ:\s+(.+?)\s+\d{2}[A-Z]\b/.exec(t) || [])[1] || "", t0 = fixes[0];
+  const type = subj ? titleName(subj.replace(/\s+/g, " ").trim()) : jclass(basin, t0.kt);
+  const gust = (/MAX SUSTAINED WINDS\s*-\s*\d+\s*KT,\s*GUSTS\s*(\d+)\s*KT/.exec(t) || [])[1];
+  const pres = (/MINIMUM CENTRAL PRESSURE AT \d{6}Z IS (\d{3,4}) MB/.exec(t) || [])[1];
+  const raw = h[3], name = (!raw || /^INVEST$/i.test(raw)) ? h[2] : titleName(raw);
+  return { pid, basin, code: h[2], name, warn: +h[4], fixMs, type, kt: t0.kt, gust: gust ? +gust : null, pressure: pres ? +pres : null,
+    dir: +h[5], spd: +h[6], fixes, past: past.slice(-60) };
+}
+function jtwcToStorm(j) {
+  const mph = j.kt ? kt2mph(j.kt) : null, typhoonish = /typhoon|cyclone/i.test(j.type);
+  return { src: "JTWC", name: j.name, type: j.type, badge: typhoonish ? j.type : null, cat: mph ? saffir(mph) : 0, mph, pressure: j.pressure,
+    lat: j.fixes[0].lat, lon: j.fixes[0].lon, basin: (JBASIN[j.basin] || "") + " · " + j.code, move: isNaN(j.dir) ? "" : `${compass(j.dir)} at ${kt2mph(j.spd)} mph`,
+    link: JTWC + "products/" + j.pid + "web.txt", updated: new Date(j.fixMs).toISOString(), jtwc: j };
+}
+/* NHC first; JTWC next (dropped in EP/CP when NHC already has it — NHC wins); then GDACS storms neither lists. */
+function mergeStorms3(nhc, jt, gd) {
+  const near = (a, b) => Math.abs(a.lat - b.lat) < 3 && Math.abs(((a.lon - b.lon + 540) % 360) - 180) < 3;
+  const same = (a, b) => a.name.toLowerCase() === b.name.toLowerCase() || near(a, b);
+  const j = jt.filter(s => !((s.jtwc.basin === "EP" || s.jtwc.basin === "CP") && nhc.some(n => same(n, s))));
+  const first = nhc.concat(j);
+  return first.concat(gd.filter(g => !first.some(s => same(s, g)))).sort((a, b) => (b.mph || 0) - (a.mph || 0));
+}
+/* 34-kt wind area: union of the quadrant wind shapes swept along the forecast track (SVG group opacity = union look). */
+function quadRing(lat, lon, q) { const c = Math.max(Math.cos(lat * Math.PI / 180), 0.05), pts = [];
+  for (let k = 0; k < 4; k++) for (let b = k * 90; b <= k * 90 + 90; b += 10) { const r = b * Math.PI / 180;
+    pts.push([lon + q[k] * Math.sin(r) / (60 * c), -(lat + q[k] * Math.cos(r) / 60)]); }
+  return pts; }
+function unwrapFix(f) { const o = []; let prev = null; f.forEach(p => { let x = p.lon; if (prev != null) { while (x - prev > 180) x -= 360; while (x - prev < -180) x += 360; } prev = x; o.push(Object.assign({}, p, { lon: x })); }); return o; }
+function windAreaRings(j, kt) {
+  const fx = []; for (const f of unwrapFix(j.fixes)) { if (!f.radii[kt]) { if (fx.length) break; continue; } fx.push(f); }
+  const rings = []; if (!fx.length) return rings; rings.push(quadRing(fx[0].lat, fx[0].lon, fx[0].radii[kt]));
+  for (let i = 1; i < fx.length; i++) { const a = fx[i - 1], b = fx[i], n = Math.max(1, Math.min(200, Math.ceil(Math.hypot(b.lat - a.lat, b.lon - a.lon) / 0.25)));
+    for (let s = 1; s <= n; s++) { const t = s / n; rings.push(quadRing(a.lat + (b.lat - a.lat) * t, a.lon + (b.lon - a.lon) * t, a.radii[kt].map((v, k) => v + (b.radii[kt][k] - v) * t))); } }
+  return rings; }
+const SS_HEX = ["#26A69A", "#FDD835", "#FF9800", "#F44336", "#E040FB", "#7C4DFF"];
+const ptHex = kt => kt == null ? "#90A4AE" : kt < 34 ? "#5C6BC0" : SS_HEX[saffir(kt2mph(kt))];
+function jtwcSvgLayers(j, scale) {
+  const fx = unwrapFix(j.fixes), past = unwrapFix(j.past), s = scale || 1;
+  const area = windAreaRings(j, "34").map(r => `<polygon points="${r.map(p => p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" ")}"/>`).join("");
+  const line = pts => pts.map(p => p.lon.toFixed(2) + "," + (-p.lat).toFixed(2)).join(" ");
+  return `<g class="jt-area" fill="#FF6B35" opacity=".38">${area}</g>` +
+    (past.length > 1 ? `<polyline points="${line(past)}" fill="none" stroke="#CBD5E1" stroke-width="${0.35 * s}" stroke-opacity=".9"/>` : "") +
+    `<polyline points="${line(fx)}" fill="none" stroke="#fff" stroke-width="${0.45 * s}" stroke-dasharray="${1.2 * s} ${0.8 * s}"/>` +
+    fx.map((p, i) => `<circle cx="${p.lon.toFixed(2)}" cy="${(-p.lat).toFixed(2)}" r="${(i ? 0.55 : 0.9) * s}" fill="${ptHex(p.kt)}" stroke="#0F172A" stroke-width="${0.15 * s}"/>`).join("");
+}
+function jtwcMiniMap(st) {
+  const j = st.jtwc, fx = unwrapFix(j.fixes); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  fx.forEach(p => { const r = Math.max(...Object.values(p.radii).flat(), 0) / 60; x0 = Math.min(x0, p.lon - r * 1.2); x1 = Math.max(x1, p.lon + r * 1.2); y0 = Math.min(y0, -p.lat - r); y1 = Math.max(y1, -p.lat + r); });
+  let w = Math.max(x1 - x0, 8) + 4, h = Math.max(y1 - y0, 6) + 4; if (w / h < 1.5) w = h * 1.5; else h = w / 1.5;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, vb = [cx - w / 2, cy - h / 2, w, h].map(v => v.toFixed(2)).join(" "), sc = w / 36;
+  const base = MAPIMG ? `<image href="${E(MAPIMG)}" x="-180" y="-90" width="360" height="180" preserveAspectRatio="none"/><image href="${E(MAPIMG)}" x="180" y="-90" width="360" height="180" preserveAspectRatio="none"/>` : "";
+  return `<figure class="owo-jtmap"><svg viewBox="${vb}" role="img" aria-label="JTWC forecast track and 34-kt wind area for ${E(st.name)}"><rect x="-540" y="-90" width="1080" height="180" fill="#0B1220"/>${base}${jtwcSvgLayers(j, sc)}</svg>
+<figcaption><span class="sw"></span><b>Shaded: 34-kt wind area (JTWC)</b> — where JTWC forecasts tropical-storm-force winds may reach. Not a cone of uncertainty. Dashed line: JTWC forecast track (${j.fixes.length - 1} points to +${j.fixes[j.fixes.length - 1].tau} h); gray: past track.</figcaption></figure>`;
+}
+
+/* Snapshot items -> storm cards; warnings older than 24 h are dropped. */
+function parseJtwc(items, now) { const t = now || Date.now();
+  return (items || []).map(i => { try { return parseTcw(i.tcw, i.pid); } catch (e) { return null; } }).filter(j => j && t - j.fixMs < 24 * 3600e3).map(jtwcToStorm); }
+const api = { parseTcw, parseJtwc, jtwcToStorm, mergeStorms3, windAreaRings, hourOf, hourlySlots, parseLaunches, parseNhc, parseGdacs, mergeStorms, parseAlerts, parseMetar, frameTimes, briefingScript, saffir, compass };
 if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
 root.YWOutlook = api;
 
 /* ---------------- browser ---------------- */
 const $ = id => document.getElementById(id), E = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const ASSET = (document.currentScript && document.currentScript.src.replace(/outlook\.js.*$/, "")) || "assets/"; root.YW_ASSET = ASSET;
+const MAPIMG = (document.querySelector("#owo-map .owo-base") || {}).src || "";
+if (!document.getElementById("owo-jtcss")) { const st = document.createElement("style"); st.id = "owo-jtcss"; st.textContent = ".owo-jtlayer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.owo-jtmap{margin:0;border-radius:12px;overflow:hidden;background:#0B1220;box-shadow:var(--shadow)}.owo-jtmap svg{display:block;width:100%;height:auto;aspect-ratio:3/2}.owo-jtmap figcaption{font-size:.78rem;line-height:1.35;padding:8px 10px;color:#CBD5E1}.owo-jtmap .sw{display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(255,107,53,.6);vertical-align:-2px;margin-right:6px}"; document.head.appendChild(st); }
 const ago = iso => { if (!iso) return ""; const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 60 ? `${Math.max(m, 1)} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 const local = iso => iso ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
 const getJSON = (u, ms) => { const c = new AbortController(); const t = setTimeout(() => c.abort(), ms || 15000);
@@ -184,18 +270,18 @@ function pin(box, s) {
 }
 function renderStorms(list, note) {
   const out = $("owo-storms"); if (!out) return; const map = document.querySelector("#owo-map .owo-pins");
-  if (!list) { out.innerHTML = `<p class="owo-empty">Storm feeds didn't load. See <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">nhc.noaa.gov</a> and <a href="https://www.gdacs.org/" target="_blank" rel="noopener">gdacs.org</a>.</p>`; return; }
-  if (map) { map.innerHTML = ""; list.forEach(s => pin(map, s)); }
+  if (!list) { out.innerHTML = `<p class="owo-empty">Storm feeds didn't load. See <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">nhc.noaa.gov</a>, <a href="https://www.metoc.navy.mil/jtwc/jtwc.html" target="_blank" rel="noopener">JTWC</a> and <a href="https://www.gdacs.org/" target="_blank" rel="noopener">gdacs.org</a>.</p>`; return; }
+  if (map) { map.innerHTML = ""; const jl = list.filter(s => s.jtwc); if (jl.length) map.insertAdjacentHTML("afterbegin", `<svg class="owo-jtlayer" viewBox="-180 -90 360 180" preserveAspectRatio="none" aria-hidden="true">${jl.map(s => jtwcSvgLayers(s.jtwc, 1.6)).join("")}</svg>`); list.forEach(s => pin(map, s)); }
   const n = $("owo-storm-n"); if (n) n.textContent = list.length;
-  if (!list.length) { out.innerHTML = `<p class="owo-empty">🌤️ No active tropical cyclones listed by NHC or GDACS right now.</p>`; return; }
+  if (!list.length) { out.innerHTML = `<p class="owo-empty">🌤️ No active tropical cyclones listed by NHC, JTWC or GDACS right now.</p>`; return; }
   const lim = +out.dataset.limit || 50;
   out.innerHTML = list.slice(0, lim).map(s => `<div class="owo-sw"><a class="owo-storm c${s.cat || 0}" href="${E(s.link)}" target="_blank" rel="noopener">
 <div class="owo-sicon" aria-hidden="true"><svg viewBox="0 0 48 48"><path fill="currentColor" d="M24 18a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm14-12c-6 0-12 3-15 7a12 12 0 0 1 13 12 12 12 0 0 1-2 6c4-3 7-9 7-15 0-4-1-7-3-10zM10 42c6 0 12-3 15-7a12 12 0 0 1-13-12 12 12 0 0 1 2-6c-4 3-7 9-7 15 0 4 1 7 3 10z"/></svg></div>
-<div class="owo-sbody"><span class="owo-badge">${s.cat ? "Cat " + s.cat : E(s.type)}</span><h3>${E(s.name)}</h3>
-<p>${E([s.cat ? s.type : "", s.basin || s.where].filter(Boolean).join(" · "))}</p>
+<div class="owo-sbody"><span class="owo-badge">${s.badge ? E(s.badge) : s.cat ? "Cat " + s.cat : E(s.type)}</span><h3>${E(s.name)}</h3>
+<p>${E([s.cat && !s.badge ? s.type : "", s.basin || s.where].filter(Boolean).join(" · "))}</p>
 <div class="owo-stats">${s.mph ? `<b>${s.mph}<small> mph</small></b>` : s.peakMph ? `<b><small>peak</small> ${s.peakMph}<small> mph</small></b>` : ""}${s.pressure ? `<b>${s.pressure}<small> mb</small></b>` : ""}${s.move ? `<b><small>moving</small> ${E(s.move)}</b>` : ""}</div>
-<p class="owo-src">${s.src}${s.alert ? " · " + E(s.alert) + " impact alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
-</a>${s.cone ? `<a class="owo-cone" href="${E(s.cone)}" target="_blank" rel="noopener" title="Open full-size NHC cone"><img src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.parentNode.remove()"><span>🔍 Tap to enlarge</span></a>` : ""}</div>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
+<p class="owo-src">${s.src === "JTWC" ? "JTWC (US Navy) · 1-min winds" : s.src}${s.alert ? " · " + E(s.alert) + " impact alert" : ""}${s.updated ? " · updated " + ago(s.updated) : ""}</p></div>
+</a>${s.cone ? `<a class="owo-cone" href="${E(s.cone)}" target="_blank" rel="noopener" title="Open full-size NHC cone"><img src="${E(s.cone)}" alt="NHC 5-day forecast cone for ${E(s.name)}" onerror="this.parentNode.remove()"><span>🔍 Tap to enlarge</span></a>` : s.jtwc ? jtwcMiniMap(s) : ""}</div>`).join("") + (note ? `<p class="owo-note">${note}</p>` : "");
 }
 function renderAlerts(a) {
   const out = $("owo-alerts"), n0 = $("owo-alert-n"); if (n0 && a) n0.textContent = a.count; if (!out) return;
@@ -245,7 +331,8 @@ function start() {
   Promise.all([snap, gd]).then(([s, g]) => {
     const fresh = s.nhc && Date.now() - Date.parse(s.nhc.fetchedAt) < 12 * 3600e3;
     const n = fresh ? parseNhc(s.nhc.items) : [];
-    state.storms = (g || fresh) ? mergeStorms(n, g || []) : null;
+    const jf = s.jtwc && Date.now() - Date.parse(s.jtwc.fetchedAt) < 12 * 3600e3, j = jf ? parseJtwc(s.jtwc.items) : [];
+    state.storms = (g || fresh || jf) ? mergeStorms3(n, j, g || []) : null;
     renderStorms(state.storms, !fresh && g ? "NHC details refresh with each site update; showing the live GDACS list." : "");
     state.cities = ((s.metar && s.metar.items) || []).map(parseMetar).filter(Boolean);
     renderCities(state.cities, s.metar && s.metar.fetchedAt);

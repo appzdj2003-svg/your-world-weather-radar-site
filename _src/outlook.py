@@ -1,6 +1,7 @@
-"""Build-time snapshot for the Your World Weather Radar Outlook (feeds with no browser CORS): NHC CurrentStorms.json + cone images,
-and METAR city observations from aviationweather.gov. Writes assets/outlook.json; keeps the old file if a feed fails."""
-import json, re, datetime, urllib.request
+"""Build-time snapshot for the Your World Weather Radar Outlook: NHC CurrentStorms.json + cone images, JTWC (US Navy) typhoon and
+cyclone warnings, METAR city observations from aviationweather.gov and LL2 launches. Served from our site, so visitors' browsers
+don't contact these agencies. Writes assets/outlook.json; keeps the old data for a feed if it fails."""
+import json, re, time, datetime, urllib.request
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 UA = {"User-Agent": "YourWorldWeatherRadar-site/1.0 (support@yourworldapps.si)"}
@@ -35,6 +36,41 @@ def nhc():
         out.append(keep)
     return out
 
+JTWC = "https://www.metoc.navy.mil/jtwc/"
+
+def jget(url, tries=3):
+    """JTWC's server sometimes drops TLS handshakes; retry a couple of times."""
+    for k in range(tries):
+        try: return get(url, 20).decode("utf-8", "ignore")
+        except Exception:
+            if k == tries - 1: raise
+            time.sleep(2)
+
+def jtwc():
+    """Active JTWC warnings (public domain): the RSS lists them, each storm's .tcw holds the coded forecast + past track.
+    Skips formation alerts (invests 90-99) and final warnings. The raw .tcw text is stored; assets/outlook.js parses it."""
+    rss = jget(JTWC + "rss/jtwc.rss")
+    seen, active = set(), []
+    for block in re.split(r"</ul>", rss, flags=re.I):
+        m = re.search(r"products/([a-z]{2})(\d{2})(\d{2})\.tcw", block, re.I)
+        if not m: continue
+        pid = (m.group(1) + m.group(2) + m.group(3)).lower()
+        head = re.split(r"<ul", block, flags=re.I)[0][-400:]
+        if pid in seen or int(m.group(2)) >= 90 or re.search(r"final warning|formation alert", head, re.I): continue
+        seen.add(pid); active.append(pid)
+    try: prev = {i["pid"]: i for i in json.loads((ROOT / "assets" / "outlook.json").read_text())["jtwc"]["items"]}
+    except Exception: prev = {}
+    out, failed = [], 0
+    for pid in active[:8]:
+        try: t = jget(JTWC + "products/" + pid + ".tcw")
+        except Exception: t = None  # falls back to the storm's previous snapshot (still listed as active by the RSS)
+        if t is not None and re.search(r"^T000\s", t, re.M): out.append({"pid": pid, "tcw": t.replace("\r", "")})
+        else:  # fetch failed, or the file was mid-update (no T000 line): keep the previous snapshot
+            failed += t is None
+            if pid in prev: out.append(prev[pid])
+    if active and not out and failed: raise RuntimeError("all JTWC .tcw fetches failed")
+    return out
+
 def metar():
     ids = ",".join(c for c, _ in CITIES); names = dict(CITIES)
     rows = json.loads(get(f"https://aviationweather.gov/api/data/metar?ids={ids}&format=json"))
@@ -61,7 +97,7 @@ def build():
     old = json.loads(f.read_text()) if f.exists() else {}
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     new = dict(old)
-    for key, fn in (("nhc", nhc), ("metar", metar), ("launches", launches)):
+    for key, fn in (("nhc", nhc), ("jtwc", jtwc), ("metar", metar), ("launches", launches)):
         try: new[key] = {"fetchedAt": now, "items": fn()}
         except Exception as e: print(f"outlook: {key} fetch failed, keeping cached:", e)
     f.write_text(json.dumps(new, ensure_ascii=False, indent=1))

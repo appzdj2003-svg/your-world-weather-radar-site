@@ -50,3 +50,20 @@ console.log("All Your World Weather Radar Outlook tests passed");
   assert.deepStrictEqual(O.hourlySlots(["2026-10-13T10:50:00Z", "2026-10-13T11:10:00Z", "2026-10-13T11:30:00Z"]), ["2026-10-13T10:00:00Z", "2026-10-13T11:00:00Z"]);
   assert.ok(O.hourlySlots(O.frameTimes(Date.now(), 8, 20, 150)).every(t => /T\d\d:00:00Z$/.test(t)), "only top-of-hour EUMETSAT frames");
   console.log("EUMETSAT hourly slot tests passed"); }
+{ const fs = require("fs"), path = require("path"), fx = n => fs.readFileSync(path.join(__dirname, "fixtures", "jtwc", n), "utf8");
+  const items = [{ pid: "wp2926", tcw: fx("wp2926.tcw") }, { pid: "sh0227", tcw: fx("sh0227.tcw") }, { pid: "xx0000", tcw: "garbage" }];
+  const now = Date.parse("2026-10-20T23:00:00Z"), j = O.parseJtwc(items, now);
+  assert.deepStrictEqual(j.map(s => s.name), ["Champi", "Agueda"], "real JTWC fixtures parse; junk skipped");
+  const c = j[0];
+  assert.deepStrictEqual([c.src, c.type, c.badge, c.mph, c.pressure, c.lat, c.lon, c.jtwc.warn, c.jtwc.gust], ["JTWC", "Super Typhoon", "Super Typhoon", 184, 895, 17.4, 131.5, 26, 195]);
+  assert.strictEqual(c.jtwc.fixes[0].tau, 0); assert.deepStrictEqual(c.jtwc.fixes[0].radii["34"], [250, 240, 160, 220]);
+  assert.ok(c.jtwc.past.length > 5 && new Set(c.jtwc.past.map(p => p.k)).size === c.jtwc.past.length, "past track deduped");
+  assert.ok(O.windAreaRings(c.jtwc, "34").length > 10, "34-kt wind area rings along the track");
+  assert.strictEqual(O.parseJtwc(items, now + 30 * 3600e3).length, 0, "warnings older than 24 h dropped");
+  const nhcTrudy = O.parseNhc([{ id: "ep212026", name: "Champi", classification: "HU", intensity: "100", latitudeNumeric: 17.5, longitudeNumeric: 131.4 }]);
+  assert.strictEqual(O.mergeStorms3(nhcTrudy, j, []).length, 3, "WP storm kept even if NHC lists a same-named storm (NHC wins only in EP/CP)");
+  const ep = Object.assign({}, c, { jtwc: Object.assign({}, c.jtwc, { basin: "EP" }) });
+  assert.deepStrictEqual(O.mergeStorms3(nhcTrudy, [ep], []).map(s => s.src), ["NHC"], "EP/CP: NHC wins");
+  assert.deepStrictEqual(O.mergeStorms3([], j, [{ src: "GDACS", name: "Champi", lat: 17.2, lon: 131.9 }]).map(s => s.src), ["JTWC", "JTWC"], "GDACS duplicate dropped");
+  assert.ok(/Super Typhoon Champi in the Western Pacific/.test(O.briefingScript({ storms: j }).join(" ")));
+  console.log("JTWC snapshot parser tests passed"); }
