@@ -47,7 +47,7 @@ dict(slug="watch-vs-warning", short="Watch vs. warning", emoji="⚠️",
 <h2>Getting alerts</h2>
 <p>Use more than one way to get warnings: Wireless Emergency Alerts on your phone, NOAA Weather Radio, local media and an alert app. Make sure your phone's emergency alerts are switched on.</p>
 """,
- sources=[("NWS: Understand watches and warnings", NWS + "/safety/understand-wwa"), ("NOAA Storm Prediction Center", "https://www.spc.noaa.gov/"), ("Ready.gov: Emergency alerts", "https://www.ready.gov/alerts")],
+ sources=[("NWS: Watch, warning and advisory explained", NWS + "/sjt/WatchWarningAdvisoryExplained"), ("NOAA Storm Prediction Center", "https://www.spc.noaa.gov/"), ("Ready.gov: Emergency alerts", "https://www.ready.gov/alerts")],
  app="The app shows NWS alerts as compact cards, and can notify you in the background."),
 dict(slug="hurricane-preparedness", short="Hurricane preparedness", emoji="🌀",
  title="Hurricane Preparedness: Categories, Watches and a Simple Checklist",
@@ -90,7 +90,7 @@ dict(slug="lightning-safety", short="Lightning safety", emoji="⚡",
 <h2>If someone is struck</h2>
 <p>Call 911. Lightning victims don't carry an electrical charge and are safe to touch, so start CPR if needed.</p>
 """,
- sources=[("NWS: Lightning safety", NWS + "/safety/lightning"), ("NWS: Lightning safety tips and resources", NWS + "/safety/lightning-safety-tips"), ("CDC: Lightning", "https://www.cdc.gov/lightning/")],
+ sources=[("NWS: Lightning safety", NWS + "/safety/lightning"), ("NWS: Lightning safety tips", NWS + "/safety/lightning-tips"), ("CDC: Lightning", "https://www.cdc.gov/lightning/")],
  app="The app's lightning layer shows strikes from NOAA satellite lightning data, and it can alert you when lightning is near."),
 dict(slug="barometric-pressure-and-weather", short="Barometric pressure", emoji="🧭",
  title="Barometric Pressure and Weather: What Rising and Falling Pressure Means",
@@ -106,7 +106,7 @@ dict(slug="barometric-pressure-and-weather", short="Barometric pressure", emoji=
 <h2>Station vs. sea-level pressure</h2>
 <p>Pressure falls as you go higher, so weather reports adjust readings to sea level so places at different elevations can be compared. A home barometer usually needs to be calibrated to your local reported sea-level pressure.</p>
 """,
- sources=[("NWS JetStream: Air pressure", NWS + "/jetstream/pressure"), ("NWS JetStream: Highs and lows", NWS + "/jetstream/highlow"), ("NOAA SciJinks: What is air pressure?", "https://scijinks.gov/air-pressure/")],
+ sources=[("NWS JetStream: Air pressure", NWS + "/jetstream/pressure"), ("NWS JetStream: Highs and lows", NWS + "/jetstream/highlow"), ("NOAA NESDIS: What are high and low pressure systems?", "https://www.nesdis.noaa.gov/about/k-12-education/weather-forecasting/what-are-high-and-low-pressure-systems")],
  app="The app compares several forecast models and shows how much they agree, so you can see how confident a forecast is."),
 dict(slug="off-grid-emergency-weather", short="Off-grid emergency weather", emoji="🛰️",
  title="Off-Grid Weather Safety: Staying Informed Without Cell Signal",

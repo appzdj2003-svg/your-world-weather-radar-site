@@ -293,24 +293,45 @@ def gear():
          + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
     page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
-DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "emergency radio", "lantern", "headlamp"]
+DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]
+# Slickdeals search RSS is loose (a "lantern" query returns floor lamps, "umbrella" returns patio umbrellas, and some results
+# match nothing at all: lawn sweepers, Halloween lights, AV receivers). So a headline is only kept when it names weather,
+# outdoor, emergency or rain gear (DEAL_OK) and names nothing off-topic (DEAL_BAD). Deals older than DEAL_MAX_DAYS are
+# dropped because their prices are likely gone. The same filter runs on the cached deals.json, so an offline build stays clean.
+DEAL_OK = re.compile(r"weather radio|noaa|emergency (weather )?radio|hand[- ]?crank|crank radio|weather station|rain gauge|barometer|anemometer"
+                     r"|lightning detector|weather alert|two-way radio|walkie[- ]?talkie|\brain\b[\w\s'’&-]{0,25}\b(jacket|coat|boots?|pants|suit|poncho|gear|shell)\b"
+                     r"|raincoat|rainboots?|poncho|waterproof[\w\s-]{0,15}\b(jacket|coat|boots?|bag|pants)\b|\bumbrellas?\b|dry bag|power bank|portable charger"
+                     r"|power station|generator|solar panel|lantern|headlamp|flashlight|first[- ]aid|emergency kit|survival kit|emergency blanket", re.I)
+DEAL_BAD = re.compile(r"halloween|christmas|holiday|xmas|patio|market umbrella|beach umbrella|\blamp\b|floor|desk fan|\bfan\b|duster|vacuum|\bmop\b"
+                      r"|receiver|sweeper|lawn|leaf|xbox|playstation|ps5|nintendo|switch|\bgame|vinyl|\blp\b|album|lego|ceiling|hook|grill"
+                      r"|docking station|magsafe|qi2|wireless charging|\bcap\b|\bhats?\b|backpack|storage bag|ice pack|cooler|\btoys?\b|inflatable|decor|fairy|string lights|squirrel|feeder|picnic|flicker|flame|hanging|garden|pathway|landscape|yard", re.I)
+DEAL_MAX_DAYS = 60
+def deal_ok(d):
+    t = d.get("title", "")
+    if not DEAL_OK.search(t) or DEAL_BAD.search(t): return False
+    try: age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(d["posted"])).days
+    except Exception: return False
+    return age <= DEAL_MAX_DAYS
 def load_deals():
     f = ROOT / "assets/deals.json"; items = []
     try:
         for kw in DEAL_KW:
             u = "https://slickdeals.net/newsearch.php?mode=frontpage&searcharea=deals&searchin=first&rss=1&q=" + enc(kw)
             x = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=15).read().decode("utf-8", "replace")
-            for it in re.findall(r"<item>(.*?)</item>", x, re.S)[:4]:
+            n = 0
+            for it in re.findall(r"<item>(.*?)</item>", x, re.S):
+                if n >= 4: break
                 t = html.unescape(re.sub(r"<!\[CDATA\[|\]\]>", "", re.search(r"<title>(.*?)</title>", it, re.S).group(1))).strip()
                 l = html.unescape(re.search(r"<link>(.*?)</link>", it, re.S).group(1)).strip()
                 pd = re.search(r"<pubDate>(.*?)</pubDate>", it)
                 posted = email.utils.parsedate_to_datetime(pd.group(1)).isoformat() if pd else ""
-                if l and not any(i["link"] == l for i in items): items.append({"title": t, "link": l, "posted": posted})
+                d = {"title": t, "link": l, "posted": posted}
+                if l and deal_ok(d) and not any(i["link"] == l or i["title"] == t for i in items): items.append(d); n += 1
         items.sort(key=lambda i: i["posted"], reverse=True)
         if items: f.write_text(json.dumps({"source": "Slickdeals RSS", "fetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "items": items}, indent=1))
     except Exception as e:
         print("deals fetch failed, keeping cached deals.json:", e)
-    return json.loads(f.read_text())["items"] if f.exists() else []
+    return [d for d in json.loads(f.read_text())["items"] if deal_ok(d)] if f.exists() else []
 
 # ---------- planners ----------
 # The app's verified App Links claim exactly /plan, /plan.html, /trip and /trip.html (android:path, not pathPrefix), so the
