@@ -161,7 +161,7 @@ def home():
 <p class="lead">A free rain ETA for your exact location, plus live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
 <div class="btns">{play_btn("home","primary","hero")}<a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
 {trial_line("trial on-dark")}
-<p class="small" style="color:#94A3B8">No account needed. No ads of our own. No tracking SDKs.</p></div>
+<p class="small" style="color:#94A3B8">No account needed. No ads of our own, no ad tracking, and we never sell your data. Optional anonymous crash and usage reports can be turned off in Settings.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
     b = f'''{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
