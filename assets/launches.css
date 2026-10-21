@@ -52,9 +52,15 @@
 .ftl{position:relative;width:min(100%,340px);aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:#0B1220;box-shadow:0 10px 40px rgba(2,6,23,.45);justify-self:center;margin:0 auto}
 .ftl video{display:block;width:100%;height:100%;object-fit:cover}
 .ftl-sim{position:absolute;left:10px;top:10px;font:700 .66rem/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#FBBF24;background:rgba(2,6,23,.7);padding:6px 9px;border-radius:999px}
-.ftl-play{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;border:0;background:rgba(245,158,11,.95);color:#0F172A;cursor:pointer;display:grid;place-items:center;box-shadow:0 0 0 8px rgba(245,158,11,.25)}
-.ftl-play svg{width:34px;height:34px;margin-left:4px}.ftl-play[hidden]{display:none}
-.ftl-end{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:8px;padding:22px 16px;background:linear-gradient(180deg,rgba(2,6,23,0) 30%,rgba(2,6,23,.92) 72%)}
+.ftl-hit{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;margin:0;padding:0;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ftl-play{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:rgba(245,158,11,.95);color:#0F172A;display:grid;place-items:center;box-shadow:0 0 0 8px rgba(245,158,11,.25);pointer-events:none;transition:opacity .2s}
+.ftl-play svg{width:34px;height:34px;margin-left:4px}
+.ftl.is-playing .ftl-play,.ftl.is-ended .ftl-play{opacity:0}
+.ftl.is-loading .ftl-play svg{opacity:.35}
+.ftl.is-loading .ftl-play::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:4px solid transparent;border-top-color:#FBBF24;animation:ftlSpin .9s linear infinite}
+@keyframes ftlSpin{to{transform:rotate(360deg)}}
+.ftl video{pointer-events:none}
+.ftl-end{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:8px;padding:22px 16px;background:linear-gradient(180deg,rgba(2,6,23,0) 30%,rgba(2,6,23,.92) 72%)}
 .ftl-end[hidden]{display:none}
 .ftl-end b{color:#fff;font-size:1.3rem;letter-spacing:.08em}.ftl-end p{color:#CBD5E1!important;margin:0 0 4px;font-size:.88rem}
 .ftl .ftl-cta{flex:none;width:100%;font-size:1rem;padding:14px 16px}
@@ -71,3 +77,17 @@
 .ftlh h2{color:#fff;margin:.4em 0 .3em}.ftlh p{color:#CBD5E1}.ftlh .dim{color:#94A3B8}
 .ftlh .btn.dark{background:#fff;color:var(--slate);border-color:#fff}
 @media(min-width:820px){.sunf{grid-template-columns:280px 1fr;padding:28px}.ftlh{grid-template-columns:320px 1fr;padding:28px}.sunf .btns .btn,.ftlh .btns .btn{flex:none}}
+.ftl-end{pointer-events:none}.ftl-end a,.ftl-end button{pointer-events:auto}
+/* /launches/ showcase: the teaser right under the header, compact on phones */
+.ln-show{background:linear-gradient(160deg,#1E1B4B,#0F172A 75%);color:#fff}
+.ln-show-in{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;padding-top:16px;padding-bottom:16px}
+.ln-show .ftl{width:150px;border-radius:16px;margin:0}
+.ln-show .ftl-play{width:56px;height:56px;margin:-28px 0 0 -28px}.ln-show .ftl-play svg{width:26px;height:26px}
+.ln-show .ftl-end{padding:10px 8px;gap:4px}.ln-show .ftl-end b{font-size:.8rem}.ln-show .ftl-end p{display:none}
+.ln-show .ftl .ftl-cta{font-size:.74rem;padding:9px 8px;gap:4px}.ln-show .ftl .ftl-cta svg{width:14px;height:14px}.ln-show .ftl-again{font-size:.72rem;padding:2px}
+.ln-show-t h2{color:#fff;margin:.35em 0 .2em;font-size:1.3rem;letter-spacing:.04em}
+.ln-show-t p{color:#CBD5E1;margin:0 0 6px;font-size:.88rem;line-height:1.45}.ln-show-t .dim{color:#94A3B8;font-size:.74rem}
+.ln-show-next{color:#FBBF24;font-weight:700;font-size:.86rem;text-decoration:none}
+.ln-show + .ln-hero .wrap{padding-top:22px}
+@media(min-width:820px){.ln-show-in{grid-template-columns:260px 1fr;gap:28px;padding-top:24px;padding-bottom:24px}.ln-show .ftl{width:260px}
+.ln-show .ftl-end p{display:block}.ln-show .ftl .ftl-cta{font-size:.9rem;padding:12px}.ln-show-t h2{font-size:2rem}.ln-show-t p{font-size:1rem}}

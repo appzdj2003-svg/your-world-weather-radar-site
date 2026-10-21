@@ -488,8 +488,9 @@ def sun_feature():
 def ftl_video(p, slug, sec):
     poster = f"{p}assets/{V('launch-teaser.jpg')}"
     webm = f'<source src="{p}assets/{V("launch-teaser.webm")}" type="video/webm">' if (ROOT / "assets/launch-teaser.webm").exists() else ""
-    return f'''<div class="ftl"><video muted playsinline preload="none" poster="{poster}" width="540" height="960" aria-label="FEEL THE LAUNCH: a 15-second simulated practice run, countdown to liftoff">{webm}<source src="{p}assets/{V("launch-teaser.mp4")}" type="video/mp4"></video>
-<button type="button" class="ftl-play" aria-label="Play the 15-second teaser"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></svg></button>
+    # MP4 (H.264 Main, yuv420p, faststart) first: it plays everywhere, including Samsung Internet and Safari.
+    return f'''<div class="ftl is-idle"><video muted playsinline webkit-playsinline preload="none" poster="{poster}" width="720" height="1280" disablepictureinpicture aria-label="FEEL THE LAUNCH: a 15-second simulated practice run, countdown to liftoff"><source src="{p}assets/{V("launch-teaser.mp4")}" type="video/mp4">{webm}</video>
+<button type="button" class="ftl-hit" aria-label="Play the 15-second teaser"><span class="ftl-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></svg></span></button>
 <div class="ftl-end" hidden><b>FEEL THE LAUNCH</b><p>Countdown, liftoff, inside and outside views, in 3D.</p>{play_btn(slug, "primary glow ftl-cta", sec, "Feel the full launch: get the app")}<button type="button" class="ftl-again">↺ Watch again</button></div></div>'''
 
 def ftl_home():
@@ -527,7 +528,10 @@ TIPS = [
 def launches_page():
     hero_s, list_s = _static_launches()
     tips = "".join(f'<div class="ln-tip"><span aria-hidden="true">{i}</span><h3>{E(t)}</h3><p>{E(d)}</p></div>' for i, t, d in TIPS)
-    h = f'''<section class="hero ln-hero"><div class="wrap"><span class="kicker">🚀 Rocket launches</span><h1>Next launch</h1>
+    show = f'''<section class="ln-show" aria-labelledby="ln-show-h"><div class="wrap ln-show-in">{ftl_video("../", "launches", "feel-the-launch")}
+<div class="ln-show-t"><span class="kicker">In the app</span><h2 id="ln-show-h">FEEL THE LAUNCH</h2><p>Tap it on a launch card in {APP} for an immersive 3D view of that launch: countdown, liftoff and climb, outside or inside the rocket.</p>
+<p class="dim small">Clip: simulated practice run, not a real launch.</p><a class="ln-show-next" href="#ln-next-h">Next launch countdown ↓</a></div></div></section>'''
+    h = show + f'''<section class="hero ln-hero"><div class="wrap"><span class="kicker">🚀 Rocket launches</span><h1 id="ln-next-h">Next launch</h1>
 <div id="ln-hero">{hero_s or '<p class="ln-empty">Loading the launch schedule…</p>'}</div><p class="ln-age" id="ln-age">Times from the latest schedule snapshot.</p></div></section>'''
     b = f'''<section aria-labelledby="ln-up-h"><h2 id="ln-up-h">Upcoming launches</h2><p class="dim">The next launches around the world, with live countdowns. Times are targets and often change.</p>
 <div class="ln-filters" id="ln-filters"></div><div class="ln-list" id="ln-list">{list_s}</div></section>
@@ -536,10 +540,10 @@ def launches_page():
 <p class="owo-attr"><span id="ln-pads-at"></span>Observations (METAR): <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>. The go/no-go weather call for a launch comes from the launch provider and range weather officers, not from this page.</p></section>
 <section aria-labelledby="ln-tips-h"><h2 id="ln-tips-h">🔭 Watching a launch</h2><div class="ln-tips">{tips}</div></section>
 <section class="ln-app" aria-labelledby="ln-app-h"><span class="kicker">In the app</span><h2 id="ln-app-h">Launches in {APP}</h2>
-<div class="ln-appgrid">{ftl_video("../", "launches", "feel-the-launch")}
+<div class="ln-appgrid">
 <div class="ln-feats"><div class="ln-feat"><h3>🚀 Rocket launches on the radar map <span class="tag prem">Premium</span></h3><p>Part of the space overlays: pad pins with a T−0 countdown, and the ascent arc once the rocket lifts off. Tap a pad for its launch card.</p></div>
 <div class="ln-feat"><h3>🔔 Launch alerts <span class="tag prem">Premium</span></h3><p>A reminder an hour before liftoff, and an alert when the launch is in flight.</p></div>
-<div class="ln-feat"><h3>🎢 FEEL THE LAUNCH</h3><p>A button on each launch card. It opens an immersive 3D view of that launch in your browser: the countdown, liftoff and climb, from outside or inside the rocket, with a practice run you can try any time.</p></div>
+<div class="ln-feat"><h3>🎢 FEEL THE LAUNCH</h3><p>A button on each launch card (see the clip at the top of this page). It opens an immersive 3D view of that launch in your browser: the countdown, liftoff and climb, from outside or inside the rocket, with a practice run you can try any time.</p></div>
 <p class="dim small">Launch cards are on the radar map, which shows launches with the Premium space overlays. Premium is ${PRICE_M}/month or ${PRICE_Y}/year, with a 7-day free trial for new subscribers.</p>
 <div class="btns">{play_btn("launches", "primary glow", "app-pitch")}<a class="btn" href="../pricing.html">Compare Free and Premium</a></div></div></div></section>
 <p class="owo-attr ln-credit">Launch data: <a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener">Launch Library 2 by The Space Devs</a>, refreshed with each site update (about every 3 hours). Times change often and launches can slip or scrub without notice: check the launch provider for official times and information. Countdowns run in your browser from the snapshot and don't update by themselves when a launch moves. Launch-weather odds appear only when an official launch weather forecast is published.</p>'''
