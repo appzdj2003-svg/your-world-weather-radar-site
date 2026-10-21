@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-21T16:21:10+00:00",
+  "fetchedAt": "2026-10-21T16:26:23+00:00",
   "items": [
    {
     "id": "ep222026",
@@ -21,7 +21,7 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-21T16:21:10+00:00",
+  "fetchedAt": "2026-10-21T16:26:23+00:00",
   "items": [
    {
     "icaoId": "KJFK",
@@ -50,16 +50,16 @@
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1792597800,
+    "obsTime": 1792599600,
     "temp": 11,
-    "dewp": 6,
+    "dewp": 5,
     "wdir": 270,
-    "wspd": 21,
+    "wspd": 17,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR EGLL 211550Z AUTO 27021KT 9999 NCD 11/06 Q1004",
+    "rawOb": "METAR EGLL 211620Z AUTO 27017KT 9999 NCD 11/05 Q1005",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
@@ -237,7 +237,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-21T16:21:10+00:00",
+  "fetchedAt": "2026-10-21T16:26:23+00:00",
   "items": [
    {
     "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
@@ -742,7 +742,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-21T16:21:10+00:00",
+  "fetchedAt": "2026-10-21T16:26:23+00:00",
   "items": [
    {
     "pid": "wp2926",
@@ -755,7 +755,7 @@
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-21T16:21:10+00:00",
+  "fetchedAt": "2026-10-21T16:26:23+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -798,10 +798,10 @@
     }
    },
    "wind": {
-    "speed": 472.0,
-    "bz": -5.0,
+    "speed": 475.0,
+    "bz": -1.0,
     "bt": 9.0,
-    "at": "2026-10-21T16:11:00Z"
+    "at": "2026-10-21T16:15:00Z"
    },
    "flare": {
     "current": "B5.5",
