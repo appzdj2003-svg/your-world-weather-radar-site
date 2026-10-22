@@ -364,8 +364,8 @@ GEAR = [
  ("outage", "🔌 Outage backup for home & phone", "Keep Wi-Fi, phones and lights on when the power flickers or fails.", "power", [
    ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", "Best value"),
    ("power", "INIU 20000mAh power bank", "Slim 20,000 mAh charger to keep phones going.", "B0FX7T4H7D", "Budget pick"),
-   ("power", "APC BE600M1 UPS battery backup", "Keeps a modem and router online through short outages.", "B01FWAZEIU", "Top pick"),
    ("power", "CyberPower CP1500PFCLCD UPS battery backup", "Bigger sine-wave UPS for a computer plus network gear.", "B00429N19W", ""),
+   ("power", "APC BE600M1 UPS battery backup", "Keeps a modem and router online through short outages.", "B01FWAZEIU", "Top pick"),
  ]),
 ]
 GEN_SAFETY = ('<p class="callout"><strong>Generator safety:</strong> Run a generator outdoors only, far from windows, doors and vents. '
