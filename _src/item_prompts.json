@@ -131,5 +131,40 @@
   "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a first aid kit case with a white cross, slightly open showing bandages",
   "items": [],
   "done": false
+ },
+ {
+  "key": "generator",
+  "file": "assets/items/generator.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a portable gas inverter generator with a carry handle, fuel cap, side outlet panel and pull-start, on wet pavement outdoors",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "solarpanel",
+  "file": "assets/items/solarpanel.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a foldable portable solar panel standing on its kickstand with a cable",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "ups",
+  "file": "assets/items/ups.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a small desktop UPS battery backup box with a row of outlets and a glowing power button, next to a home Wi-Fi router, stormy window behind",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "cord",
+  "file": "assets/items/cord.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a coiled heavy-duty outdoor extension cord with a thick plug and a locking twist plug",
+  "items": [],
+  "done": false
+ },
+ {
+  "key": "coalarm",
+  "file": "assets/items/coalarm.webp",
+  "prompt": "Illustration in a clean modern storm-ready style: slate, storm-blue and navy tones with a cool sky-blue rim light and a hint of warm orange accent, dark moody rain-textured background, the item centered and filling most of the frame, clean bold illustrated look (not a photo), square 1:1. Generic unbranded item: no text, no logos, no brand marks, no recognizable real product. Subject: a round white wall-mounted carbon monoxide alarm with a speaker grille and small status lights",
+  "items": [],
+  "done": false
  }
 ]
