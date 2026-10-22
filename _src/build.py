@@ -448,21 +448,51 @@ def legacy_planners():
 <body style="font-family:system-ui;padding:24px"><p>The {E(t)} has moved: <a href="/{new}">{SITE}{new}</a></p></body></html>''')
 
 def planner(path, kind):
-    is_plan = kind == "plan"
-    ex = ("Hiking in Asheville, NC this Saturday, warn me about lightning" if is_plan else "Road trip from Atlanta to Nashville Oct 30 - Nov 1")
-    title = "Forecast & Alert Planner" if is_plan else "Weather Trip Planner"
-    lead = ("Pick a place, what you're doing and when. Get a link and QR code that open the plan in the app." if is_plan
-            else "Destination, dates and how you're traveling. Get a link and QR code that open the trip in the app.")
-    head = (f'<div class="atl-head"><img class="atl-av" src="/assets/{V('atlas.svg')}" width="44" height="44" alt=""><div><b>Ask Atlas</b><span>Describe your trip, or ask a weather question</span></div></div>'
-            if not is_plan else '<h3 style="margin-top:0">⚡ Quick Plan: say it in one sentence</h3>')
-    b = f'''<div class="wiz"><div class="wcard" style="margin-bottom:16px">{head}
-<div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="{"Describe your plan" if is_plan else "Ask Atlas about your trip"}">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">{"Plan it" if is_plan else "Ask"}</button></div>
+    if kind == "trip": return trip_planner(path)
+    ex = "Hiking in Asheville, NC this Saturday, warn me about lightning"
+    title = "Forecast & Alert Planner"
+    lead = "Pick a place, what you're doing and when. Get a link and QR code that open the plan in the app."
+    b = f'''<div class="wiz"><div class="wcard" style="margin-bottom:16px"><h3 style="margin-top:0">⚡ Quick Plan: say it in one sentence</h3>
+<div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="Describe your plan">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">Plan it</button></div>
 <p class="note">Try: “{E(ex)}”. Tap 🎤 to speak. Parsed in your browser; this site sends nothing anywhere (your browser's own speech service handles voice).</p><div class="parsed" id="qout"></div></div>
 <div class="wcard"><div class="prog"><i id="prog"></i></div><div id="wiz"></div></div>
-<p class="note" style="text-align:center">Don't have the app? {play_btn("plan" if is_plan else "trip", "dark", "planner", "Get it on Google Play")}</p></div>'''
-    codec = "plancodec.js" if is_plan else "tripcodec.js"
+<p class="note" style="text-align:center">Don't have the app? {play_btn("plan", "dark", "planner", "Get it on Google Play")}</p></div>'''
     page(path, title, lead, b, hero(title, lead, "Planner"), "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", codec, "quickparse.js") + (() if is_plan else ("askdata.js", "ask.js")) + ("wizard.js",) + (("plan.js",) if is_plan else ("tripgear.js", "trip.js")) + ("voice.js", "listen.js"))
+         scripts=("vendor/qrcode.js", "codec-core.js", "plancodec.js", "quickparse.js", "wizard.js", "plan.js", "voice.js", "listen.js"))
+
+# Weather Trip Planner: Ask Atlas (travel agent) + trip form in the hero; results (NWS forecast, best days, day-by-day plan,
+# prefilled outbound searches, packing, app link) are rendered by assets/trip.js. Logic lives in assets/tripcore.js (tested).
+def trip_planner(path):
+    ex = "Road trip from Atlanta to Nashville Oct 30 - Nov 1"
+    title = "Weather Trip Planner"
+    lead = "Ask Atlas, your travel agent: plan around the forecast, find the best weather days, then book on the sites you already use."
+    sugg = ["Weekend in Nashville this weekend", "Fly to Denver next week for a week", "Yellowstone camping next weekend", "Will lightning be a risk on my hike?"]
+    h = f'''<section class="hero tp-hero"><div class="wrap"><span class="kicker">Trip Planner</span><h1>Plan your trip around the weather</h1><p class="lead">{E(lead)}</p>
+<div class="tp-card" id="tp"><div class="atl-head"><img class="atl-av" src="/assets/{V('atlas.svg')}" width="44" height="44" alt=""><div><b>Ask Atlas</b><span>Your travel agent for weather-smart trips</span></div></div>
+<div class="ask-log tp-log" id="tlog" aria-live="polite"><div class="msg bot atl"><b><img class="atl-ic" src="/assets/{V('atlas.svg')}" width="24" height="24" alt="">Atlas<button type="button" class="lsay" data-say="msg" aria-label="Listen" title="Listen">🔊</button></b><p>Hi, I'm Atlas. Tell me where and when you're going and I'll check the forecast, find the best days, plan each day and line up searches for flights, hotels and cars. You book on the site you choose.</p></div></div>
+<div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="Ask Atlas about your trip" autocomplete="off">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">Ask</button></div>
+<div class="parsed" id="tsugg">{"".join(f'<button type="button" class="sug tp-sug">{E(x)}</button>' for x in sugg)}</div>
+<details class="tp-fd" open><summary>Or fill in the details</summary>
+<form id="tform" class="tp-form" novalidate autocomplete="off">
+<label class="tp-f tp-wide"><span>Where to</span><input id="f-to" type="text" placeholder="City, town or national park" required></label>
+<label class="tp-f tp-wide"><span>From <small>(optional)</small></span><input id="f-from" type="text" placeholder="Your starting city"></label>
+<label class="tp-f"><span>Start</span><input id="f-sd" type="date" required></label>
+<label class="tp-f"><span>End</span><input id="f-ed" type="date"></label>
+<label class="tp-f"><span>Trip type</span><select id="f-act"></select></label>
+<label class="tp-f"><span>Getting there</span><select id="f-mode"></select></label>
+<p class="err tp-wide" id="terr" role="alert"></p>
+<button class="btn primary tp-go tp-wide">Plan my trip</button></form></details>
+<p class="note">Tap 🎤 to speak. Atlas runs in your browser: it reads the National Weather Service forecast for US destinations and never books, holds or prices anything. Voice uses your browser's own speech service.</p></div></div></section>'''
+    b = f'''<div id="tres" class="tp-res" hidden></div>
+<section class="tp-why"><h2>Why plan with Atlas</h2><div class="tp-wg">
+<div><b>🌦️ Weather first</b><span>See each trip day's NWS forecast and active alerts before you pick dates or book.</span></div>
+<div><b>🏆 Best days</b><span>Atlas points out the driest, calmest stretch in the forecast and moves your dates in one tap.</span></div>
+<div><b>🧳 Book where you like</b><span>One tap opens Google Flights, Booking.com, Airbnb, Kayak or Google Maps with your trip filled in. No account, no fees.</span></div>
+<div><b>📱 Take it with you</b><span>Send the trip to Your World Weather Radar for radar and alerts on the road.</span></div></div>
+<p class="note" style="text-align:center">Don't have the app? {play_btn("trip", "dark", "planner", "Get it on Google Play")}</p>
+<p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US). Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
+    page(path, title, "Weather trip planner with Ask Atlas, your travel agent: NWS forecast for your trip days, best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
+         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "tripgear.js", "trip.js", "voice.js", "listen.js"))
 
 def ask():
     import askdata

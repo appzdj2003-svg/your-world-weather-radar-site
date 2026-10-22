@@ -1,5 +1,5 @@
 /* Trip Planner "Got your gear?" card. Rule-based from the trip the user entered (activity, travel mode, dates, length).
-   This page has no forecast, so nothing here claims a forecast; it points to the app for the real forecast. */
+   Without a forecast (non-US or too far ahead) nothing here claims a forecast; with one, forecast-based picks come first. */
 (function (root) {
   const ITEMS = {
     jacket: ["Rain jacket", "Packable waterproof shell"], poncho: ["Poncho", "Covers you and a small pack"], umbrella: ["Umbrella", "Compact windproof"],
@@ -10,8 +10,14 @@
     anemo: ["Pocket wind meter", "Wind, temperature and humidity"], kit: ["Emergency kit", "72-hour supplies for the car"], firstaid: ["First aid kit", "All-purpose kit"],
   };
   const OUT = ["HIKE", "CAMP", "BEACH", "FISH", "BOAT", "SKI", "EVENT"];
-  function pick(st) {
+  function pick(st, wx) {   // wx: optional forecast summary for the trip days (YWTripCore.summary), from the NWS forecast
     const out = [], add = (k, why) => { if (!out.some(o => o.k === k)) out.push({ k, why }); };
+    if (wx) {
+      if (wx.thunder) { add("lightning", "thunderstorms in the forecast"); add("radio", "thunderstorms in the forecast"); }
+      if (wx.pop >= 40) { add(["MOTORCYCLE", "BIKE"].includes(st.mode) ? "rainsuit" : "jacket", `up to ${wx.pop}% rain chance`); add("umbrella", `up to ${wx.pop}% rain chance`); }
+      if (wx.lo <= 32 || wx.snow) add("thermo", wx.snow ? "snow or ice in the forecast" : `lows near ${wx.lo}°F`);
+      if (wx.wind >= 20) add("anemo", `wind up to ${wx.wind} mph`);
+    }
     const act = st.act, mode = st.mode, d = +st.d || 1, m = st.sd ? +String(st.sd).slice(5, 7) : 0;
     const warm = m >= 4 && m <= 9, cold = m === 12 || m <= 2 && m >= 1, hurr = m >= 6 && m <= 11;
     const water = ["BEACH", "FISH", "BOAT"].includes(act) || mode === "BOAT", open = ["MOTORCYCLE", "BIKE", "FOOT"].includes(mode);
@@ -30,16 +36,16 @@
     return out.slice(0, 6);
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  function html(st) {
-    const items = pick(st);
+  function html(st, wx) {
+    const items = pick(st, wx);
     return `<div class="tgear" id="tgear" role="region" aria-label="Gear suggestions"><button type="button" class="x" aria-label="Dismiss gear suggestions">×</button>
-<h3>🎒 Got your gear?</h3><p class="note" style="margin:0">Picked from your trip details (type, travel, dates). Open the trip in the app for the actual forecast.</p>
+<h3>🎒 Got your gear?</h3><p class="note" style="margin:0">${wx ? "Picked from your trip details and the National Weather Service forecast for your trip days." : "Picked from your trip details (type, travel, dates). Open the trip in the app for the actual forecast."}</p>
 <div class="tgrid">${items.map(o => `<a class="tgi" href="/gear/#g-${o.k}" data-k="${o.k}"><img src="/assets/items/${o.k}.webp" width="560" height="420" loading="lazy" alt=""><span><b>${esc(ITEMS[o.k][0])}</b>${esc(o.why)}</span></a>`).join("")}</div>
 <p class="note"><a href="/gear/">See all weather gear →</a> · Gear page links to Amazon; we may earn a commission. <a href="/affiliate-disclosure.html">Disclosure</a></p></div>`;
   }
-  function mount(st, el) {
+  function mount(st, el, wx) {
     if (!el || !root.document || sessionStorage.getItem("yw_tgear_x")) return;
-    el.insertAdjacentHTML("beforeend", html(st));
+    el.insertAdjacentHTML("beforeend", html(st, wx));
     const g = el.querySelector("#tgear"); g.querySelector(".x").onclick = () => { g.remove(); try { sessionStorage.setItem("yw_tgear_x", "1"); } catch (e) {} };
   }
   const api = { pick, html, mount, ITEMS };
