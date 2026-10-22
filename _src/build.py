@@ -386,13 +386,17 @@ def gear():
         safety = GEN_SAFETY if sid == "generators" else ""
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
     deals = load_deals()
+    # Storm-power deals (generators, power stations, UPS) can be older than the newest rain/radio headlines, so up to 3 of
+    # them keep a slot in the 12 shown; the rest fill by date. Same filters and age limit as every other deal.
+    pw = [d for d in deals if STORM_POWER.search(d["title"])][:3]
+    deals = sorted(pw + [d for d in deals if d not in pw][:12 - len(pw)], key=lambda d: d["posted"], reverse=True)
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
     dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
     b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to Amazon search results or product pages for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. Labels like “Top pick” are our own picks, not Amazon deals. We don\'t show prices or ratings because they change daily, so check the current price on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
          + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
     page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors, generators, power stations, UPS battery backups and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments, backup power and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
-DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]
+DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "inverter generator", "portable generator", "battery backup", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]
 # Slickdeals search RSS is loose (a "lantern" query returns floor lamps, "umbrella" returns patio umbrellas, and some results
 # match nothing at all: lawn sweepers, Halloween lights, AV receivers). So a headline is only kept when it names weather,
 # outdoor, emergency or rain gear (DEAL_OK) and names nothing off-topic (DEAL_BAD). Deals older than DEAL_MAX_DAYS are
@@ -400,11 +404,12 @@ DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umb
 DEAL_OK = re.compile(r"weather radio|noaa|emergency (weather )?radio|hand[- ]?crank|crank radio|weather station|rain gauge|barometer|anemometer"
                      r"|lightning detector|weather alert|two-way radio|walkie[- ]?talkie|\brain\b[\w\s'’&-]{0,25}\b(jacket|coat|boots?|pants|suit|poncho|gear|shell)\b"
                      r"|raincoat|rainboots?|poncho|waterproof[\w\s-]{0,15}\b(jacket|coat|boots?|bag|pants)\b|\bumbrellas?\b|dry bag|power bank|portable charger"
-                     r"|power station|generator|solar panel|lantern|headlamp|flashlight|first[- ]aid|emergency kit|survival kit|emergency blanket", re.I)
+                     r"|power station|generator|solar panel|\bups\b[\w\s/-]{0,30}battery backup|lantern|headlamp|flashlight|first[- ]aid|emergency kit|survival kit|emergency blanket", re.I)
 DEAL_BAD = re.compile(r"halloween|christmas|holiday|xmas|patio|market umbrella|beach umbrella|\blamp\b|floor|desk fan|\bfan\b|duster|vacuum|\bmop\b"
                       r"|receiver|sweeper|lawn|leaf|xbox|playstation|ps5|nintendo|switch|\bgame|vinyl|\blp\b|album|lego|ceiling|hook|grill"
-                      r"|docking station|magsafe|qi2|wireless charging|\bcap\b|\bhats?\b|backpack|storage bag|ice pack|cooler|\btoys?\b|inflatable|decor|fairy|string lights|squirrel|feeder|picnic|flicker|flame|hanging|garden|pathway|landscape|yard", re.I)
+                      r"|docking station|\bnas\b|jump starter|magsafe|qi2|wireless charging|\bcap\b|\bhats?\b|backpack|storage bag|ice pack|cooler|\btoys?\b|inflatable|decor|fairy|string lights|squirrel|feeder|picnic|flicker|flame|hanging|garden|pathway|landscape|yard", re.I)
 DEAL_MAX_DAYS = 60
+STORM_POWER = re.compile(r"generator|power station|battery backup", re.I)
 def deal_ok(d):
     t = d.get("title", "")
     if not DEAL_OK.search(t) or DEAL_BAD.search(t): return False
