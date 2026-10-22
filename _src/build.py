@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Static site builder for Your World Weather Radar. Run: python3 _src/build.py  (writes HTML into the repo root).
 Deals: fetched from the Slickdeals RSS at build time into assets/deals.json (keeps the old file if offline)."""
-import json, re, html, datetime, urllib.parse, urllib.request, email.utils, sys
+import json, os, re, html, datetime, urllib.parse, urllib.request, email.utils, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from guides import GUIDES
@@ -462,13 +462,17 @@ def planner(path, kind):
 
 # Weather Trip Planner: Ask Atlas (travel agent) + trip form in the hero; results (NWS forecast, best days, day-by-day plan,
 # prefilled outbound searches, packing, app link) are rendered by assets/trip.js. Logic lives in assets/tripcore.js (tested).
+# MET Norway forecasts for non-US trips (preview). Off unless set: "direct" = browser calls api.met.no (allowed for low-volume
+# sites, identified by the Origin header), or the URL of the caching proxy in _src/worker/ (sends a proper User-Agent).
+METNO = os.environ.get("METNO", "").strip()
+
 def trip_planner(path):
     ex = "Road trip from Atlanta to Nashville Oct 30 - Nov 1"
     title = "Weather Trip Planner"
     lead = "Ask Atlas, your travel agent: plan around the forecast, find the best weather days, then book on the sites you already use."
     sugg = ["Weekend in Nashville this weekend", "Fly to Denver next week for a week", "Yellowstone camping next weekend", "Will lightning be a risk on my hike?"]
     h = f'''<section class="hero tp-hero"><div class="wrap"><span class="kicker">Trip Planner</span><h1>Plan your trip around the weather</h1><p class="lead">{E(lead)}</p>
-<div class="tp-card" id="tp"><div class="atl-head"><img class="atl-av" src="/assets/{V('atlas.svg')}" width="44" height="44" alt=""><div><b>Ask Atlas</b><span>Your travel agent for weather-smart trips</span></div></div>
+<div class="tp-card" id="tp"{f' data-metno="{E(METNO)}"' if METNO else ""}><div class="atl-head"><img class="atl-av" src="/assets/{V('atlas.svg')}" width="44" height="44" alt=""><div><b>Ask Atlas</b><span>Your travel agent for weather-smart trips</span></div></div>
 <div class="ask-log tp-log" id="tlog" aria-live="polite"><div class="msg bot atl"><b><img class="atl-ic" src="/assets/{V('atlas.svg')}" width="24" height="24" alt="">Atlas<button type="button" class="lsay" data-say="msg" aria-label="Listen" title="Listen">🔊</button></b><p>Hi, I'm Atlas. Tell me where and when you're going and I'll check the forecast, find the best days, plan each day and line up searches for flights, hotels and cars. You book on the site you choose.</p></div></div>
 <div class="quick"><input type="text" id="qtext" placeholder="{E(ex)}" aria-label="Ask Atlas about your trip" autocomplete="off">{mic("qtext", "qgo")}<button class="btn primary" id="qgo">Ask</button></div>
 <div class="parsed" id="tsugg">{"".join(f'<button type="button" class="sug tp-sug">{E(x)}</button>' for x in sugg)}</div>
@@ -490,9 +494,9 @@ def trip_planner(path):
 <div><b>🧳 Book where you like</b><span>One tap opens Google Flights, Booking.com, Airbnb, Kayak or Google Maps with your trip filled in. No account, no fees.</span></div>
 <div><b>📱 Take it with you</b><span>Send the trip to Your World Weather Radar for radar and alerts on the road.</span></div></div>
 <p class="note" style="text-align:center">Don't have the app? {play_btn("trip", "dark", "planner", "Get it on Google Play")}</p>
-<p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US). Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
+<p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US).{' Forecasts elsewhere: <a href="https://www.met.no/en" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), summarized into daily values by us.' if METNO else ""} Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
     page(path, title, "Weather trip planner with Ask Atlas, your travel agent: NWS forecast for your trip days, best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "tripgear.js", "trip.js", "voice.js", "listen.js"))
+         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"))
 
 def ask():
     import askdata

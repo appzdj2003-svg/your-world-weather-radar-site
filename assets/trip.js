@@ -2,7 +2,8 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
 /* Weather Trip Planner (/trip-planner/): Ask Atlas, your travel agent. Atlas turns a sentence (or the trip form) into a weather-first
    plan: NWS daily forecast + alerts for US destinations, best-weather dates, a day-by-day plan, prefilled outbound searches
    (we don't book or see prices), a packing list and the /trip#v1 app link. Runs in the browser; the only network calls are
-   /assets/places.json (destination search) and api.weather.gov (forecast + alerts). */
+   /assets/places.json (destination search), api.weather.gov (US forecast + alerts) and, when data-metno is set on #tp,
+   MET Norway Locationforecast for other countries (directly from api.met.no, or through our caching proxy in _src/worker/). */
 (function () {
   const C = window.YWTripCore, $ = id => document.getElementById(id), E = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   if (!C || !$("tp")) return;
@@ -10,11 +11,11 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
   const MODE = [["CAR", "🚗 Car"], ["FLY", "✈️ Flying"], ["RV", "🚐 RV"], ["MOTORCYCLE", "🏍️ Motorcycle"], ["BIKE", "🚲 Bicycle"], ["BOAT", "⛴️ Boat"], ["FOOT", "🚶 On foot"]];
   const nm = (L, k) => ((L.find(x => x[0] === k) || [k, k])[1]).replace(/^\S+\s/, "");
   const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const st = { v: 1, act: "SIGHTSEEING", mode: "CAR" }; let awaiting = null, rows = null, rowsP = null, runId = 0;
+  const st = { v: 1, act: "SIGHTSEEING", mode: "CAR" }; let awaiting = null, rows = null, rowsP = null, pdata = null, runId = 0;
   const LS = "yw-trip-last";
   const say = (cls, html) => { const d = document.createElement("div"); d.className = "msg " + cls + (cls === "bot" ? " atl" : ""); d.innerHTML = cls === "bot" ? `<b>${window.YW_ATL_IMG()}Atlas<button type="button" class="lsay" data-say="msg" aria-label="Listen" title="Listen">🔊</button></b>${html}` : html;
     $("tlog").appendChild(d); $("tlog").scrollTop = $("tlog").scrollHeight; return d; };
-  const places = () => rowsP || (rowsP = fetch("/assets/places.json").then(r => r.json()).then(j => rows = j.rows).catch(() => { rowsP = null; return rows = []; }));
+  const places = () => rowsP || (rowsP = fetch("/assets/places.json").then(r => r.json()).then(j => (pdata = j, rows = j.rows)).catch(() => { rowsP = null; return rows = []; }));
   function timed(url, ms) { const ac = typeof AbortController === "function" ? new AbortController() : null, t = setTimeout(() => ac && ac.abort(), ms);
     return fetch(url, { signal: ac && ac.signal, headers: { Accept: "application/geo+json" } }).then(r => { clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }); }
   async function nws(lat, lon) {   // points -> forecast, one retry; cached 30 min in this tab
@@ -24,6 +25,20 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     let al = []; try { al = ((await timed(`https://api.weather.gov/alerts/active?point=${lat},${lon}`, 8000)).features || []).map(f => f.properties).filter(p => p && p.status === "Actual"); } catch (e) {}
     const v = { periods: fc.properties.periods, alerts: al.map(p => ({ ev: p.event, head: p.headline, sev: p.severity, ends: p.ends || p.expires })) };
     try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v })); } catch (e) {} return v;
+  }
+  /* MET Norway (non-US): "direct" = api.met.no from the browser (identified by the Origin header, as MET's terms allow for
+     low-volume sites), or our caching proxy's URL. The browser's HTTP cache honours MET's Expires/Last-Modified (If-Modified-Since). */
+  const METNO = (($("tp") || {}).dataset || {}).metno || "", MET_URL = METNO === "direct" ? "https://api.met.no/weatherapi/locationforecast/2.0/complete" : METNO;
+  const M = window.YWMetno;
+  async function met(lat, lon) {
+    const u = M.url(MET_URL, lat, lon), key = "yw-met-" + u;
+    try { const c = JSON.parse(sessionStorage.getItem(key) || "null"); if (c && Date.now() < c.exp) return c.v; } catch (e) {}   // until MET's Expires
+    const get = ms => { const ac = typeof AbortController === "function" ? new AbortController() : null, t = setTimeout(() => ac && ac.abort(), ms);
+      return fetch(u, { signal: ac && ac.signal }).then(async r => { clearTimeout(t); if (r.status === 203) console.warn("MET Norway: this Locationforecast version is deprecated");
+        if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; } return { v: await r.json(), exp: Date.parse(r.headers.get("Expires") || "") }; }); };
+    let res; try { res = await get(9000); } catch (e) { if (e.status === 429 || e.status === 403) throw e; res = await get(12000); }   // never hammer MET after a 429/403
+    const exp = res.exp > Date.now() ? Math.min(res.exp, Date.now() + 36e5) : Date.now() + 18e5;
+    try { sessionStorage.setItem(key, JSON.stringify({ exp, v: res.v })); } catch (e) {} return res.v;
   }
   /* ---------- form <-> state ---------- */
   function toForm() { $("f-to").value = st.to || ""; $("f-from").value = st.from || ""; $("f-sd").value = st.sd || ""; $("f-ed").value = st.sd ? C.addDays(st.sd, (+st.d || 1) - 1) : ""; $("f-act").value = st.act; $("f-mode").value = st.mode; }
@@ -85,16 +100,19 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     const dest = place ? C.label(place) : st.to;
     if (place) st.to = dest;
     try { localStorage.setItem(LS, JSON.stringify({ to: st.to, from: st.from, sd: st.sd, d: st.d, act: st.act, mode: st.mode })); } catch (e) {}
-    out.innerHTML = head(dest) + `<section class="tp-sec" id="tp-wx"><h2>🌦️ Weather for your trip</h2><div class="tp-days" id="tp-days"><p class="tp-load">Checking the National Weather Service forecast…</p></div></section>` + "<div id=tp-rest></div>";
-    let ds = null, alerts = [], wxNote = "";
+    out.innerHTML = head(dest) + `<section class="tp-sec" id="tp-wx"><h2>🌦️ Weather for your trip</h2><div class="tp-days" id="tp-days"><p class="tp-load">Checking the ${place && !C.hasNws(place) ? "MET Norway" : "National Weather Service"} forecast…</p></div></section>` + "<div id=tp-rest></div>";
+    let ds = null, alerts = [], wxNote = "", metMeta = null; const tz = place && !C.hasNws(place) && METNO && M ? M.tzFor(place, rows, pdata) : null;
     if (place && C.hasNws(place)) {
       try { const v = await nws(place[3].toFixed(4).replace(/0+$/, "").replace(/\.$/, ""), place[4].toFixed(4).replace(/0+$/, "").replace(/\.$/, "")); if (id !== runId) return; ds = C.days(v.periods); alerts = v.alerts; }
       catch (e) { wxNote = `<p class="tp-warn">Couldn't reach the National Weather Service just now (weak signal?). <button type="button" class="btn" id="tp-retry">Try again</button></p>`; }
+    } else if (tz) {
+      try { const v = await met(place[3], place[4]); if (id !== runId) return; ds = M.days(v, tz).map(d => (d.icon = C.emoji(d.short, d.nightOnly), d.risk = C.risk(d), d)); metMeta = { at: v.properties && v.properties.meta && v.properties.meta.updated_at, tz }; if (!ds.length) throw new Error("empty"); }
+      catch (e) { ds = null; wxNote = `<p class="tp-warn">Couldn't load the MET Norway forecast for ${E(dest)} just now. <button type="button" class="btn" id="tp-retry">Try again</button></p>`; }
     } else wxNote = place ? `<p class="tp-info">Day-by-day forecasts on this page cover US destinations (National Weather Service). For ${E(dest)}, open the trip in the app for the forecast.</p>`
       : `<p class="tp-info">I couldn't find “${E(st.to)}” on my map, so I can't show its forecast here. Pick a place from the suggestions in the Where box, or try the nearest town.</p>`;
     if (id !== runId) return;
     const itin = C.itinerary(st, ds, place, today()), wx = C.summary(ds, st);
-    $("tp-days").innerHTML = wxNote + (ds ? wxCards(itin, ds) : "") + alertsHtml(alerts);
+    $("tp-days").innerHTML = wxNote + (ds ? (metMeta ? metCards(itin, ds, metMeta) : wxCards(itin, ds)) : "") + alertsHtml(alerts);
     $("tp-rest").innerHTML = best(ds) + days(itin) + book() + pack() + phone();
     if ($("tp-retry")) $("tp-retry").onclick = () => plan(true);
     if (window.YWTripGear) YWTripGear.mount(st, $("tp-gear"), wx);
@@ -108,11 +126,12 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
   }
   function headline(dest, itin, ds, alerts, place) {
     const w = itin.filter(x => x.w);
-    if (!w.length) return place && C.hasNws(place) ? `Here's your trip to ${dest}. Its forecast isn't out yet; it appears about 7 days ahead. I've lined up the day-by-day plan, searches to book and a packing list.`
+    const met = !!(ds && ds[0] && ds[0].src === "metno");
+    if (!w.length) return place && (C.hasNws(place) || met) ? `Here's your trip to ${dest}. Its forecast isn't out yet; it appears about ${met ? 9 : 7} days ahead. I've lined up the day-by-day plan, searches to book and a packing list.`
       : `Here's your trip to ${dest}: a day-by-day plan, searches to book and a packing list.`;
     const bad = w.filter(x => !["good", "maybe"].includes(x.w.risk.k)), g = w.filter(x => x.w.risk.k === "good");
     let s = `Here's your trip to ${dest}. `;
-    s += bad.length ? `Watch ${bad.map(x => x.label.split(" ")[0] + " (" + x.w.risk.t.toLowerCase() + ")").join(", ")}. ` : g.length === w.length ? `The forecast looks good for ${w.length > 2 ? "all " + w.length + " forecast days" : w.length === 2 ? "both days" : "that day"}. ` : "Mostly good, with a chance of rain. ";
+    s += bad.length ? `Watch ${bad.map(x => x.label.split(" ")[0] + " (" + x.w.risk.t.toLowerCase() + ")").join(", ")}. ` : g.length === w.length ? `The forecast looks good for ${w.length > 2 ? "all " + w.length + " forecast days" : w.length === 2 ? "both days" : "that day"}. ` : met ? "Mostly good, with some rain forecast. " : "Mostly good, with a chance of rain. ";
     if (alerts.length) s += `There ${alerts.length > 1 ? "are " + alerts.length + " active weather alerts" : "is an active weather alert"} there right now. `;
     return s + "Your plan, booking searches and packing list are below.";
   }
@@ -121,6 +140,20 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     const inTrip = new Set(itin.map(x => x.date));
     return `<div class="tp-strip" role="list">${ds.map(d => `<div class="tp-day${inTrip.has(d.date) ? " in" : ""}" role="listitem"><span class="dn">${E(C.fmt(d.date).split(" ")[0])}<small>${E(C.fmt(d.date).split(" ").slice(1).join(" "))}</small></span><span class="ic" aria-hidden="true">${d.icon}</span><b>${d.hi != null ? d.hi + "°" : "–"}<small>${d.lo != null ? " / " + d.lo + "°" : ""}</small></b><span class="pp">💧 ${d.pop}%</span>${pill(d.risk)}${inTrip.has(d.date) ? '<span class="tp-in">Your trip</span>' : ""}</div>`).join("")}</div>
 <p class="note">Highlighted days are your trip. Forecast: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>, about 7 days ahead. °F, highest rain chance of the day.</p>`;
+  }
+  /* MET Norway cards: only values MET gave for this place; anything missing says "not available" (never estimated). */
+  const NA = '<span class="na">not available</span>';
+  function metCards(itin, ds, meta) {
+    const inTrip = new Set(itin.map(x => x.date)), f = M.fields(ds), miss = [!f.pop && "rain chance", !f.thunderPct && "thunder chance", !f.gust && "wind gusts"].filter(Boolean);
+    const rain = d => d.pop != null ? `💧 ${d.pop}%` : d.precipIn != null ? `💧 ${d.precipIn} in` : "💧 –";
+    const mine = ds.filter(d => inTrip.has(d.date));
+    let at = ""; try { at = meta.at ? new Date(meta.at).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : ""; } catch (e) {}
+    return `<div class="tp-strip" role="list">${ds.map(d => `<div class="tp-day${inTrip.has(d.date) ? " in" : ""}" role="listitem"><span class="dn">${E(C.fmt(d.date).split(" ")[0])}<small>${E(C.fmt(d.date).split(" ").slice(1).join(" "))}</small></span><span class="ic" aria-hidden="true">${d.icon}</span><b>${d.hi != null ? d.hi + "°" : "–"}<small>${d.lo != null ? " / " + d.lo + "°" : ""}</small></b><span class="pp">${rain(d)}</span>${pill(d.risk)}${inTrip.has(d.date) ? '<span class="tp-in">Your trip</span>' : ""}</div>`).join("")}</div>
+${mine.length ? `<div class="tp-metd"><h3>Your trip days in MET Norway's forecast</h3>${mine.map(d => `<div class="tp-metr"><b>${E(C.fmt(d.date))}</b><dl>${[
+      ["Rain", d.precipIn != null ? d.precipIn + " in" : null], ["Rain chance", d.pop != null ? d.pop + "%" : null], ["Wind", d.wind != null ? "up to " + d.wind + " mph" : null],
+      ["Gusts", d.gust != null ? "up to " + d.gust + " mph" : null], ["Thunder chance", d.thunderPct != null ? d.thunderPct + "%" : null]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v != null ? E(v) : NA}</dd></div>`).join("")}</dl></div>`).join("")}</div>` : ""}
+<p class="note">Highlighted days are your trip, in local time at your destination. About 9 days ahead. °F; 💧 ${f.pop ? "is the highest rain chance of the day" : "is MET's forecast rain amount for the day"}; wind is the steady wind, not gusts.${miss.length ? ` MET Norway doesn't provide ${miss.length > 1 ? miss.slice(0, -1).join(", ") + " or " + miss[miss.length - 1] : miss[0]} for this location, so they show as not available.` : ""} No weather alerts are shown for this destination; check the local weather service.</p>
+<p class="note tp-metattr">${M.ATTR}${at ? ` Forecast updated ${E(at)}.` : ""}</p>`;
   }
   function alertsHtml(al) {
     if (!al || !al.length) return "";
@@ -133,7 +166,7 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     const top = ds.filter(d => !d.nightOnly).map(d => [C.score(d), d]).sort((a, b) => b[0] - a[0]).slice(0, 3).map(x => x[1]).sort((a, b) => a.date < b.date ? -1 : 1);
     return `<section class="tp-sec tp-best"><h2>🏆 Best weather days</h2><p>Driest, calmest days in the current forecast for ${E(st.to)}: <b>${top.map(d => E(C.fmt(d.date))).join(", ")}</b>.</p>
 ${same ? `<p class="tp-ok">✅ Your dates are already among the best ${n > 1 ? n + "-day stretches" : "days"} in the forecast.</p>` : `<p>Best ${n > 1 ? n + "-day stretch" : "day"} in the forecast: <b>${E(C.fmtRange(w.sd, n))}</b>.${n < +st.d ? ` (The forecast covers ${ds.length} days.)` : ""}</p>${n === +st.d ? `<button type="button" class="btn" id="tp-shift" data-sd="${w.sd}">Use these dates</button>` : ""}`}
-<p class="note">Ranked by rain chance, thunderstorms, wind and temperature in the NWS forecast. Forecasts change, so check again closer to the trip.</p></section>`;
+<p class="note">Ranked by ${ds[0].src === "metno" && ds.every(d => d.pop == null) ? "rain amount, thunder, wind and temperature in the MET Norway forecast" : `rain chance, thunderstorms, wind and temperature in the ${ds[0].src === "metno" ? "MET Norway" : "NWS"} forecast`}. Forecasts change, so check again closer to the trip.</p></section>`;
   }
   function days(itin) {
     return `<section class="tp-sec" id="tp-plan"><h2>🗓️ Day by day</h2><ol class="tp-itin">${itin.map(x => `<li><div class="tp-ih"><b>Day ${x.i}</b><span>${E(x.label)}</span>${x.w ? `<span class="tp-iw">${x.w.icon} ${x.w.hi != null ? x.w.hi + "°" : ""}</span>${pill(x.w.risk)}` : ""}</div>${x.tips.map(t => `<p>${E(t)}</p>`).join("")}</li>`).join("")}</ol>

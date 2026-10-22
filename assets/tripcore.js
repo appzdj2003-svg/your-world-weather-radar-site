@@ -65,17 +65,24 @@
     });
   }
   function risk(d) {
-    if (d.thunder && d.pop >= 20) return { k: "storm", t: "Storms possible" };
-    if (d.snow && d.pop >= 30) return { k: "snow", t: "Snow or ice possible" };
-    if (d.pop >= 50) return { k: "rain", t: "Rain likely" };
-    if (d.pop >= 30) return { k: "maybe", t: "Chance of rain" };
+    if (d.pop == null) {   // MET Norway outside the Nordics: no rain chance, so use MET's own symbols and rain amount (never a made-up %)
+      const mm = d.precipMm || 0;
+      if (d.thunder) return { k: "storm", t: "Thunder in the forecast" };
+      if (d.snow && mm >= 1) return { k: "snow", t: "Snow or sleet forecast" };
+      if (mm >= 5) return { k: "rain", t: "Rain forecast" };
+      if (mm >= 1) return { k: "maybe", t: "Some rain forecast" };
+    }
+    else if (d.thunder && d.pop >= 20) return { k: "storm", t: "Storms possible" };
+    if (d.pop != null && d.snow && d.pop >= 30) return { k: "snow", t: "Snow or ice possible" };
+    if (d.pop != null && d.pop >= 50) return { k: "rain", t: "Rain likely" };
+    if (d.pop != null && d.pop >= 30) return { k: "maybe", t: "Chance of rain" };
     if (d.hi != null && d.hi >= 95) return { k: "heat", t: "Very hot" };
     if (d.lo != null && d.lo <= 25 || d.hi != null && d.hi <= 32) return { k: "cold", t: "Freezing" };
     if (d.wind >= 25) return { k: "wind", t: "Windy" };
     return { k: "good", t: "Looks good" };
   }
   function score(d) {   // 0..100, higher is better for being outside
-    let s = 100 - d.pop * 0.8;
+    let s = 100 - (d.pop != null ? d.pop * 0.8 : Math.min(80, (d.precipMm || 0) * 5));   // MET without rain chance: ranked by MET's rain amount
     if (d.thunder) s -= 20; if (d.snow) s -= 10; if (d.wind >= 20) s -= (d.wind - 15);
     if (d.hi != null) { if (d.hi >= 92) s -= (d.hi - 88) * 2; if (d.hi <= 40) s -= (45 - d.hi); }
     return Math.max(0, Math.min(100, Math.round(s)));
@@ -96,6 +103,7 @@
     return w.length === Math.max(1, n) ? Math.round(w.reduce((a, d) => a + score(d), 0) / w.length) : null;
   }
 
+  const rainTxt = w => w.pop != null ? `${w.pop}% chance` : w.precipIn != null ? `about ${w.precipIn} in of rain forecast` : "rain forecast";
   /* ---------- day-by-day plan ---------- */
   const OUTDOOR = ["HIKE", "BEACH", "SKI", "CAMP", "FISH", "BOAT", "EVENT", "SIGHTSEEING"];
   const ACT_TXT = { SIGHTSEEING: "sightseeing", HIKE: "a hike", BEACH: "the beach", SKI: "the slopes", CAMP: "camp", FISH: "fishing", BOAT: "the water", EVENT: "your event", BUSINESS: "meetings", FAMILY: "family time" };
@@ -111,14 +119,14 @@
         const k = w.risk.k, a = ACT_TXT[st.act] || "your plans", outside = OUTDOOR.includes(st.act);
         if (k === "storm") tips.push(`${w.short}. Keep outdoor time flexible, and head indoors at the first rumble of thunder.`);
         else if (k === "snow") tips.push(`${w.short}. Allow extra time on the roads.`);
-        else if (k === "rain") tips.push(`${w.short} (${w.pop}% chance). ${outside ? "Have an indoor backup for " + a + "." : "Pack the umbrella."}`);
-        else if (k === "maybe") tips.push(`${w.short} (${w.pop}% chance of rain). ${outside ? "A good day for " + a + ", with a rain layer handy." : "Bring a rain layer."}`);
+        else if (k === "rain") tips.push(`${w.short} (${rainTxt(w)}). ${outside ? "Have an indoor backup for " + a + "." : "Pack the umbrella."}`);
+        else if (k === "maybe") tips.push(`${w.short} (${w.pop != null ? w.pop + "% chance of rain" : rainTxt(w)}). ${outside ? "A good day for " + a + ", with a rain layer handy." : "Bring a rain layer."}`);
         else if (k === "heat") tips.push(`Hot, up to ${w.hi}°F. ${outside ? "Go early, take breaks in the shade and bring plenty of water." : "Stay hydrated."}`);
         else if (k === "cold") tips.push(`Cold, ${w.lo != null ? "down to " + w.lo + "°F" : "near freezing"}. Dress in warm layers.`);
         else if (k === "wind") tips.push(`Windy, winds up to about ${w.wind} mph${st.act === "BOAT" || st.act === "FISH" || st.mode === "BOAT" ? ". Check the marine forecast before heading out" : ""}.`);
         else tips.push(`${w.short}. ${outside ? "A good day for " + a + "." : "Nice weather for getting around."}`);
-      } else if (place && !hasNws(place)) tips.push("Open the trip in the app for this day's forecast.");
-      else if (lastFc && date > lastFc || !lastFc && todayIso && daysBetween(todayIso, date) > 6) tips.push(`The forecast for this day appears about 7 days ahead, from around ${fmt(addDays(date, -7))}.`);
+      } else if (place && !hasNws(place) && !lastFc) tips.push("Open the trip in the app for this day's forecast.");
+      else if (lastFc && date > lastFc || !lastFc && todayIso && daysBetween(todayIso, date) > 6) { const h = ds && ds.length && ds[0].src === "metno" ? 9 : 7; tips.push(`The forecast for this day appears about ${h} days ahead, from around ${fmt(addDays(date, -h))}.`); }
       if (i === n - 1 && n > 1) tips.push(st.from ? `Heading home to ${st.from}.` : "Last day of the trip.");
       out.push({ i: i + 1, date, label: fmt(date), w, tips });
     }
@@ -157,7 +165,11 @@
     const inTrip = (ds || []).filter(d => d.date >= st.sd && d.date <= addDays(st.sd, Math.max(1, +st.d || 1) - 1));
     if (!inTrip.length) return null;
     const max = k => Math.max(...inTrip.map(d => d[k] == null ? -999 : d[k])), min = k => Math.min(...inTrip.map(d => d[k] == null ? 999 : d[k]));
-    return { n: inTrip.length, pop: max("pop"), thunder: inTrip.some(d => d.thunder), snow: inTrip.some(d => d.snow && d.pop >= 30), hi: max("hi"), lo: min("lo"), wind: max("wind") };
+    const hasPop = inTrip.some(d => d.pop != null), mm = inTrip.some(d => d.precipMm != null) ? max("precipMm") : null;
+    const r = { n: inTrip.length, pop: hasPop ? max("pop") : null, thunder: inTrip.some(d => d.thunder),
+      snow: inTrip.some(d => d.snow && (d.pop != null ? d.pop >= 30 : (d.precipMm || 0) >= 1)), hi: max("hi"), lo: min("lo"), wind: max("wind") };
+    if (mm != null) { r.rainMm = mm; r.rainIn = Math.round(mm / 25.4 * 100) / 100; }   // MET Norway's daily rain amount (NWS gives a chance instead)
+    return r;
   }
   const api = { windowScore, summary, iso, addDays, daysBetween, fmt, fmtRange, norm, label, suggest, resolve, hasNws, days, risk, score, bestWindow, itinerary, links, isBookingAsk, sourcedAnswer, emoji };
   root.YWTripCore = api; if (typeof module !== "undefined") module.exports = api;

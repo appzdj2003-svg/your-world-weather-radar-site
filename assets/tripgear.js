@@ -14,7 +14,8 @@
     const out = [], add = (k, why) => { if (!out.some(o => o.k === k)) out.push({ k, why }); };
     if (wx) {
       if (wx.thunder) { add("lightning", "thunderstorms in the forecast"); add("radio", "thunderstorms in the forecast"); }
-      if (wx.pop >= 40) { add(["MOTORCYCLE", "BIKE"].includes(st.mode) ? "rainsuit" : "jacket", `up to ${wx.pop}% rain chance`); add("umbrella", `up to ${wx.pop}% rain chance`); }
+      const wet = wx.pop != null ? wx.pop >= 40 && `up to ${wx.pop}% rain chance` : wx.rainMm >= 2 && `up to ${wx.rainIn} in of rain forecast in a day`;   // MET: amount, no %
+      if (wet) { add(["MOTORCYCLE", "BIKE"].includes(st.mode) ? "rainsuit" : "jacket", wet); add("umbrella", wet); }
       if (wx.lo <= 32 || wx.snow) add("thermo", wx.snow ? "snow or ice in the forecast" : `lows near ${wx.lo}°F`);
       if (wx.wind >= 20) add("anemo", `wind up to ${wx.wind} mph`);
     }

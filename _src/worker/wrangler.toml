@@ -1,0 +1,14 @@
+# NOT DEPLOYED. Deploy only after Aaron approves (needs a free Cloudflare account): npx wrangler deploy
+name = "yw-metno"
+main = "metno-proxy.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+UA = "YourWorldWeatherRadar/1.0 https://weather.yourworldapps.si support@yourworldapps.si"
+ORIGINS = "https://weather.yourworldapps.si"
+
+# Optional, recommended on workers.dev (the Cache API doesn't persist there). Create with: npx wrangler kv namespace create METNO_KV
+# [[kv_namespaces]]
+# binding = "METNO_KV"
+# id = "<id from the command above>"

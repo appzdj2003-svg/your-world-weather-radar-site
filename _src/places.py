@@ -3,7 +3,7 @@
 with attribution: https://www.geonames.org/). Run by hand when you want fresher data: python3 _src/places.py
 Needs network once (downloads cities5000.zip, admin1CodesASCII.txt, countryInfo.txt into /tmp). Not part of build.py.
 Rows: [name, region, countryCode, lat, lon, population, asciiName?] where region is the US state code (e.g. "TN") or the
-country name elsewhere. US towns of 3,000+ (from US.zip), US national parks, and places of 75,000+ elsewhere."""
+country name elsewhere. "z"[i] indexes "tz" (IANA time zone of rows[i], used to group MET Norway's UTC forecast into local days). US towns of 3,000+ (from US.zip), US national parks, and places of 75,000+ elsewhere."""
 import csv, io, json, urllib.request, zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,20 +34,22 @@ def main():
         region = r[10] if cc == "US" else countries.get(cc, cc)
         row = [r[1], region, cc, round(float(r[4]), 3), round(float(r[5]), 3), pop]
         if r[2] and r[2] != r[1]: row.append(r[2])
-        rows.append(row)
-    rows = [x for x in rows if x[2] != "US"]
+        rows.append((row, r[17]))
+    rows = [x for x in rows if x[0][2] != "US"]
     zu = zipfile.ZipFile(get("US.zip")); parks = {}
     for r in csv.reader(io.TextIOWrapper(zu.open("US.txt"), encoding="utf8"), delimiter="\t", quoting=csv.QUOTE_NONE):
         pop = int(r[14] or 0)
         if r[6] == "P" and r[7] not in ("PPLX", "PPLH", "PPLQ", "PPLW") and pop >= 3000:
             row = [r[1], r[10], "US", round(float(r[4]), 3), round(float(r[5]), 3), pop]
             if r[2] and r[2] != r[1]: row.append(r[2])
-            rows.append(row)
+            rows.append((row, r[17]))
         elif r[7] == "PRK" and r[1] in NPS and r[1] not in parks:
-            parks[r[1]] = [r[1], r[10], "US", round(float(r[4]), 3), round(float(r[5]), 3), 0]
+            parks[r[1]] = ([r[1], r[10], "US", round(float(r[4]), 3), round(float(r[5]), 3), 0], r[17])
     rows += parks.values()
-    rows.sort(key=lambda x: -x[5])
+    rows.sort(key=lambda x: -x[0][5])
+    tz = sorted({z for _, z in rows}); ti = {z: i for i, z in enumerate(tz)}
     out = ROOT / "assets/places.json"
-    out.write_text(json.dumps({"src": "GeoNames (CC BY 4.0) geonames.org", "rows": rows}, ensure_ascii=False, separators=(",", ":")))
+    out.write_text(json.dumps({"src": "GeoNames (CC BY 4.0) geonames.org", "rows": [r for r, _ in rows], "tz": tz, "z": [ti[z] for _, z in rows]},
+                              ensure_ascii=False, separators=(",", ":")))
     print(len(rows), "places,", out.stat().st_size // 1024, "KB")
 if __name__ == "__main__": main()
