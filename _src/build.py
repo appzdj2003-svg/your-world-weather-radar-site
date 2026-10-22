@@ -386,9 +386,9 @@ def gear():
         safety = GEN_SAFETY if sid == "generators" else ""
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
     deals = load_deals()
-    # Storm-power deals (generators, power stations, UPS) can be older than the newest rain/radio headlines, so up to 3 of
-    # them keep a slot in the 12 shown; the rest fill by date. Same filters and age limit as every other deal.
-    pw = [d for d in deals if STORM_POWER.search(d["title"])][:3]
+    # Storm-power deals can be older than the newest rain/radio headlines, so the newest generator, power station and
+    # UPS battery backup deal each keep a slot in the 12 shown; the rest fill by date. Same filters and age limit as every other deal.
+    pw = [d for d in (next((d for d in deals if rx.search(d["title"])), None) for rx in STORM_POWER) if d]
     deals = sorted(pw + [d for d in deals if d not in pw][:12 - len(pw)], key=lambda d: d["posted"], reverse=True)
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
     dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
@@ -409,7 +409,7 @@ DEAL_BAD = re.compile(r"halloween|christmas|holiday|xmas|patio|market umbrella|b
                       r"|receiver|sweeper|lawn|leaf|xbox|playstation|ps5|nintendo|switch|\bgame|vinyl|\blp\b|album|lego|ceiling|hook|grill"
                       r"|docking station|\bnas\b|jump starter|magsafe|qi2|wireless charging|\bcap\b|\bhats?\b|backpack|storage bag|ice pack|cooler|\btoys?\b|inflatable|decor|fairy|string lights|squirrel|feeder|picnic|flicker|flame|hanging|garden|pathway|landscape|yard", re.I)
 DEAL_MAX_DAYS = 60
-STORM_POWER = re.compile(r"generator|power station|battery backup", re.I)
+STORM_POWER = [re.compile(r"generator", re.I), re.compile(r"power station", re.I), re.compile(r"battery backup", re.I)]
 def deal_ok(d):
     t = d.get("title", "")
     if not DEAL_OK.search(t) or DEAL_BAD.search(t): return False
