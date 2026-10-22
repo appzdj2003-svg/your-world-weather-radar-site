@@ -4,7 +4,8 @@ import gearart
 ROOT = Path(__file__).resolve().parent.parent
 # product-name keyword -> image key (first match wins); else the gearart kind
 MAP = [("rain suit","rainsuit"),("crank","crankradio"),("frx3","crankradio"),("headlamp","headlamp"),("lantern","lantern"),
-       ("power station","powerstation"),("power bank","powerbank"),("first aid","firstaid")]
+       ("power station","powerstation"),("power bank","powerbank"),("first aid","firstaid"),
+       ("cord","cord"),("generator","generator"),("solar panel","solarpanel"),("ups battery","ups"),("carbon monoxide","coalarm")]
 def key(kind, name):
     n = name.lower()
     for kw, k in MAP:

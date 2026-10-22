@@ -299,8 +299,10 @@ def guides():
 
 # ---------- gear ----------
 def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
+def amz_dp(asin): return f"https://www.amazon.com/dp/{asin}?tag={AMZ_TAG}"  # verified product page (storm-power cards)
 import gearart, gearimg
-# (section id, title, intro, tone, [(art, product name, note)]). Real named products; links are Amazon searches for the exact name.
+# (section id, title, intro, tone, [(art, product name, note[, asin, label])]). Real named products; links are Amazon searches for the exact name,
+# or the product page when an ASIN is given (storm-power picks, ASINs checked on amazon.com 2026-10-22). Labels are neutral picks, never prices/deals.
 GEAR = [
  ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
    ("jacket", "Columbia Watertight II rain jacket", "Packable waterproof shell for everyday rain."),
@@ -343,7 +345,32 @@ GEAR = [
    ("kit", "Ready America 70280 emergency kit", "72-hour kit with food, water and supplies."),
    ("kit", "First Aid Only 299 piece first aid kit", "All-purpose first-aid kit."),
  ]),
+ ("generators", "⚡ Generators & generator safety", "Keep the fridge, lights and phones going through a long outage.", "power", [
+   ("power", "Westinghouse iGen5000DFc dual fuel inverter generator", "Gas or propane, remote electric start, quiet inverter power.", "B099KSY4XG", "Best value"),
+   ("power", "PowerSmart 2500 watt inverter generator", "Light gas inverter for the basics: fridge, lights, chargers.", "B089FDFDH5", "Budget pick"),
+   ("power", "Champion 4000-watt dual fuel inverter generator", "Gas or propane, RV ready, a step up in power.", "B0D6SQR1L1", "Top pick"),
+   ("power", "Honda EU2200i inverter generator", "Quiet, proven 2200 W gas inverter.", "B079YF1HF6", "Premium pick"),
+   ("power", "Kidde battery carbon monoxide alarm", "A CO alarm on every level is a must if you run a generator.", "B004Y6V5CI", "Safety pick"),
+   ("power", "Champion 25 ft 30 amp generator power cord", "L14-30 cord for a manual transfer switch your electrician installs.", "B076HQ2THC", ""),
+   ("power", "HUANCHAIN 50 ft 12 gauge outdoor extension cord", "Heavy-duty cord so the generator can sit well away from the house.", "B09WR4ZHRD", ""),
+ ]),
+ ("batteries", "🔋 Power stations & solar", "Quiet battery backup you can run indoors. Recharge from the wall, a car or the sun.", "power", [
+   ("power", "Anker SOLIX C1000 portable power station", "1,056 Wh LiFePO4 battery, 1800 W AC output.", "B0C5C89QKZ", "Best value"),
+   ("power", "EcoFlow RIVER 3 portable power station", "Small 245 Wh unit for phones, lights and a router.", "B0DB1S36YP", "Budget pick"),
+   ("power", "Jackery Explorer 1000 v2 portable power station", "1,070 Wh LiFePO4 battery, 1500 W AC output.", "B0D7PPG25F", "Top pick"),
+   ("power", "BLUETTI AC180 portable power station", "1,152 Wh LiFePO4 battery, 1800 W AC output.", "B0C1SMJTDT", ""),
+   ("power", "EcoFlow 220W bifacial portable solar panel", "Folding panel to recharge a power station when the grid is down.", "B09TKM8PBQ", ""),
+ ]),
+ ("outage", "🔌 Outage backup for home & phone", "Keep Wi-Fi, phones and lights on when the power flickers or fails.", "power", [
+   ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", "Best value"),
+   ("power", "INIU 20000mAh power bank", "Slim 20,000 mAh charger to keep phones going.", "B0FX7T4H7D", "Budget pick"),
+   ("power", "APC BE600M1 UPS battery backup", "Keeps a modem and router online through short outages.", "B01FWAZEIU", "Top pick"),
+   ("power", "CyberPower CP1500PFCLCD UPS battery backup", "Bigger sine-wave UPS for a computer plus network gear.", "B00429N19W", ""),
+ ]),
 ]
+GEN_SAFETY = ('<p class="callout"><strong>Generator safety:</strong> Run a generator outdoors only, far from windows, doors and vents. '
+              'Never run one indoors, in a garage, basement or shed, even with the door open. Exhaust has carbon monoxide, which you can\'t see or smell. '
+              'Never plug a generator into a wall outlet; use extension cords or a transfer switch installed by a licensed electrician.</p>')
 def gear():
     jump = '<div class="tabs" style="margin-top:18px">' + "".join(f'<a href="#{sid}" class="btn" style="padding:7px 14px;font-size:.85rem">{E(t)}</a>' for sid, t, *_ in GEAR) + "</div>"
     secs = ""; seen = set()
@@ -351,16 +378,19 @@ def gear():
         g = gearimg.key(k, n)
         if g in seen: return ""
         seen.add(g); return f' id="g-{g}"'
+    def card(k, n, d, asin="", label=""):
+        tag = f'<i class="pc-tag">{E(label)}</i>' if label else ""
+        return (f'<a class="pcard"{gid(k, n)} href="{E(amz_dp(asin) if asin else amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
+                f'<span class="pc-body">{tag}<b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>')
     for sid, title, sub, tone, items in GEAR:
-        secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p><div class="pgrid">' + "".join(
-            f'<a class="pcard"{gid(k, n)} href="{E(amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
-            f'<span class="pc-body"><b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>' for k, n, d in items) + "</div>"
+        safety = GEN_SAFETY if sid == "generators" else ""
+        secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
     deals = load_deals()
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
     dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
-    b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to Amazon search results for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. We don\'t show prices or ratings, so check details on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
+    b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to Amazon search results or product pages for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. Labels like “Top pick” are our own picks, not Amazon deals. We don\'t show prices or ratings because they change daily, so check the current price on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
          + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
-    page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments and emergency kit worth owning before storm season.", "Gear"), "0.7")
+    page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors, generators, power stations, UPS battery backups and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments, backup power and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
 DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]
 # Slickdeals search RSS is loose (a "lantern" query returns floor lamps, "umbrella" returns patio umbrellas, and some results
