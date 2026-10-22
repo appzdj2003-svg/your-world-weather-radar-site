@@ -1,4 +1,4 @@
-/* MET Norway Locationforecast caching proxy for the website's Trip Planner (Cloudflare Worker, free plan). NOT DEPLOYED.
+/* MET Norway Locationforecast caching proxy for the website's Trip Planner (Cloudflare Worker, free plan). Deployed as yw-metno on workers.dev.
    Why: MET asks browsers/apps to use a proxy, wants a real User-Agent with contact info, and caching by Expires/Last-Modified.
    This worker: GET only; lat/lon truncated to 4 decimals (MET 403s on more); only our site's Origin; one identified upstream
    request per place per MET update (KV cache when bound, else caches.default); If-Modified-Since revalidation; serves the
@@ -34,17 +34,18 @@ export async function handle(req, env, fetchFn = fetch, now = Date.now()) {
   if (!env.UA) return out(500, '{"error":"UA not configured"}');
   const q = parseQuery(req.url); if (!q) return out(400, '{"error":"lat and lon required"}');
   const k = `lf2c:${q.lat},${q.lon}`, st = store(env), hit = await st.get(k).catch(() => null);
+  const save = async c => { try { await st.put(k, c); } catch (e) { console.warn("cache write failed", String(e)); } };   // e.g. KV daily write limit: still answer
   const send = (c, state) => out(200, c.body, { "Cache-Control": `public, max-age=${Math.max(0, Math.min(3600, Math.round((c.expires - now) / 1000)))}`, "X-Cache": state, ...(c.lastModified ? { "Last-Modified": c.lastModified } : {}) });
   if (hit && now < hit.expires) return send(hit, "HIT");
   const h = { "User-Agent": env.UA, "Accept": "application/json", "Accept-Encoding": "gzip, deflate" };
   if (hit && hit.lastModified) h["If-Modified-Since"] = hit.lastModified;
   let r; try { r = await fetchFn(`${UPSTREAM}?lat=${q.lat}&lon=${q.lon}`, { headers: h }); } catch (e) { r = null; }
   const exp = r => { const t = Date.parse(r.headers.get("Expires") || ""); return isFinite(t) && t > now ? t : now + 30 * 60e3; };
-  if (r && r.status === 304 && hit) { const c = { ...hit, expires: exp(r) }; await st.put(k, c); return send(c, "REVALIDATED"); }
+  if (r && r.status === 304 && hit) { const c = { ...hit, expires: exp(r) }; await save(c); return send(c, "REVALIDATED"); }
   if (r && (r.status === 200 || r.status === 203)) {
     if (r.status === 203) console.warn("MET Norway: Locationforecast 2.0 reports deprecation (203)");
     const c = { body: await r.text(), lastModified: r.headers.get("Last-Modified") || "", expires: exp(r) };
-    await st.put(k, c); return send(c, "MISS");
+    await save(c); return send(c, "MISS");
   }
   if (hit) return send({ ...hit, expires: now + 5 * 60e3 }, "STALE");   // 429 / 5xx / network: keep serving what we have
   return out(r && r.status === 429 ? 429 : 502, JSON.stringify({ error: "forecast unavailable", upstream: r ? r.status : "network" }), r && r.status === 429 ? { "Retry-After": "600" } : {});
