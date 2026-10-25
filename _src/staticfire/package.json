@@ -1,0 +1,8 @@
+{
+  "name": "yw-static-fire-sim",
+  "private": true,
+  "type": "module",
+  "description": "Bundles the Starship Static Fire simulator for /static-fire/. Run: npm i && node build.mjs",
+  "dependencies": { "postprocessing": "^6.39.5", "suncalc": "^1.9.0", "three": "^0.186.1" },
+  "devDependencies": { "esbuild": "^0.28.2" }
+}

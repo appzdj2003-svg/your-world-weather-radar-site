@@ -27,6 +27,7 @@ OG_SPECS = {
  "ask.html": dict(kicker="Ask Atlas", title="Weather safety answers in plain English", sub="Sourced from NWS and NOAA guides", visual=["shot-home.jpg"]),
  "gear/index.html": dict(kicker="Weather gear", title="Gear for when the weather turns", sub="Radios, rain gear, power and lights for storm days", visual=["app-hurricane.jpg", "app-radar.jpg"]),
  "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["app-radar.jpg"]),
+ "static-fire/index.html": dict(kicker="Free simulator", title="Starship static fire simulator", sub="Fan-made and simulated, not real. Runs in your browser", visual=["static-fire-shot.jpg"]),
  "launches/index.html": dict(kicker="Rocket launches", title="Next launch countdown and schedule", sub="Upcoming launches worldwide and weather at the main US launch sites", visual=["launch-teaser.jpg"]),
  "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play", visual=["shot-home.jpg", "app-hurricane.jpg"]),
 }
@@ -641,6 +642,36 @@ def launches_page():
          b, h, "0.8", scripts=("launches.js", "teaser.js"), jsonld=ld, head_extra=SHOW_CSS("../"))
 
 
+def static_fire_page():
+    # Free, fan-made SIMULATED static fire (bundle: _src/staticfire -> assets/static-fire/). Nothing on it is real data.
+    sim = "SIMULATED · NOT REAL"
+    h = f'''<section class="hero sf-hero"><div class="wrap"><span class="kicker">🔥 Free simulator</span><h1>Starship Static Fire · Simulator</h1>
+<p class="lead">A pretend Starship static fire in your browser: water deluge, 33 engines, steam. Every number is made up.</p></div></section>'''
+    b = f'''<section aria-label="Simulator"><div class="sf-stage" id="sf-stage" data-three="../assets/{V('static-fire/sf3d.js')}" data-assets="../assets/static-fire/" role="region" aria-label="Simulated Starship static fire">
+<canvas id="sf-gl" hidden></canvas><canvas id="sf-lite" hidden aria-hidden="true"></canvas>
+<div class="sf-badge">⚠ {sim}</div><div class="sf-callout" id="sf-callout" aria-hidden="true"></div>
+<button type="button" class="sf-go" id="sf-go">▶ Start static fire<small>{sim}</small></button><div class="sf-tier" id="sf-tier"></div>
+<noscript><p style="position:absolute;inset:auto 0 45% 0;text-align:center;color:#fff">The simulator needs JavaScript.</p></noscript></div>
+<div class="sf-controls"><button type="button" class="btn primary" id="sf-start">▶ Start static fire</button></div>
+<p class="sf-status dim small" id="sf-status" aria-live="polite">Tap Start to run the simulated static fire. It takes about a minute.</p></section>
+<section aria-labelledby="sf-what-h"><h2 id="sf-what-h">What you're watching</h2><ul>
+<li><b>Terminal count:</b> a made-up countdown from T−20 s. The water deluge comes on at T−8 s.</li>
+<li><b>Ignition:</b> the center 3 engines light first, then the inner 10, then the outer 20.</li>
+<li><b>Mainstage:</b> about 8 seconds at full thrust while the vehicle stays clamped down. In some runs one engine shuts down early.</li>
+<li><b>Safing:</b> cutoff, purge, deluge off and detanking.</li></ul>
+<p class="dim">Thrust, chamber pressure, tank, deluge and ambient weather readings are simulated ballpark values, not telemetry from any real test. The view picks a 3D quality level that suits your device, with a simple 2D view as a fallback.</p></section>
+<section class="sf-cta" aria-labelledby="sf-cta-h"><span class="kicker">From the makers of this page</span><h2 id="sf-cta-h">{APP}</h2>
+<p>Free rain ETA, live radar and weather alerts on Android.</p>
+<div class="btns">{play_btn("static-fire", "primary glow", "sf-cta", f"Get {APP}")}<a class="btn" href="../launches/">Next rocket launch &amp; pad weather</a></div></section>
+<p class="owo-attr sf-fine"><b>Fan-made simulation. Not affiliated with SpaceX.</b> Everything shown here is simulated; it is not a real or scheduled event.
+3D: three.js (MIT), postprocessing (zlib), SunCalc (BSD-2-Clause). Sky: Poly Haven HDRIs (CC0). <a href="../assets/static-fire/LICENSES.txt">Licenses</a>.</p>'''
+    ld = [{"@context": "https://schema.org", "@type": "WebPage", "name": "Starship Static Fire · Simulator", "url": SITE + "static-fire/",
+           "description": "A free, fan-made simulated Starship static fire in your browser. Not real data.", "isPartOf": {"@type": "WebSite", "name": APP, "url": SITE}}]
+    page("static-fire/index.html", "Starship Static Fire · Simulator",
+         "A free, fan-made Starship static fire simulator in your browser: water deluge, 33 engines, steam and a test-stand readout. Simulated, not real.",
+         b, h, "0.5", scripts=("static-fire/sf.js",), jsonld=ld, head_extra=f'<link rel="stylesheet" href="../assets/{V("static-fire/sf.css")}">')
+
+
 if __name__ == "__main__":
-    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); misc()
     print(f"Built {len(PAGES)} pages")
