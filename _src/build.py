@@ -303,15 +303,15 @@ def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
 def amz_dp(asin): return f"https://www.amazon.com/dp/{asin}?tag={AMZ_TAG}"  # verified product page
 import gearart, gearimg
 # (section id, title, intro, tone, [(art, product name, note[, asin, label])]). Real named products; links are Amazon searches for the exact name,
-# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22). "Best value" = list-price discount >=25% verified that day. Labels are our picks; never prices.
+# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22, rechecked 2026-10-26). "Best value" = list-price/typical-price discount >=20% verified that day. Labels are our picks; never prices.
 GEAR = [
  ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
    ("umbrella", "Repel windproof travel umbrella", "Compact auto open/close umbrella built for wind.", "B0160HYB8S", "Best value"),
    ("umbrella", "totes compact auto open umbrella", "Classic auto open/close folding umbrella.", "B071CWYNNW", "Best value"),
    ("jacket", "Columbia men's Watertight II rain jacket", "Packable waterproof shell for everyday rain.", "B0FYHTD33N", "Best value"),
    ("boots", "Hunter women's Original Tall rain boot", "Tall waterproof rubber rain boot.", "B01DJ3S8F8", "Best value"),
-   ("jacket", "Frogg Toggs Ultra-Lite2 rain suit", "Budget jacket and pants set that packs small.", "B07VZH1GSG", "Budget pick"),
-   ("boots", "KEEN men's Targhee 4 waterproof hiking boot", "Waterproof mid hiker for wet trails.", "B0CNF7PV5T", "Top pick"),
+   ("jacket", "Frogg Toggs Ultra-Lite2 rain suit", "Budget jacket and pants set that packs small.", "B07VZH1GSG", "Best value"),  # normal label: Budget pick
+   ("boots", "KEEN men's Targhee 4 waterproof hiking boot", "Waterproof mid hiker for wet trails.", "B0CNF7PV5T", "Best value"),  # normal label: Top pick
    ("jacket", "Marmot men's PreCip Eco rain jacket", "Lightweight waterproof, breathable jacket for hiking.", "B0CMRS1Q55", ""),
    ("drybag", "Earth Pak waterproof dry bag", "Roll-top bag with shoulder strap.", "B06XD2N14J", "Top pick"),
    ("boots", "XTRATUF men's 6 inch ankle deck boot", "Waterproof rubber boot for docks, boats and puddles.", "B074NGKL9G", ""),
@@ -338,9 +338,9 @@ GEAR = [
    ("anemo", "BTMETER BT-100 handheld anemometer", "Pocket wind speed meter.", "B07J64TCBQ", "Budget pick"),
  ]),
  ("emergency", "🔦 Emergency & power", "For outages, storms and trips past the edge of coverage.", "power", [
-   ("light", "Energizer WeatheReady PRO-360 LED lantern", "Battery lantern for power outages.", "B01N5MBY3J", "Best value"),
    ("kit", "Ready America 70280 emergency kit", "2-person, 3-day backpack with food, water and supplies.", "B000FJQQVI", "Best value"),
-   ("power", "Anker 10,000mAh power bank", "Slim pocket charger for phones.", "B0D5CLSMFB", "Budget pick"),
+   ("light", "Energizer WeatheReady PRO-360 LED lantern", "Battery lantern for power outages.", "B01N5MBY3J", "Best value"),
+   ("power", "Anker 10,000mAh power bank", "Slim pocket charger for phones.", "B0D5CLSMFB", "Best value"),  # normal label: Budget pick
    ("light", "Black Diamond Spot 400 headlamp", "Hands-free light, rated waterproof.", "B0H1R7G7VN", "Top pick"),
    ("power", "Jackery Explorer 300 portable power station", "Runs small devices and charges phones in outages.", "B082TMBYR6", ""),
    ("kit", "First Aid Only 298 piece first aid kit", "All-purpose first-aid kit.", "B000069EYA", "Safety pick"),
@@ -355,11 +355,11 @@ GEAR = [
    ("power", "HUANCHAIN 50 ft 12 gauge outdoor extension cord", "Heavy-duty cord so the generator can sit well away from the house.", "B09WR4ZHRD", ""),
  ]),
  ("batteries", "🔋 Power stations & solar", "Quiet battery backup you can run indoors. Recharge from the wall, a car or the sun.", "power", [
-   ("power", "Anker SOLIX C1000 portable power station", "1,056 Wh LiFePO4 battery, 1800 W AC output.", "B0C5C89QKZ", "Best value"),
+   ("power", "EcoFlow 220W bifacial portable solar panel", "Folding panel to recharge a power station when the grid is down.", "B09TKM8PBQ", "Best value"),  # normal label: none
+   ("power", "Anker SOLIX C1000 portable power station", "1,056 Wh LiFePO4 battery, 1800 W AC output.", "B0C5C89QKZ", ""),
    ("power", "EcoFlow RIVER 3 portable power station", "Small 245 Wh unit for phones, lights and a router.", "B0DB1S36YP", "Budget pick"),
    ("power", "Jackery Explorer 1000 v2 portable power station", "1,070 Wh LiFePO4 battery, 1500 W AC output.", "B0D7PPG25F", "Top pick"),
    ("power", "BLUETTI AC180 portable power station", "1,152 Wh LiFePO4 battery, 1800 W AC output.", "B0C1SMJTDT", ""),
-   ("power", "EcoFlow 220W bifacial portable solar panel", "Folding panel to recharge a power station when the grid is down.", "B09TKM8PBQ", ""),
  ]),
  ("outage", "🔌 Outage backup for home & phone", "Keep Wi-Fi, phones and lights on when the power flickers or fails.", "power", [
    ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", "Best value"),
