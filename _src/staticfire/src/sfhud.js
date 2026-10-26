@@ -1,10 +1,16 @@
-// Test-stand HUD for the SIMULATED static fire (made-up numbers, not telemetry). Compact monospace panels at the screen edges.
+// Test-stand readouts for the SIMULATED static fire (made-up numbers, not telemetry).
+// The full panels live in `mount` (below the stage on phones, side panels on wide screens); the stage only gets a
+// small corner block (SIMULATED pill + T-clock + thrust) so nothing covers the rocket, tower or plume.
 import { ENGINES, sfEvents } from "./staticfire.js";
 const E = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const f = (v, d = 1) => (v == null || isNaN(v)) ? "—" : v.toFixed(d);
 const clk = (t) => { const a = Math.abs(t), m = Math.floor(a / 60), s = a % 60; return (t < 0 ? "T-" : "T+") + String(m).padStart(2, "0") + ":" + s.toFixed(1).padStart(4, "0"); };
 
-export function createSfHud(root) {
+export function createSfHud(root, mount) {
+  const mini = document.createElement("div"); mini.className = "sf-mini";
+  mini.innerHTML = `<div class="sf-pill">⚠ SIMULATED · NOT REAL</div><div class="sf-mclk" id="sfMClk" hidden>T-00:20.0</div><div class="sf-mthr" id="sfMThr" hidden>0.0 MN · 0%</div>`;
+  root.appendChild(mini);
+  const mClk = mini.querySelector("#sfMClk"), mThr = mini.querySelector("#sfMThr");
   const el = document.createElement("div"); el.id = "sfHud"; el.setAttribute("aria-label", "Simulated static fire test data"); el.hidden = true;
   const dots = ENGINES.map((e, i) => `<circle id="sfE${i}" cx="${(e.x * 10).toFixed(1)}" cy="${(e.z * 10).toFixed(1)}" r="${e.g === 2 ? 3.6 : 3.9}"/>`).join("");
   el.innerHTML = `
@@ -23,14 +29,16 @@ export function createSfHud(root) {
     <div class="sfK">DELUGE</div><div class="sfS" id="sfDel">—</div>
     <div class="sfK" id="sfAmbK">AMBIENT</div><div class="sfS" id="sfAmb">—</div></div>
   <div class="sfp sfB"><div class="sfTag">⚠ SIMULATED · NOT REAL · made-up test data</div><div class="sfK">GSE <span id="sfGse"></span></div><div id="sfLog" class="sfLog"></div></div>`;
-  root.appendChild(el);
+  (mount || root).appendChild(el);
   const $ = (id) => el.querySelector("#" + id), set = (id, v) => { const n = $(id); if (n._v !== v) { n._v = v; n.textContent = v; } };
   let events = [], logKey = "";
   return {
     el,
-    show(on, run) { el.hidden = !on; if (run) { events = sfEvents(run); logKey = ""; } },
+    show(on, run) { el.hidden = !on; mClk.hidden = mThr.hidden = !on; if (run) { events = sfEvents(run); logKey = ""; } },
     update(st) {
       set("sfClk", clk(st.t));
+      const mc = clk(st.t), mt = f(st.thrustMN, 1) + " MN · " + Math.round(st.thrust * 100) + "%";
+      if (mClk._v !== mc) { mClk._v = mc; mClk.textContent = mc; } if (mThr._v !== mt) { mThr._v = mt; mThr.textContent = mt; }
       set("sfSt", st.t < -16 ? "PROP LOAD" : st.t < 0 ? "TERMINAL COUNT" : st.t < 2.4 ? "STARTUP" : st.t < 8 ? "MAINSTAGE" : st.t < 9 ? "SHUTDOWN" : st.t < 30 ? "SAFING" : "TEST COMPLETE");
       set("sfThr", f(st.thrustMN, 1) + " MN"); set("sfTf", Math.round(st.thrustTf).toLocaleString("en-US") + " tf · " + Math.round(st.thrust * 100) + "%");
       set("sfPc", Math.round(st.pcAvg) + " bar"); set("sfPcR", st.pcAvg ? Math.round(st.pcMin) + " / " + Math.round(st.pcMax) + " bar" : "— / —");

@@ -647,18 +647,21 @@ def static_fire_page():
     sim = "SIMULATED · NOT REAL"
     h = f'''<section class="hero sf-hero"><div class="wrap"><span class="kicker">🔥 Free simulator</span><h1>Starship Static Fire · Simulator</h1>
 <p class="lead">A pretend Starship static fire in your browser: water deluge, 33 engines, steam. Every number is made up.</p></div></section>'''
-    b = f'''<section aria-label="Simulator"><div class="sf-stage" id="sf-stage" data-three="../assets/{V('static-fire/sf3d.js')}" data-assets="../assets/static-fire/" role="region" aria-label="Simulated Starship static fire">
+    b = f'''<section aria-label="Simulator"><div class="sf-wrap" id="sf-wrap"><div class="sf-stage" id="sf-stage" data-three="../assets/{V('static-fire/sf3d.js')}" data-assets="../assets/static-fire/" role="region" aria-label="Simulated Starship static fire">
 <canvas id="sf-gl" hidden></canvas><canvas id="sf-lite" hidden aria-hidden="true"></canvas>
-<div class="sf-badge">⚠ {sim}</div><div class="sf-callout" id="sf-callout" aria-hidden="true"></div>
+<div class="sf-callout" id="sf-callout" aria-hidden="true"></div>
 <button type="button" class="sf-go" id="sf-go">▶ Start static fire<small>{sim}</small></button><div class="sf-tier" id="sf-tier"></div>
 <noscript><p style="position:absolute;inset:auto 0 45% 0;text-align:center;color:#fff">The simulator needs JavaScript.</p></noscript></div>
-<div class="sf-controls"><button type="button" class="btn primary" id="sf-start">▶ Start static fire</button></div>
-<p class="sf-status dim small" id="sf-status" aria-live="polite">Tap Start to run the simulated static fire. It takes about a minute.</p></section>
+<div class="sf-controls"><button type="button" class="btn primary" id="sf-start">▶ Start static fire</button>
+<button type="button" class="btn sf-tog" id="sf-sound" aria-pressed="true">🔊 Sound on</button><button type="button" class="btn sf-tog" id="sf-readtog" aria-pressed="true" aria-controls="sf-read">Hide readouts</button></div>
+<p class="sf-status dim small" id="sf-status" aria-live="polite">Tap Start to run the simulated static fire, with sound. It takes about a minute.</p>
+<div class="sf-read" id="sf-read" aria-label="Simulated readouts"></div></div></section>
 <section aria-labelledby="sf-what-h"><h2 id="sf-what-h">What you're watching</h2><ul>
 <li><b>Terminal count:</b> a made-up countdown from T−20 s. The water deluge comes on at T−8 s.</li>
 <li><b>Ignition:</b> the center 3 engines light first, then the inner 10, then the outer 20.</li>
 <li><b>Mainstage:</b> about 8 seconds at full thrust while the vehicle stays clamped down. In some runs one engine shuts down early.</li>
-<li><b>Safing:</b> cutoff, purge, deluge off and detanking.</li></ul>
+<li><b>Safing:</b> cutoff, purge, deluge off and detanking.</li>
+<li><b>Sound:</b> synthesized in your browser to follow the simulation (water deluge, ignition crackle, the roar and the steam). Use the 🔊 button to turn it off.</li></ul>
 <p class="dim">Thrust, chamber pressure, tank, deluge and ambient weather readings are simulated ballpark values, not telemetry from any real test. The view picks a 3D quality level that suits your device, with a simple 2D view as a fallback.</p></section>
 <section class="sf-cta" aria-labelledby="sf-cta-h"><span class="kicker">From the makers of this page</span><h2 id="sf-cta-h">{APP}</h2>
 <p>Free rain ETA, live radar and weather alerts on Android.</p>

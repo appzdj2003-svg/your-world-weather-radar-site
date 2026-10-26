@@ -1,28 +1,41 @@
 /* Starship Static Fire · Simulator (/static-fire/) */
 .sf-hero{padding-bottom:10px}
-.sf-stage{position:relative;width:100%;height:min(80svh,760px);min-height:520px;border-radius:16px;overflow:hidden;background:#06101e;border:1px solid #1e293b;contain:layout paint}
+.sf-wrap{position:relative}
+.sf-stage{position:relative;width:100%;height:min(calc(100svh - 160px),760px);min-height:520px;scroll-margin-top:84px;border-radius:16px;overflow:hidden;background:#06101e;border:1px solid #1e293b;contain:layout paint}
 .sf-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .sf-stage canvas[hidden]{display:none}
-.sf-badge{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:5;background:#0f172acc;border:1px solid #fbbf2466;color:#fde68a;font:700 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;padding:5px 9px;border-radius:999px;white-space:nowrap}
 .sf-tier{position:absolute;right:8px;bottom:8px;z-index:5;color:#94a3b8;font:600 9px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;opacity:.8}
 .sf-stage.on .sf-tier{display:none}
 .sf-go{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;background:#0f172ad9;border:1px solid #f59e0b88;color:#fff;border-radius:16px;padding:16px 22px;font:700 17px/1.2 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 30px #0008}
 .sf-go small{font:600 11px/1.3 system-ui,sans-serif;color:#fde68a;letter-spacing:.06em}
 .sf-go[hidden]{display:none}
-.sf-callout{position:absolute;left:0;right:0;top:42px;z-index:5;text-align:center;color:#fff;font:800 20px/1 system-ui,sans-serif;letter-spacing:.18em;text-shadow:0 2px 12px #000c;pointer-events:none}
+/* corner block: the only thing drawn over the view (top-right sky, clear of the ship, tower and plume) */
+.sf-mini{position:absolute;right:8px;top:8px;z-index:5;display:flex;flex-direction:column;align-items:flex-end;gap:3px;pointer-events:none;font:700 10px/1.15 ui-monospace,SFMono-Regular,Menlo,monospace}
+.sf-pill{background:#0f172acc;border:1px solid #fbbf2466;color:#fde68a;letter-spacing:.1em;padding:4px 8px;border-radius:999px;white-space:nowrap;font-size:9.5px}
+.sf-mclk,.sf-mthr{background:#020617a6;color:#f8fafc;padding:2px 6px;border-radius:6px;white-space:nowrap}
+.sf-mclk{font-size:13px;letter-spacing:.04em}.sf-mthr{color:#cbd5e1;font-size:9.5px}
+.sf-mclk[hidden],.sf-mthr[hidden]{display:none}
+.sf-callout{position:absolute;right:10px;top:74px;z-index:5;text-align:right;color:#fde68a;font:800 13px/1 system-ui,sans-serif;letter-spacing:.14em;text-shadow:0 1px 8px #000e;pointer-events:none;max-width:60%}
 .sf-stage.loading::after{content:"Loading 3D…";position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;color:#cbd5e1;font:600 12px system-ui}
-.sf-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:14px 0 4px}
+.sf-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:12px 0 4px}
+.sf-controls .sf-tog{padding:9px 12px;font-size:.85rem}
 .sf-status{text-align:center;margin:4px 0 0}
 .sf-cta{margin:26px 0;text-align:center}
 .sf-cta .btns{justify-content:center}
 .sf-fine{font-size:13px}
-/* HUD (copied layout, positioned inside the stage) */
-#sfHud{position:absolute;inset:0;pointer-events:none;z-index:4;font:600 9.5px/1.28 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#e2e8f0}
+/* Readouts: below the stage in a compact 2-column grid (log underneath); side panels only on wide screens */
+.sf-read{margin:10px 0 0}.sf-read.off{display:none}
+#sfHud{display:grid;grid-template-columns:1fr 1fr;gap:8px;font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#e2e8f0}
 #sfHud[hidden]{display:none}
-#sfHud .sfp{position:absolute;background:#020617b0;border:1px solid #33415580;border-radius:9px;padding:5px 7px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-#sfHud .sfL{left:6px;top:70px;width:128px}
-#sfHud .sfR{right:6px;top:70px;width:128px}
-#sfHud .sfB{left:6px;right:6px;bottom:6px;max-width:560px;margin:0 auto}
+#sfHud .sfp{background:#0b1220;border:1px solid #1e293b;border-radius:10px;padding:7px 9px;min-width:0}
+#sfHud .sfB{grid-column:1/-1}
+@media (min-width:1000px){
+  #sfHud{grid-template-columns:1fr}
+  #sfHud .sfL,#sfHud .sfR{position:absolute;top:56px;width:156px;z-index:4;background:#020617b8;border-color:#33415580;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #sfHud .sfL{left:8px}#sfHud .sfR{right:8px;top:110px}
+}
+@media (max-width:759px){.sf-stage{scroll-margin-top:68px;height:calc(100svh - 200px);min-height:430px;max-height:760px}.sf-controls{margin-top:10px;gap:6px}.sf-controls .btn{padding:9px 13px;font-size:.88rem}}
+html.sf-playing .playbar{display:none!important}
 #sfHud .sfTag{color:#fbbf24;font-size:8.5px;letter-spacing:.1em;margin-bottom:2px}
 #sfHud .sfH{color:#7dd3fc;font-size:9px;letter-spacing:.1em;margin-bottom:2px}#sfHud .sfH b{color:#e2e8f0}
 #sfHud .sfClk{font-size:17px;color:#f8fafc;letter-spacing:.04em}
@@ -39,4 +52,3 @@
 #sfHud .sfLog{margin-top:2px}#sfHud .sfLog div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#sfHud .sfLog span{color:#7dd3fc}
 #sfHud .sfLog div:last-child{color:#fde68a}
 #sfHud #sfGse{color:#94a3b8;letter-spacing:.02em}
-@media (min-width:760px){#sfHud .sfL,#sfHud .sfR{width:150px}#sfHud{font-size:10.5px}}

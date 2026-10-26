@@ -4,6 +4,7 @@
 import { SF_START, SF_END, SF_CALLOUTS, makeRun, sfState, sfSample } from "./staticfire.js";
 import { createSfHud } from "./sfhud.js";
 import { createLite } from "./lite.js";
+import { createSfAudio } from "./sfaudio.js";
 
 (function () {
   const root = document.getElementById("sf-stage"); if (!root) return;
@@ -15,7 +16,15 @@ import { createLite } from "./lite.js";
   const STAND = { rocket: "Starship", family: "Starship", padLat: 25.997, padLon: -97.157, _az: 90, metar: null, net: simDate().getTime() };
   const PROFILE = { sep: 1e9, fairing: 1e9, meco: 1e9, ses: 1e9, maxq: 1e9 };
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const hud = createSfHud(root);
+  const hud = createSfHud(root, $("sf-read"));
+  const audio = createSfAudio(), sndBtn = $("sf-sound"), readBtn = $("sf-readtog"), readBox = $("sf-read");
+  const syncSnd = () => { sndBtn.textContent = audio.on ? "🔊 Sound on" : "🔇 Sound off"; sndBtn.setAttribute("aria-pressed", String(audio.on)); };
+  sndBtn.addEventListener("click", () => { audio.setOn(!audio.on); syncSnd(); }); syncSnd();
+  let showRead = true; try { showRead = localStorage.getItem("ywsf.readouts") !== "0"; } catch (e) {}
+  const syncRead = () => { readBox.classList.toggle("off", !showRead); readBtn.textContent = showRead ? "Hide readouts" : "Show readouts"; readBtn.setAttribute("aria-pressed", String(showRead)); };
+  readBtn.addEventListener("click", () => { showRead = !showRead; try { localStorage.setItem("ywsf.readouts", showRead ? "1" : "0"); } catch (e) {} syncRead(); }); syncRead();
+  // while the sequence plays, the site's floating Play bar steps aside so it never covers the stage or the controls
+  const playing = (v) => document.documentElement.classList.toggle("sf-playing", v);
   const NEXT = { ultra: "standard", standard: "lite", lite: null };
   let engine = null, lite = null, tier = null, switching = false, run = makeRun(1), t0 = 0, running = false, done = false;
   let last = 0, fpsT = 0, fpsN = 0, fpsW = 0, visible = true;
@@ -59,20 +68,23 @@ import { createLite } from "./lite.js";
     if (!fpsW) { fpsW = now; fpsN = 0; } fpsN++;
     if (now - fpsW > 3000) { const fps = fpsN * 1000 / (now - fpsW); fpsW = now; fpsN = 0; if (fps < 22) useTier(NEXT[tier]); }
   }
-  function simT() { if (!running) return SF_START; const t = (performance.now() - t0) / 1000 + SF_START; if (t >= SF_END) { done = true; return SF_END; } return t; }
+  function simT() { if (!running) return SF_START; const t = (performance.now() - t0) / 1000 + SF_START; if (t >= SF_END) { if (!done) { done = true; playing(false); audio.stop(); } return SF_END; } return t; }
   function start() {
     run = makeRun(+Q.get("seed") || ((Math.random() * 2 ** 31) >>> 0)); t0 = performance.now(); running = true; done = false;
+    audio.start(run); playing(true);   // inside the tap: unlocks/resumes audio on iOS Safari and Android Chrome
+    { const rb = root.getBoundingClientRect(), cb = btn.getBoundingClientRect(); if (rb.top < 56 || cb.bottom > innerHeight) root.scrollIntoView({ behavior: "auto", block: "start" }); }   // stage + controls in view
     hud.show(true, run); root.classList.add("on"); big.hidden = true; btn.textContent = "↻ Restart static fire";
     status.textContent = "Simulated static fire running. Not a real event.";
   }
   btn.addEventListener("click", start); big.addEventListener("click", start);
   function tick(ts) {
     requestAnimationFrame(tick);
+    audio.duck(!visible || document.hidden);
     if (!visible || document.hidden || switching) { last = ts; return; }
     const dt = Math.min(0.1, (ts - (last || ts)) / 1000 || 0.016); last = ts;
     const t = simT(), st = sfState(t, run, null), s = sfSample(st);
     if (running) {
-      hud.update(st);
+      hud.update(st); audio.update(st);
       let co = ""; for (const k in SF_CALLOUTS) if (t >= +k && t < +k + 2.5) co = SF_CALLOUTS[k];
       if (st.out >= 0 && t < run.outAt + 2.5) co = "ENGINE OUT";
       if (done) co = "TEST COMPLETE · SIM";
@@ -87,5 +99,5 @@ import { createLite } from "./lite.js";
   if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; }).observe(root);
   useTier(pickTier()).then(() => requestAnimationFrame(tick));
   if (Q.get("autostart") === "1") start();
-  window.YWSF = { start, get tier() { return tier; }, get t() { return simT(); } };   // for tests
+  window.YWSF = { start, audio, get tier() { return tier; }, get t() { return simT(); } };   // for tests
 })();
