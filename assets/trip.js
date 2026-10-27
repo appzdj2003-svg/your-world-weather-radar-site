@@ -209,6 +209,7 @@ ${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl
     else if (t.classList.contains("tp-pick")) { $("f-sd").focus(); try { $("f-sd").showPicker(); } catch (x) {} }
     else if (t.id === "tp-shift") { st.sd = t.dataset.sd; say("bot", `<p>Moved your trip to ${E(C.fmtRange(st.sd, st.d))}, the best stretch in the forecast.</p>`); plan(true); }
     else if (t.dataset && t.dataset.partner && window.gtag) gtag("event", "trip_outbound", { partner: t.dataset.partner });
+    else if (t.dataset && t.dataset.ev === "flight_page" && window.gtag) gtag("event", "flight_page_click", { section: t.dataset.sec || "trip_planner" });
   });
   let last = null; try { last = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}   // remembered on this device only
   if (last && last.to && last.sd >= today() && !location.hash && !location.search)

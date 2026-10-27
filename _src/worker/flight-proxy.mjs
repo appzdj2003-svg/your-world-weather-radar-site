@@ -1,27 +1,30 @@
-/* Flight tracker relay for the website's /flight page (Cloudflare Worker, free plan). NOT DEPLOYED: needs Aaron's OK first.
+/* Flight tracker relay for the website's /flight page (Cloudflare Worker, free plan). Deployed as yw-flight (https://yw-flight.yourworldapps.workers.dev), approved by Aaron Oct 26 2026.
    Why: adsb.lol, aviationweather.gov and FAA NAS Status send no CORS headers, so a browser page can't read them directly.
    This worker: GET only; only our site's Origin; short caches so many visitors share one upstream call; serves the last good copy
    when an upstream fails; trims replies to what the page shows. Visitors' IPs are not forwarded. Keys: none (all sources are free).
-   Routes:  /flight?cs=DAL809   live aircraft for an ICAO callsign (adsb.lol, ODbL)                     cache 15 s
+   Routes:  /flight?cs=DAL809   live aircraft for an ICAO callsign (adsb.lol, ODbL)    cache 30-120 s, daily cap
             /wx?ids=KATL,KSJC    METAR + TAF, up to 4 airports (aviationweather.gov, public domain)      cache 5 min
             /nas                 FAA NAS airport status XML -> JSON (public domain)                       cache 60 s
             /sigmet              US + international SIGMETs incl. convective (aviationweather.gov)        cache 5 min
             /places?lat=&lon=    named places near an airport from OpenStreetMap via Nominatim (ODbL)     cache 7 days
                                  (one request per category, 1.1 s apart, per Nominatim's 1 req/s policy)
-   Config (wrangler [vars]): UA (required), ORIGINS (comma list). Optional KV binding FLIGHT_KV. */
+   Config (wrangler [vars]): UA (required), ORIGINS (comma list). KV binding FLIGHT_KV (adsb.lol cache + daily budget, places). */
 const NOMI = "https://nominatim.openstreetmap.org/search";
 export const PLACE_CATS = [["restaurant", 15], ["cafe", 6], ["fast_food", 6], ["museum", 6], ["attraction", 6], ["park", 6], ["cinema", 4], ["station", 8]];
 const ADSB = "https://api.adsb.lol/v2/callsign/", AWC = "https://aviationweather.gov/api/data/", NAS = "https://nasstatus.faa.gov/api/airport-status-information";
 const allowed = (env, origin) => (env.ORIGINS || "https://weather.yourworldapps.si").split(",").map(s => s.trim()).filter(Boolean).includes(origin);
 const mem = new Map();
-function store(env) {
-  if (env.FLIGHT_KV) return { get: async k => { const v = await env.FLIGHT_KV.get(k); return v ? JSON.parse(v) : null; },
-    put: (k, v) => env.FLIGHT_KV.put(k, JSON.stringify(v), { expirationTtl: 3600 }) };
-  const c = typeof caches !== "undefined" && caches.default, key = k => "https://flight-cache.invalid/" + encodeURIComponent(k);
-  if (c) return { get: async k => { const r = await c.match(key(k)); return r ? r.json() : null; },
-    put: (k, v) => c.put(key(k), new Response(JSON.stringify(v), { headers: { "Cache-Control": "max-age=3600" } })) };
-  return { get: async k => mem.get(k) || null, put: async (k, v) => { mem.set(k, v); } };
+// Memory (per isolate) first; KV only for the adsb.lol cache + daily budget and the 7-day places cache, so KV writes stay
+// well inside the free plan's 1,000/day. (The Cache API does nothing on workers.dev, so it isn't used.)
+function store(env, persist) {
+  const kv = persist && env.FLIGHT_KV;
+  return { get: async k => { const m = mem.get(k); if (m) return m; if (!kv) return null; const v = await kv.get(k); const o = v ? JSON.parse(v) : null; if (o) mem.set(k, o); return o; },
+    put: async (k, v, ttlSec = 3600) => { mem.set(k, v); if (mem.size > 500) mem.delete(mem.keys().next().value); if (kv) await kv.put(k, JSON.stringify(v), { expirationTtl: Math.max(60, ttlSec) }); } };
 }
+// adsb.lol asks for light use (about 500 requests a day per IP). Every visitor shares this budget; the cache time per
+// callsign grows as the day's count rises, and past the cap we serve the last copy or say live tracking is paused.
+export const ADSB_DAILY_CAP = 300;
+export const flightTtl = used => used < ADSB_DAILY_CAP * 0.5 ? 30e3 : used < ADSB_DAILY_CAP * 0.8 ? 60e3 : 120e3;
 
 const num = v => (typeof v === "number" && isFinite(v) ? v : null);
 export function trimAircraft(j) {
@@ -68,7 +71,7 @@ export function trimPlaces(texts) {
 export function route(url) {
   const u = new URL(url), p = u.pathname.replace(/\/+$/, "");
   if (p === "/flight") { const cs = (u.searchParams.get("cs") || "").toUpperCase().trim();
-    return /^[A-Z]{3}[0-9]{1,4}[A-Z]{0,2}$/.test(cs) ? { key: "f:" + cs, ttl: 15e3, up: [ADSB + cs], kind: "flight" } : null; }
+    return /^[A-Z]{3}[0-9]{1,4}[A-Z]{0,2}$/.test(cs) ? { key: "f:" + cs, ttl: 30e3, up: [ADSB + cs], kind: "flight" } : null; }
   if (p === "/wx") { const ids = [...new Set((u.searchParams.get("ids") || "").toUpperCase().split(",").map(s => s.trim()).filter(Boolean))];
     if (!ids.length || ids.length > 4 || !ids.every(s => /^[A-Z0-9]{4}$/.test(s))) return null; const q = ids.sort().join(",");
     return { key: "w:" + q, ttl: 5 * 60e3, up: [`${AWC}metar?ids=${q}&format=json`, `${AWC}taf?ids=${q}&format=json`], kind: "wx" }; }
@@ -98,9 +101,14 @@ export async function handle(req, env, fetchFn = fetch, now = Date.now(), sleep 
   if (!cors["Access-Control-Allow-Origin"]) return out(403, '{"error":"origin not allowed"}');
   if (!env.UA) return out(500, '{"error":"UA not configured"}');
   const r = route(req.url); if (!r) return out(400, '{"error":"bad request"}');
-  const st = store(env), hit = await st.get(r.key).catch(() => null);
+  const st = store(env, r.kind === "flight" || r.kind === "places"), hit = await st.get(r.key).catch(() => null);
   const send = (c, state) => out(200, c.body, { "Cache-Control": `public, max-age=${Math.max(0, Math.round((c.exp - now) / 1000))}`, "X-Cache": state, "X-Fetched": new Date(c.at).toISOString() });
   if (hit && now < hit.exp) return send(hit, "HIT");
+  let bkey, used = 0;
+  if (r.kind === "flight") { bkey = "b:" + new Date(now).toISOString().slice(0, 10); const m = mem.get(bkey), kb = env.FLIGHT_KV ? await env.FLIGHT_KV.get(bkey).then(v => v && JSON.parse(v)).catch(() => null) : null;
+    used = Math.max(m ? m.n : 0, kb ? kb.n : 0);   // other isolates count too: take the higher of ours and the shared one
+    if (used >= ADSB_DAILY_CAP) return hit ? send({ ...hit, exp: now + 120e3 }, "STALE") : out(503, '{"error":"daily live-data budget used"}', { "Retry-After": "3600" });
+    r.ttl = flightTtl(used); try { await st.put(bkey, { n: used + 1 }, 2 * 86400); } catch (e) {} }
   try {
     const one = async (u, i) => {
       const res = await fetchFn(u, { headers: { "User-Agent": env.UA, "Accept": r.kind === "nas" ? "application/xml" : "application/json" } });
@@ -112,7 +120,7 @@ export async function handle(req, env, fetchFn = fetch, now = Date.now(), sleep 
     if (r.serial) { texts = []; for (let i = 0; i < r.up.length; i++) { if (i && sleep) await sleep(r.serial); texts.push(await one(r.up[i], i)); } }
     else texts = await Promise.all(r.up.map(one));
     const c = { body: JSON.stringify(await build(r, texts)), at: now, exp: now + r.ttl };
-    try { await st.put(r.key, c); } catch (e) { console.warn("cache write failed", String(e)); }
+    try { await st.put(r.key, c, r.kind === "places" ? 8 * 86400 : 3600); } catch (e) { console.warn("cache write failed", String(e)); }
     return send(c, "MISS");
   } catch (e) {
     if (hit) return send({ ...hit, exp: now + Math.min(r.ttl, 60e3) }, "STALE");

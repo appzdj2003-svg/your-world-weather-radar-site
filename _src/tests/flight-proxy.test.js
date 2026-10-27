@@ -23,13 +23,13 @@ const assert = require("assert"), path = require("path");
     const j = await r.json(); assert.strictEqual(j.ac[0].flight, "DAL681"); assert.strictEqual(j.ac[0].reg, "N557DN"); assert(!("extra" in j.ac[0]));
     assert(calls[0].u.startsWith("https://api.adsb.lol/v2/callsign/DAL681")); assert.strictEqual(calls[0].h["User-Agent"], env.UA); assert(!("X-Forwarded-For" in calls[0].h));
   });
-  await t("15 s cache shared by visitors, then refetched", async () => {
+  await t("30 s cache shared by visitors, then refetched", async () => {
     assert.strictEqual((await W.handle(req("/flight?cs=DAL681"), env, up, T0 + 10e3)).headers.get("X-Cache"), "HIT"); assert.strictEqual(calls.length, 1);
-    await W.handle(req("/flight?cs=DAL681"), env, up, T0 + 16e3); assert.strictEqual(calls.length, 2);
+    await W.handle(req("/flight?cs=DAL681"), env, up, T0 + 31e3); assert.strictEqual(calls.length, 2);
   });
   await t("upstream down: last good copy served as STALE; nothing cached gives 502, rate limit gives 429", async () => {
     reply = () => new Response("oops", { status: 503 });
-    const r = await W.handle(req("/flight?cs=DAL681"), env, up, T0 + 40e3); assert.strictEqual(r.headers.get("X-Cache"), "STALE");
+    const r = await W.handle(req("/flight?cs=DAL681"), env, up, T0 + 100e3); assert.strictEqual(r.headers.get("X-Cache"), "STALE");
     assert.strictEqual((await W.handle(req("/flight?cs=UAL1"), env, up, T0)).status, 502);
     reply = () => new Response("slow down", { status: 429 });
     const z = await W.handle(req("/flight?cs=AAL2"), env, up, T0); assert.strictEqual(z.status, 429); assert.strictEqual(z.headers.get("Retry-After"), "60");
@@ -44,6 +44,14 @@ const assert = require("assert"), path = require("path");
     const r = await W.handle(req("/places?lat=37.6189&lon=-122.3750"), env, up, T0, async ms => { waits.push(ms); });
     assert.strictEqual(r.status, 200); assert.strictEqual(calls.length, W.PLACE_CATS.length); assert(waits.length === calls.length - 1 && waits.every(ms => ms >= 1000));
     assert(calls.every(c => c.u.startsWith("https://nominatim.openstreetmap.org/search")));
+  });
+  await t("adsb.lol daily budget: longer cache as it fills, 503 past the cap, counted in KV per UTC day", async () => {
+    assert.strictEqual(W.flightTtl(0), 30e3); assert.strictEqual(W.flightTtl(W.ADSB_DAILY_CAP * 0.9), 120e3);
+    const k = kv(), e2 = { ...env, FLIGHT_KV: k }, day = "b:" + new Date(T0).toISOString().slice(0, 10);
+    reply = () => new Response(JSON.stringify(adsb), { status: 200 }); calls = [];
+    await W.handle(req("/flight?cs=SWA12"), e2, up, T0); const n1 = JSON.parse(await k.get(day)).n; assert(n1 >= 1 && calls.length === 1);
+    await k.put(day, JSON.stringify({ n: W.ADSB_DAILY_CAP }));
+    const r = await W.handle(req("/flight?cs=JBU34"), e2, up, T0); assert.strictEqual(r.status, 503); assert.strictEqual(calls.length, 1, "no upstream call past the cap");
   });
   console.log(`flight-proxy: ${n} tests passed`);
 })().catch(e => { console.error(e); process.exit(1); });

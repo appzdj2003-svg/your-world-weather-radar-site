@@ -494,10 +494,14 @@ def trip_planner(path):
 <div><b>🏆 Best days</b><span>Atlas points out the driest, calmest stretch in the forecast and moves your dates in one tap.</span></div>
 <div><b>🧳 Book where you like</b><span>One tap opens Google Flights, Booking.com, Airbnb, Kayak or Google Maps with your trip filled in. No account, no fees.</span></div>
 <div><b>📱 Take it with you</b><span>Send the trip to Your World Weather Radar for radar and alerts on the road.</span></div></div>
+<a class="tp-fl" href="../flight/" data-ev="flight_page" data-sec="trip_planner"><span class="tp-fl-i" aria-hidden="true">✈️</span><span class="tp-fl-t"><b>Track my flight</b><span>Flying? Follow your plane live, with the weather and FAA delays at both airports and a plain-English delay estimate. Free.</span></span><span class="tp-fl-go" aria-hidden="true">→</span></a>
 <p class="note" style="text-align:center">Don't have the app? {play_btn("trip", "dark", "planner", "Get it on Google Play")}</p>
 <p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US).{' Forecasts elsewhere: <a href="https://www.met.no/en" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), summarized into daily values by us.' if METNO else ""} Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
     page(path, title, "Weather trip planner with Ask Atlas, your travel agent: the forecast for your trip days (NWS in the US, MET Norway worldwide), best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"))
+         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"),
+         head_extra='<style>.tp-fl{display:flex;align-items:center;gap:12px;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;color:inherit;text-decoration:none}'
+                    '.tp-fl:hover{border-color:var(--sky,#2b7bd8)}.tp-fl-i{font-size:1.6rem}.tp-fl-t{flex:1;min-width:0}.tp-fl b{display:block;margin-bottom:2px}'
+                    '.tp-fl-t span{color:var(--slate-3);font-size:.95rem}.tp-fl-go{font-size:1.3rem;font-weight:700}</style>')
 
 def ask():
     import askdata
@@ -675,8 +679,8 @@ def static_fire_page():
          b, h, "0.5", scripts=("static-fire/sf.js",), jsonld=ld, head_extra=f'<link rel="stylesheet" href="../assets/{V("static-fire/sf.css")}">')
 
 
-# ---------- /flight: free flight tracker (PREVIEW: not in nav, not in the sitemap, noindex) ----------
-FLIGHT_API = os.environ.get("FLIGHT_API", "").strip()   # our relay in _src/worker/flight-proxy.mjs (NOT deployed yet); empty = relay-free mode
+# ---------- /flight: free flight tracker (live; linked from the Trip Planner only, not in the nav; indexed + in the sitemap like other pages) ----------
+FLIGHT_API = os.environ.get("FLIGHT_API", "https://yw-flight.yourworldapps.workers.dev").strip()   # our relay in _src/worker/flight-proxy.mjs; FLIGHT_API="" = relay-free mode
 def flight_ref(sec):
     return PLAY + "&referrer=" + enc(f"utm_source=flight_page&utm_medium=web&utm_campaign={sec}")
 def flight_cta(sec):
@@ -723,8 +727,8 @@ Weather: <a href="https://aviationweather.gov" target="_blank" rel="noopener">av
 Places: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). Map imagery: NASA GIBS / Blue Marble. Not affiliated with any airline or the FAA.</p></div>'''
     page("flight/index.html", "Track my flight · Free flight tracker",
          "Free flight tracker: live position, weather and FAA delays at both airports, storms on the route and a plain-English delay estimate.",
-         b, h, "0.5", scripts=("codec-core.js", "flightcore.js", "flight.js"), sitemap=False,
-         head_extra=f'<meta name="robots" content="noindex"><link rel="stylesheet" href="../assets/{V("flight.css")}">')
+         b, h, "0.5", scripts=("codec-core.js", "flightcore.js", "flight.js"),
+         head_extra=f'<link rel="stylesheet" href="../assets/{V("flight.css")}">')
 
 if __name__ == "__main__":
     OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); flight_page(); misc()

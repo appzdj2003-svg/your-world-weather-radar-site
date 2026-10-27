@@ -41,7 +41,7 @@
     const p = F.parseFlight(S.t.fn); if (!API || !p || !p.cs) return;
     try { const j = await api(`/flight?cs=${encodeURIComponent(p.cs)}`); S.ac = (j.ac || [])[0] || null; S.acAt = Date.now(); S.acErr = "";
       if (S.ac) { const base = j.now ? (j.now > 1e12 ? j.now : j.now * 1000) : Date.now(); S.ac.seenAt = Math.min(Date.now(), base - (S.ac.seen || 0) * 1000); } }
-    catch (e) { S.acErr = e.status === 429 ? "busy" : "down"; }
+    catch (e) { S.acErr = e.status === 503 ? "budget" : e.status === 429 ? "busy" : "down"; }
   }
   async function loadWx() {
     const apts = airports(); if (!apts.length) return; const ids = [...new Set(apts.map(a => a.icao))];
@@ -99,6 +99,7 @@
   function statusLine(c) {
     const pr = c.progress, ac = S.ac, code = a => a.iata || a.icao;
     if (!API) return { big: "Live position isn't connected on this preview yet.", sub: "Route, weather and the delay estimate below still work." };
+    if (S.acErr === "budget" && !ac) return { big: "Live position is paused for now.", sub: "We use a free live-data source with a daily limit, and today's share is used up. Weather, FAA status and the delay estimate below still work." };
     if (S.acErr && !ac) return { big: "Live tracking is busy right now.", sub: "We'll try again in a few seconds." };
     if (!S.leg && S.legs.length > 1) return { big: "This flight number flies more than one leg.", sub: "Pick yours below." };
     if (S.inbound && c.inbound) { const ib = c.inbound;

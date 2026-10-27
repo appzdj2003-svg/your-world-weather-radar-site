@@ -1,5 +1,6 @@
-# NOT DEPLOYED. Needs Aaron's OK. Deploy (free Workers plan, workers.dev only): npx wrangler deploy -c wrangler-flight.toml
-# Then rebuild the site with FLIGHT_API=https://yw-flight.yourworldapps.workers.dev
+# Live at https://yw-flight.yourworldapps.workers.dev (approved by Aaron, Oct 26 2026). Free Workers plan, workers.dev only.
+# Deploy: copy flight-proxy.mjs + this file (as wrangler.toml) into a folder with wrangler installed, then `npx wrangler deploy`.
+# The site is built with FLIGHT_API=https://yw-flight.yourworldapps.workers.dev
 # Separate from yw-metno and from the app's ywwa-cams worker on purpose: nothing here touches either.
 name = "yw-flight"
 main = "flight-proxy.mjs"
@@ -10,7 +11,7 @@ workers_dev = true
 UA = "YourWorldWeatherRadar/1.0 https://weather.yourworldapps.si support@yourworldapps.si"
 ORIGINS = "https://weather.yourworldapps.si"
 
-# Optional free KV cache (the Cache API doesn't persist on workers.dev). Create with: npx wrangler kv namespace create FLIGHT_KV
-# [[kv_namespaces]]
-# binding = "FLIGHT_KV"
-# id = "<fill in after creating>"
+# Free KV (the Cache API doesn't persist on workers.dev): adsb.lol cache + its daily budget counter, and the 7-day places cache.
+[[kv_namespaces]]
+binding = "FLIGHT_KV"
+id = "3a4a8a35c73d4ad9bf4beb2637673843"
