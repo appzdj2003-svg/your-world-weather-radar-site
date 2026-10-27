@@ -1,4 +1,5 @@
-/* /flight page UI. Data: adsb.lol live aircraft (ODbL) + adsb.lol/VRS routes (CC0); METAR/TAF and SIGMETs from aviationweather.gov,
+/* /flight page UI. Data: adsb.lol live aircraft (ODbL) + adsb.lol/VRS routes (CC0); day-of route cross-check via api.adsbdb.com
+   (browser, free, no key — not the adsb.lol budget); METAR/TAF and SIGMETs from aviationweather.gov,
    FAA NAS Status, OpenStreetMap places (Nominatim, ODbL) through our relay (data-api); NWS observations directly as a fallback.
    No keys, no AI. Everything that's an estimate says so. */
 (function () {
@@ -6,6 +7,7 @@
   if (!F || !root) return;
   const API = (root.dataset.api || "").replace(/\/+$/, ""), PLAY = root.dataset.play || "";
   const ROUTES = "https://vrs-standing-data.adsb.lol/routes/";
+  const ADSBDB = "https://api.adsbdb.com/v0/callsign/";
   const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const mi = nm => Math.round(nm * 1.15078), kmToMi = km => km / 1.609344;
   const tz = (() => { try { return new Intl.DateTimeFormat([], { timeZoneName: "short" }).formatToParts(new Date()).find(p => p.type === "timeZoneName").value; } catch (e) { return ""; } })();
@@ -58,6 +60,50 @@
   // ---------- data loading ----------
   async function loadRoute(cs) {
     try { const j = await getJSON(`${ROUTES}${cs.slice(0, 2)}/${cs}.json`); return j && j._airports ? j : null; } catch (e) { return null; }
+  }
+  // Day-of route from adsbdb (same source the Android app uses). Browser CORS *; no relay, no adsb.lol budget.
+  async function loadAdsbdb(cs) {
+    if (!cs) return null;
+    try {
+      const j = await getJSON(ADSBDB + encodeURIComponent(cs));
+      return F.fromAdsbdb(j);
+    } catch (e) { return null; }
+  }
+  function reindexLegs(L) { return (L || []).map((l, i) => ({ from: l.from, to: l.to, i })); }
+  // Standing data is typical for the flight number and can be wrong on the day (airlines reuse numbers).
+  // Prefer a leg the live plane actually fits; fall back to adsbdb; never keep a route we know is wrong.
+  async function resolveRoute(cs) {
+    S.routeUnconfirmed = false;
+    S.routeSrc = S.route && S.route._src ? S.route._src : (S.route ? "standing" : "");
+    const standing = reindexLegs(S.legs);
+    const ac = S.ac && isFinite(S.ac.lat) && isFinite(S.ac.lon) ? S.ac : null;
+    const standingFit = ac && standing.length ? F.liveLeg(standing, ac) : null;
+    const needAlt = !standing.length || (ac && !standingFit) || !ac;
+    if (!needAlt) return;
+    const alt = await loadAdsbdb(cs);
+    const altLegs = alt ? reindexLegs(F.legs(alt)) : [];
+    const altFit = ac && altLegs.length ? F.liveLeg(altLegs, ac) : null;
+    if (ac) {
+      if (altFit) {
+        S.route = alt; S.legs = altLegs; S.routeSrc = "adsbdb"; return;
+      }
+      if (standingFit) return;
+      // Live plane exists but matches neither source — show the plane, not a wrong city pair.
+      S.route = null; S.legs = []; S.routeSrc = ""; S.routeUnconfirmed = true; return;
+    }
+    // No live plane: cross-check. If sources disagree, offer both so we don't auto-pick a stale leg.
+    if (!altLegs.length) return;
+    if (!standing.length) { S.route = alt; S.legs = altLegs; S.routeSrc = "adsbdb"; return; }
+    if (standing.length === 1 && altLegs.length === 1 && F.sameEndpoints(standing[0], altLegs[0])) return;
+    const merged = [];
+    const seen = new Set();
+    for (const l of standing.concat(altLegs)) {
+      const k = [(l.from.icao || l.from.iata || ""), (l.to.icao || l.to.iata || "")].join(">");
+      if (seen.has(k)) continue;
+      seen.add(k); merged.push(l);
+    }
+    S.legs = reindexLegs(merged);
+    S.routeSrc = "mixed";
   }
   function posKey(fn) { return "yw-fl-pos:" + String(fn || "").toUpperCase(); }
   function savePos(ac, fn) {
@@ -132,7 +178,10 @@
       if (!S.t) return;
       if (document.hidden) { scheduleLive(); return; }
       if (S.sim === "busy") { forceBusySim(); pickLeg(); render(); scheduleLive(); return; }
-      await loadLive(); pickLeg(); render(); scheduleLive();
+      await loadLive();
+      const p2 = F.parseFlight(S.t.fn);
+      if (p2 && p2.cs && (S.routeUnconfirmed || (S.ac && !F.liveLeg(S.legs, S.ac)))) await resolveRoute(p2.cs);
+      pickLeg(); render(); scheduleLive();
     }, wait);
   }
   async function loadWx() {
@@ -162,7 +211,12 @@
   function pickLeg() {
     const L = S.legs; let leg = F.userLeg(L, S.t.from, S.t.to);
     const live = F.liveLeg(L, S.ac);
-    if (!leg && !(S.t.from || S.t.to)) leg = live || (L.length === 1 ? L[0] : null);
+    if (!leg && !(S.t.from || S.t.to)) {
+      // Sole standing/adsbdb leg is OK only when there is no plane, or the plane fits it.
+      const sole = L.length === 1 ? L[0] : null;
+      const soleOk = sole && (!S.ac || F.legFits(S.ac, sole));
+      leg = live || (soleOk ? sole : null);
+    }
     if (!leg && (S.t.from || S.t.to)) leg = null;
     // Share link named both airports but standing route JSON missing: still build a leg for canceled/drive options.
     if (!leg && S.t && S.t.from && S.t.to && S.airportsNa) {
@@ -180,7 +234,7 @@
   }
 
   async function start(t) {
-    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null });
+    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null, routeSrc: "", routeUnconfirmed: false });
     const cpanel = $("fl-canceled");
     if (cpanel) { cpanel.open = false; }
     const p = F.parseFlight(t.fn); $("fl-out").hidden = false; document.body.classList.add("fl-tracking");
@@ -190,7 +244,7 @@
     // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
     if (S.sim) { pickLeg(); render(); }
     await loadAirportsNa();
-    S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); pickLeg();
+    S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); await resolveRoute(p.cs); pickLeg();
     if (S.sim === "busy") forceBusySim();
     await Promise.all([loadWx(), loadNas(), loadSig(), loadRouteWx()]); render(); loadPlaces().then(renderStuck);
     const every = (ms, fn) => S.timers.push(setInterval(() => { if (!document.hidden) fn(); }, ms));
@@ -201,7 +255,12 @@
     S.onVis && document.removeEventListener("visibilitychange", S.onVis);
     S.onVis = async () => { if (document.hidden || !S.t) return; const now = Date.now();
       if (S.sim === "busy") { forceBusySim(); pickLeg(); }
-      else if (now - S.acAt > 20e3) { await loadLive(); pickLeg(); }
+      else if (now - S.acAt > 20e3) {
+        await loadLive();
+        const p2 = F.parseFlight(S.t.fn);
+        if (p2 && p2.cs && (S.routeUnconfirmed || (S.ac && !F.liveLeg(S.legs, S.ac)))) await resolveRoute(p2.cs);
+        pickLeg();
+      }
       scheduleLive();
       if (now - (S.fetched.wx || 0) > 5 * 60e3) await Promise.all([loadWx(), loadSig(), loadRouteWx()]);
       if (now - (S.fetched.nas || 0) > 2 * 60e3) await loadNas(); render(); };
@@ -260,7 +319,7 @@
       const dest = S.leg ? code(S.leg.to) : (c.dest ? code(c.dest) : "");
       return { big: dest ? `In the air · {DIST} mi to ${dest}` : "In the air", sub: [pr.phase[0].toUpperCase() + pr.phase.slice(1), alt, ac && ac.gs ? `${Math.round(ac.gs * 1.15078)} mph` : ""].filter(Boolean).join(" · ") };
     }
-    if (ac && !S.leg) return { big: "In the air", sub: "We couldn't match it to a route." };
+    if (ac && !S.leg) return { big: "In the air", sub: "We couldn't confirm this flight's route." };
     return { big: "Not in the air right now", sub: "We don't see this flight on live tracking. It may not have left yet, may have landed, or may be outside receiver coverage." };
   }
   function render() {
@@ -573,7 +632,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
       if (S.ac) svg += `<g id="fl-pl" class="fl-plane${planeStale ? " stale" : ""}" data-tip="plane" tabindex="0"><circle class="halo" r="26"/><circle class="hit" r="34"/><path d="M0,-22 L4,-8 L20,2 L20,6 L4,1 L3,14 L9,19 L9,22 L0,19 L-9,22 L-9,19 L-3,14 L-4,1 L-20,6 L-20,2 L-4,-8 Z"/>${planeStale ? `<text class="fl-last" x="0" y="38" text-anchor="middle">last seen</text>` : ""}</g>`;
       box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of the route${S.ac ? (planeStale ? " and the plane's last seen position" : " and the plane's live position") : ""}. Tap the plane, an airport or a red area for details."><image href="${img}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>${svg}</svg>
 <div class="fl-pop" id="fl-pop" hidden></div>
-<p class="fl-legend">${S.ac ? (planeStale ? "✈️ last seen · " : "✈️ live position · ") : ""}<span class="k rt"></span> route${S.inbound ? ' · <span class="k in"></span> your plane\'s inbound leg' : ""}${sig.length ? ' · <span class="k sg"></span> SIGMET area' : ""} · <span class="dim">tap for details</span></p>`;
+<p class="fl-legend">${S.ac ? (planeStale ? "✈️ last seen · " : "✈️ live position · ") : ""}${leg ? '<span class="k rt"></span> route' : "position only"}${S.inbound ? ' · <span class="k in"></span> your plane\'s inbound leg' : ""}${sig.length ? ' · <span class="k sg"></span> SIGMET area' : ""} · <span class="dim">tap for details</span></p>`;
       const pl = $("fl-pl"); if (pl) { pl.style.transition = "none"; requestAnimationFrame(() => { pl.style.transition = ""; }); }
     }
     // Every refresh: rotate toward the new track the short way round, extend the flown part to the plane.

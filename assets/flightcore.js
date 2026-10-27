@@ -462,22 +462,72 @@
     return n && apt.name !== n ? { ...apt, name: n } : apt;
   }
 
-  // ---------- route legs (adsb.lol / VRS standing data, CC0) ----------
+  // ---------- route legs (adsb.lol / VRS standing data, CC0; adsbdb as day-of cross-check) ----------
   function legs(routeJson) {
     const a = (routeJson && routeJson._airports || []).filter(x => isFinite(x.lat) && isFinite(x.lon)).map(applyAptName);
     const out = []; for (let i = 0; i + 1 < a.length; i++) out.push({ from: a[i], to: a[i + 1], i }); return out;
   }
   const aptMatch = (apt, code) => !!code && !!apt && (apt.iata === code || apt.icao === code);
+  // How far (nm) the plane sits off the great-circle origin→dest. 0 = on the line.
+  function legOffNm(ac, leg) {
+    if (!ac || !leg) return Infinity;
+    const p = { lat: ac.lat, lon: ac.lon };
+    return distNm(p, leg.to) + distNm(p, leg.from) - distNm(leg.from, leg.to);
+  }
+  // Score a plane against a leg: off-route nm + heading penalty. Lower is better.
+  // Max accepted by liveLeg (~150) rejects city-pairs hundreds of nm away (e.g. AAL893 on a stale MIA–DFW).
+  function legScore(ac, leg) {
+    if (!ac || !leg || !isFinite(ac.lat) || !isFinite(ac.lon)) return Infinity;
+    const p = { lat: ac.lat, lon: ac.lon };
+    const off = legOffNm(ac, leg);
+    const head = isFinite(ac.track) ? angDiff(ac.track, bearing(p, leg.to)) : 0;
+    return off + (head > 100 ? 400 : head * 0.5);
+  }
+  const LEG_FIT_MAX = 150;   // nm-ish score; ~AAL893-on-NAS–CLT ≈ 7, on stale MIA–DFW ≈ 410
+  function legFits(ac, leg, maxScore) {
+    return legScore(ac, leg) <= (maxScore == null ? LEG_FIT_MAX : maxScore);
+  }
   // Which leg is the plane flying now? Closest to the leg line, heading roughly toward its destination.
-  function liveLeg(L, ac) {
+  // Returns null when no leg is a plausible fit (stale standing data / wrong day).
+  function liveLeg(L, ac, maxScore) {
     if (!ac || !L.length) return null; let best = null;
-    for (const l of L) { const p = { lat: ac.lat, lon: ac.lon }, toD = distNm(p, l.to), fromD = distNm(p, l.from), len = distNm(l.from, l.to);
-      const off = toD + fromD - len, head = isFinite(ac.track) ? angDiff(ac.track, bearing(p, l.to)) : 0;
-      const score = off + (head > 100 ? 400 : head * 0.5); if (!best || score < best.score) best = { leg: l, score }; }
-    return best.leg;
+    const cap = maxScore == null ? LEG_FIT_MAX : maxScore;
+    for (const l of L) {
+      const score = legScore(ac, l);
+      if (!best || score < best.score) best = { leg: l, score };
+    }
+    return best && best.score <= cap ? best.leg : null;
   }
   function userLeg(L, from, to) {
     return L.find(l => (!from || aptMatch(l.from, from)) && (!to || aptMatch(l.to, to)) && (from || to)) || null;
+  }
+  // Normalize api.adsbdb.com /v0/callsign JSON into the same shape as VRS standing-data route JSON.
+  // Display-only lookup (not stored in a database). Route dataset attribution: David Taylor / Jim Mason via adsbdb.
+  function fromAdsbdb(j) {
+    const fr = j && j.response && j.response.flightroute;
+    if (!fr || !fr.origin || !fr.destination) return null;
+    const apt = a => a && isFinite(+a.latitude) && isFinite(+a.longitude) ? {
+      name: a.name || "", icao: a.icao_code || "", iata: a.iata_code || "",
+      location: a.municipality || "", countryiso2: a.country_iso_name || "",
+      lat: +a.latitude, lon: +a.longitude, alt_feet: a.elevation != null ? +a.elevation : undefined
+    } : null;
+    const o = apt(fr.origin), d = apt(fr.destination);
+    if (!o || !d) return null;
+    const mid = fr.midpoint ? apt(fr.midpoint) : null;
+    const airports = mid ? [o, mid, d] : [o, d];
+    return {
+      callsign: fr.callsign_icao || fr.callsign || "",
+      airport_codes: airports.map(a => a.icao).filter(Boolean).join("-"),
+      _airport_codes_iata: airports.map(a => a.iata).filter(Boolean).join("-"),
+      _airports: airports,
+      _src: "adsbdb"
+    };
+  }
+  // Same origin/dest (order matters). Ignores midpoints.
+  function sameEndpoints(a, b) {
+    if (!a || !b) return false;
+    const code = x => (x && (x.icao || x.iata)) || "";
+    return code(a.from) && code(a.from) === code(b.from) && code(a.to) && code(a.to) === code(b.to);
   }
 
   // ---------- weather ----------
@@ -882,7 +932,7 @@
   const api = Object.assign(base, {
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
-    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
+    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
     wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

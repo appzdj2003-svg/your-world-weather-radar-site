@@ -16,6 +16,37 @@ t("legs and leg picking: user from/to, and live plane geometry", () => {
   assert.strictEqual(L.length, 2); assert.strictEqual(F.userLeg(L, "SFO", "ATL").i, 1); assert.strictEqual(F.userLeg(L, "KATL", null).i, 0);
   assert.strictEqual(F.liveLeg(L, { lat: 34.6, lon: -88, track: 285 }).i, 0); assert.strictEqual(F.liveLeg(L, { lat: 34.6, lon: -88, track: 100 }).i, 1);
 });
+t("liveLeg returns null when the plane is far off every standing leg (stale reuse)", () => {
+  const MIA = { iata: "MIA", icao: "KMIA", countryiso2: "US", lat: 25.7932, lon: -80.290604 };
+  const DFW = { iata: "DFW", icao: "KDFW", countryiso2: "US", lat: 32.896801, lon: -97.038002 };
+  const NAS = { iata: "NAS", icao: "MYNN", countryiso2: "BS", lat: 25.039, lon: -77.4662 };
+  const CLT = { iata: "CLT", icao: "KCLT", countryiso2: "US", lat: 35.214, lon: -80.9431 };
+  const stale = F.legs({ _airports: [MIA, DFW] });
+  const today = F.legs({ _airports: [NAS, CLT] });
+  const ac = { lat: 34.064667, lon: -80.019369, alt: 20275, gs: 373.9, track: 333.98 }; // AAL893 near Florence SC
+  assert.strictEqual(F.liveLeg(stale, ac), null);
+  assert(!F.legFits(ac, stale[0]));
+  assert(F.legFits(ac, today[0]));
+  assert.strictEqual(F.liveLeg(today, ac).i, 0);
+  assert(F.legScore(ac, stale[0]) > F.LEG_FIT_MAX);
+  assert(F.legScore(ac, today[0]) < 20);
+});
+t("fromAdsbdb normalizes callsign JSON into standing-data shape", () => {
+  const j = { response: { flightroute: {
+    callsign: "AAL893", callsign_icao: "AAL893",
+    origin: { country_iso_name: "BS", iata_code: "NAS", icao_code: "MYNN", latitude: 25.039, longitude: -77.4662, municipality: "Nassau", name: "Lynden Pindling International Airport", elevation: 16 },
+    destination: { country_iso_name: "US", iata_code: "CLT", icao_code: "KCLT", latitude: 35.214, longitude: -80.9431, municipality: "Charlotte", name: "Charlotte Douglas International Airport", elevation: 748 }
+  }}};
+  const r = F.fromAdsbdb(j);
+  assert(r && r._src === "adsbdb");
+  const L = F.legs(r);
+  assert.strictEqual(L.length, 1);
+  assert.strictEqual(L[0].from.iata, "NAS");
+  assert.strictEqual(L[0].to.iata, "CLT");
+  assert.strictEqual(F.fromAdsbdb({ response: "unknown callsign" }), null);
+  assert(F.sameEndpoints(L[0], L[0]));
+  assert(!F.sameEndpoints(L[0], F.legs({ _airports: [{ iata: "MIA", icao: "KMIA", lat: 25.7, lon: -80.2 }, { iata: "DFW", icao: "KDFW", lat: 32.9, lon: -97 }] })[0]));
+});
 t("weather words: heavy only for +, nearby for VC, freezing rain not also 'rain'", () => {
   assert.deepStrictEqual(F.wxWords("+TSRA"), ["heavy thunderstorms", "rain"]); assert.deepStrictEqual(F.wxWords("-RA BR"), ["rain", "mist"]);
   assert.deepStrictEqual(F.wxWords("FZRA"), ["freezing rain"]); assert.deepStrictEqual(F.wxWords("VCTS"), ["nearby thunderstorms"]);
