@@ -167,8 +167,13 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
 <p class="fl-fresh" id="fl-fresh"></p>`;
     $("fl-status").querySelectorAll("[data-leg]").forEach(b => b.onclick = () => { const l = S.legs[+b.dataset.leg]; S.t.from = l.from.iata || l.from.icao; S.t.to = l.to.iata || l.to.icao; fillForm(S.t); pickLeg(); loadWx().then(render); loadPlaces().then(renderStuck); render(); });
     renderMap(c); renderAirports(c); renderHazards(c); renderStuck(a);
-    $("fl-stuck").open = $("fl-stuck").dataset.user ? $("fl-stuck").open : a.level >= 1;
+    const late = a.read && a.read.lateMin, likely = a.level >= 1 || (late != null && late >= 20) || !!S.whatIfMin;
+    const stuck = $("fl-stuck");
+    stuck.classList.toggle("hot", !!(a.level >= 1 || (late != null && late >= 20) || S.whatIfMin));
+    if (!stuck.dataset.user) stuck.open = likely;
+    else if (likely && !stuck.dataset.userClosed) stuck.open = true;
     S.level = a.level; S.justLanded = false; tick();
+    syncWhatIf();
   }
   const city = a => String(a.name || "").replace(/\b(International|Intl\.?|Regional|Municipal)\b.*$/i, "").replace(/\bAirport\b.*$/i, "").trim() || a.name || "";
   const fmtLate = ms => F.fmtMin(ms / 60e3);
@@ -409,8 +414,9 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     if (c.inbound && c.inbound.etaMs && dep) { const ready = c.inbound.etaMs + F.TURN_MIN * 60e3; if (ready > dep) { dep = ready; basis = `your inbound plane landing about ${tm(c.inbound.etaMs)} plus a ${F.TURN_MIN}-min turnaround (assumption)`; } }
     // Auto-reset countdown from the AI delay read (take the later of schedule vs estimated)
     const a0 = F.assess(c), dLate = a0.delay && a0.delay.lateMin;
-    if (dep && dLate != null && dLate > 0 && a0.delay.source !== "live track") { /* FAA holds push departure */ dep = Math.max(dep, c.now + dLate * 60e3); basis = `AI delay read (${a0.delay.source || "estimate"}): about ${F.fmtMin(dLate)} late`; }
+    if (dep && dLate != null && dLate > 0 && a0.delay.source !== "live track" && !(a0.delay.airborne && dLate <= 10)) { /* FAA holds push departure (pre-takeoff) */ dep = Math.max(dep, c.now + dLate * 60e3); basis = `AI delay read (${a0.delay.source || "estimate"}): about ${F.fmtMin(dLate)} late`; }
     else if (dep && dLate != null && dLate > 0) { dep = dep + dLate * 60e3; basis = `AI delay read from ${a0.delay.basis || "live track"}`; }
+    if (S.whatIfMin && dep) { dep = Math.max(dep, c.now) + S.whatIfMin * 60e3; basis = `what-if ${F.fmtMin(S.whatIfMin)} delay (not a real delay)`; }
     const boardMin = +$("s-board").value || 35, secMin = +$("s-sec").value || 45;
     const near = (S.places || []).map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).filter(p => p.c !== "station");
     const station = (S.places || []).filter(p => p.c === "station").map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).sort((x, y) => x.km - y.km)[0];
@@ -445,7 +451,26 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
 <p class="fl-links"><a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Hotels on the map</a></p></div>
 <div class="fl-opt"><b>🚗 Rental cars at ${E(code)}</b><span>If the flight is cancelled and driving makes sense.</span>
 <p class="fl-links"><a${ev("car_rental", "google_search", code)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", code)} href="${LINK.gmaps(`car rental ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Rental desks on the map</a></p></div>`;
-    const html = clock + warn + airside + places + transport + stay;
+    // Big top-pick cards (eye-catching) — same affiliate links as the lists below
+    const dinner0 = by(["restaurant"], 1)[0], todo0 = by(["museum", "attraction", "park", "cinema"], 1)[0];
+    const pick = (cls, title, body, links) => `<div class="fl-pick ${cls}"><b>${title}</b><span>${body}</span><p class="fl-links">${links}</p></div>`;
+    const picks = `<div class="fl-stuck-picks" aria-label="Top picks while you wait">
+${pick("air", "✈️ Stay inside the airport", short ? "Best when time is short — food and shops past security, no re-screening." : "Food, shops and lounges past security so you don't risk missing the new time.",
+  `<a${ev("food_airside", "google_maps", code)} href="${LINK.gmaps(`restaurants inside ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Food in ${E(code)}</a>`)}
+${dinner0 ? pick("food", `🍽️ Dinner near ${E(code)}`, `${E(dinner0.n)} · ${kmToMi(dinner0.km) < 0.95 ? kmToMi(dinner0.km).toFixed(1) : Math.round(kmToMi(dinner0.km))} mi away`,
+  `<a${ev("place_map", "osm", code, dinner0.c)} href="${LINK.osm(dinner0.osm)}" target="_blank" rel="noopener">Map</a><a${ev("place_directions", "google_maps", code, dinner0.c)} href="${LINK.dir(o, { lat: dinner0.lat, lon: dinner0.lon }, "driving")}" target="_blank" rel="noopener">Directions</a><a${ev("rideshare", "uber", code, dinner0.c)} href="${LINK.uber(o, { lat: dinner0.lat, lon: dinner0.lon }, dinner0.n)}" target="_blank" rel="noopener">Uber</a>`)
+  : pick("food", `🍽️ Dinner near ${E(code)}`, "Find restaurants near the airport on the map.",
+  `<a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`restaurants near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Restaurants on Maps</a>`)}
+${todo0 ? pick("todo", "🎯 Things to do", `${E(todo0.n)} · ${E(CATN[todo0.c] || "Nearby")}`,
+  `<a${ev("place_map", "osm", code, todo0.c)} href="${LINK.osm(todo0.osm)}" target="_blank" rel="noopener">Map</a><a${ev("place_directions", "google_maps", code, todo0.c)} href="${LINK.dir(o, { lat: todo0.lat, lon: todo0.lon }, "driving")}" target="_blank" rel="noopener">Directions</a>`)
+  : pick("todo", "🎯 Things to do", "Museums, parks and attractions near the airport.",
+  `<a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`things to do near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Explore on Maps</a>`)}
+${pick("hotel", `🏨 Hotels near ${E(code)}`, "Compare prices if you're stuck overnight. Your airline may cover a hotel if the delay is its fault.",
+  `<a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a>`)}
+${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi — check the price in the app. We don't show fares.",
+  `<a${ev("rideshare", "uber", code)} href="${LINK.uber(o, o, code + " airport")}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", code)} href="${LINK.lyft(o, o)}" target="_blank" rel="noopener">Lyft</a>`)}
+</div>`;
+    const html = clock + warn + picks + airside + places + transport + stay;
     const key = html.replace(/data-until="\d+"/g, ""); if (key === S.stuckKey && box.firstChild) return; S.stuckKey = key;
     const sl = $("fl-swipe") ? $("fl-swipe").scrollLeft : 0;
     box.innerHTML = html +
@@ -454,7 +479,28 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
   }
   $("fl-stuck-b").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; S.tab = b.dataset.tab; S.stuckKey = ""; renderStuck(); const sw = $("fl-swipe"); if (sw) sw.scrollLeft = 0; });
   ["s-board", "s-sec"].forEach(id => $(id).addEventListener("change", () => renderStuck()));
-  $("fl-stuck").addEventListener("toggle", () => { $("fl-stuck").dataset.user = "1"; });
+  $("fl-stuck").addEventListener("toggle", () => {
+    $("fl-stuck").dataset.user = "1";
+    if (!$("fl-stuck").open) $("fl-stuck").dataset.userClosed = "1";
+    else delete $("fl-stuck").dataset.userClosed;
+  });
+  function syncWhatIf() {
+    document.querySelectorAll("[data-whatif]").forEach(b => {
+      const v = +b.dataset.whatif;
+      b.setAttribute("aria-pressed", v && S.whatIfMin === v ? "true" : "false");
+    });
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest("[data-whatif]"); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const v = +b.dataset.whatif;
+    S.whatIfMin = v > 0 ? v : 0;
+    S.stuckKey = "";
+    const stuck = $("fl-stuck");
+    if (v > 0) { stuck.open = true; stuck.classList.add("hot"); delete stuck.dataset.userClosed; }
+    stuck.dataset.user = "1";
+    syncWhatIf(); renderStuck();
+  }, true);
 
   // ---------- boot from #link ----------
   async function boot() {

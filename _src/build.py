@@ -718,15 +718,22 @@ def flight_page():
 <div id="fl-out" hidden>
 <div class="fl-alerts" id="fl-alerts" aria-live="assertive"></div>
 <section class="card fl-status" id="fl-status" aria-live="polite"></section>
+<details class="card fl-stuck" id="fl-stuck" data-sec="stuck"><summary class="fl-stuck-sum">
+<span class="fl-stuck-sum-hot"><b>Stuck with a delay? Here's what fits</b><em>Countdown, food, things to do, hotels and rides near the airport</em></span>
+<span class="fl-stuck-sum-idle"><b>Delayed? Plan your extra time</b><em>See what fits near the airport — or try a what-if delay</em>
+<span class="fl-whatif" role="group" aria-label="What if delay"><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button></span></span>
+</summary>
+<div class="fl-stuck-body">
+<div class="fl-set"><label>Boarding starts <select id="s-board"><option value="30">30</option><option value="35">35</option><option value="40" selected>40</option></select> min before departure</label>
+<label>Getting back through security <select id="s-sec"><option value="30">30</option><option value="45" selected>45</option><option value="60">60</option><option value="90">90</option></select> min</label>
+<span class="fl-whatif fl-whatif-in" role="group" aria-label="What if delay"><span class="dim">What if</span><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button><button type="button" data-whatif="0" class="fl-whatif-clear">Clear</button></span>
+</div>
+<div id="fl-stuck-b"></div></div></details>
 <p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
 {flight_cta("after_estimate")}
 <section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>
 <section aria-label="Airports"><div id="fl-apts" class="fl-apts"></div></section>
 <section id="fl-haz" class="fl-haz"></section>
-<details class="card fl-stuck" id="fl-stuck" data-sec="stuck"><summary><b>Stuck with a delay?</b> <span>How much time you have, and what's nearby</span></summary>
-<div class="fl-set"><label>Boarding starts <select id="s-board"><option value="30">30</option><option value="35">35</option><option value="40" selected>40</option></select> min before departure</label>
-<label>Getting back through security <select id="s-sec"><option value="30">30</option><option value="45" selected>45</option><option value="60">60</option><option value="90">90</option></select> min</label></div>
-<div id="fl-stuck-b"></div></details>
 {flight_cta("bottom")}
 </div>
 <section class="fl-how"><h2>How it works</h2><ul>
