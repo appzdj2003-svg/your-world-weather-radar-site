@@ -54,7 +54,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
+NAV = [("index.html", "Home"), ("flight/", "Track my flight"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -89,7 +89,14 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
     depth = path.count("/"); p = "../" * depth
     url = SITE + ("" if path == "index.html" else path.replace("index.html", ""))
     cur = path.split("/")[0] + "/" if "/" in path else path
-    nav = "".join(f'<a href="{p}{"" if h=="index.html" else h}"{" aria-current=page" if h==cur else ""}>{t}</a>' for h, t in NAV).replace('href=""', 'href="./"')
+    def _nav_a(h, t):
+        href = "./" if h == "index.html" and not p else f"{p}{'' if h == 'index.html' else h}"
+        if h == "index.html" and p: href = p
+        attrs = f'href="{href}"'
+        if h == cur: attrs += ' aria-current="page"'
+        if h == "flight/": attrs += ' data-ev="flight_page" data-sec="nav"'
+        return f"<a {attrs}>{t}</a>"
+    nav = "".join(_nav_a(h, t) for h, t in NAV)
     slug = slug or (re.sub(r"[^a-z0-9]+", "-", path.replace(".html", "").replace("/index", "")).strip("-") or "home")
     lds = "".join(f'<script type="application/ld+json">{json.dumps(j, ensure_ascii=False)}</script>' for j in (jsonld or []))
     sc = "".join(f'<script src="{p}assets/{V(s)}"></script>' for s in scripts + ("site-ui.js",))
@@ -689,7 +696,7 @@ def static_fire_page():
          b, h, "0.5", scripts=("static-fire/sf.js",), jsonld=ld, head_extra=f'<link rel="stylesheet" href="../assets/{V("static-fire/sf.css")}">')
 
 
-# ---------- /flight: free flight tracker (live; linked from the Trip Planner only, not in the nav; indexed + in the sitemap like other pages).
+# ---------- /flight: free flight tracker (live; in main nav + Trip Planner/home promos; indexed + in the sitemap).
 # App Links claim /flight/open only (same idea as /plan vs /alert-planner/); bare /flight stays in the browser. ----------
 FLIGHT_API = os.environ.get("FLIGHT_API", "https://yw-flight.yourworldapps.workers.dev").strip()   # our relay in _src/worker/flight-proxy.mjs; FLIGHT_API="" = relay-free mode
 # Gate the "Open on the radar in the app" button until a supporting build is on Production.
