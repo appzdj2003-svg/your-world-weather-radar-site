@@ -207,13 +207,44 @@ t("polish2: route fog only when visibility under 3 mi; names not ICAO", () => {
     { icaoId: "KMDS", name: "Madison Muni, SD, US", fltCat: "LIFR", visib: "10+", wxString: null, clouds: [{ cover: "VV", base: 200 }] },
     { icaoId: "KMVE", name: "Montevideo/Chippewa Cnty, MN, US", fltCat: "LIFR", visib: "2.5", wxString: "BR", clouds: [{ cover: "VV", base: 100 }] },
   ]);
-  const fog = flags.filter(f => f.kind === "fog");
-  assert.strictEqual(fog.length, 1, "only low-vis fog: " + JSON.stringify(flags));
-  assert(/Montevideo/i.test(fog[0].text), fog[0].text);
-  assert(!/\bKMVE\b/.test(fog[0].text), fog[0].text);
+  // 2.5 mi BR is mist, not fog: poor-visibility flag with the town name, never "fog".
+  assert.strictEqual(flags.filter(f => f.kind === "fog").length, 0, "mist is not fog: " + JSON.stringify(flags));
+  const mve = flags.find(f => /Montevideo/i.test(f.text));
+  assert(mve && /poor visibility/i.test(mve.text) && !/fog/i.test(mve.text), JSON.stringify(mve));
+  assert(!/\bKMVE\b/.test(mve.text), mve.text);
   const ceil = flags.filter(f => /Madison/i.test(f.text));
   assert(ceil.length >= 1, "Madison low ceiling still noted");
   assert(!/fog/i.test(ceil[0].text), "Madison must not claim fog with 10+ mi: " + ceil[0].text);
+});
+
+t("fog only when visibility supports it (AAL893 / CLT 10 SM regression)", () => {
+  const NAS = { icao: "MYNN", iata: "NAS", name: "Lynden Pindling International Airport", lat: 25.039, lon: -77.4662 };
+  const CLT = { icao: "KCLT", iata: "CLT", countryiso2: "US", name: "Charlotte Douglas International Airport", lat: 35.214, lon: -80.9431 };
+  const none = { groundStops: [], groundDelays: [], delays: [], closures: [] };
+  const clt10 = { KCLT: { metar: { fltCat: "VFR", vis: 10, wxString: "", gust: 0, clouds: [{ cover: "FEW", base: 25000 }] }, taf: null } };
+  const base = { now: NOW, origin: NAS, dest: CLT, progress: { etaMs: NOW + 15 * 60e3, onGround: false }, nas: none, sigmets: [] };
+  // Real Oct 27 trigger: St. Augustine route sample IFR, 5 SM haze, BKN009 — CLT itself 10 SM VFR.
+  const a = F.assess({ ...base, wx: clt10, routeWx: [{ icaoId: "KSGJ", name: "St Augustine Arpt, FL, US", fltCat: "IFR", visib: 5, wxString: "HZ", clouds: [{ cover: "BKN", base: 900 }] }] });
+  assert(!/fog/i.test(a.read.headline), a.read.headline);
+  assert.strictEqual(a.level, 0, "en-route haze must not raise risk: " + a.read.headline);
+  assert(a.reasons.some(r => /St Augustine|KSGJ/.test(r.text)), "still listed in All signals");
+  // Ceiling-only IFR / LIFR at the destination with 10 SM: low ceilings, never "fog".
+  for (const fltCat of ["IFR", "LIFR"]) {
+    const b = F.assess({ ...base, arrMs: NOW + 20 * 60e3, wx: { KCLT: { metar: { fltCat, vis: 10, wxString: "", gust: 0, clouds: [{ cover: "OVC", base: 300 }] }, taf: null } } });
+    assert(!/fog/i.test(b.read.headline), fltCat + ": " + b.read.headline);
+    assert(!b.reasons.some(r => r.kind === "fog"), fltCat + " no fog reason");
+  }
+  // BR (mist) with 10 SM is nothing; FG with 10 SM (bad obs) is nothing.
+  for (const wxString of ["BR", "FG"]) {
+    const c = F.assess({ ...base, wx: { KCLT: { metar: { fltCat: "VFR", vis: 10, wxString, gust: 0, clouds: [] }, taf: null } } });
+    assert.strictEqual(c.level, 0, wxString); assert(!/fog/i.test(c.read.headline), c.read.headline);
+  }
+  // Real fog (1/4 SM FG) still reads as fog.
+  const d = F.assess({ ...base, wx: { KCLT: { metar: { fltCat: "LIFR", vis: 0.25, wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null } } });
+  assert(/^Fog at CLT \(visibility 0\.25 miles\)/.test(d.read.headline), d.read.headline);
+  assert(F.isFogVis(0.5) && !F.isFogVis(1) && !F.isLowVis(10));
+  const rf = F.routeWxFlags([{ icaoId: "KAAA", name: "Alpha", fltCat: "LIFR", visib: "1/4", wxString: "FG", clouds: [{ cover: "VV", base: 100 }] }]);
+  assert(rf.some(f => f.kind === "fog" && /^Fog near Alpha/.test(f.text)), JSON.stringify(rf));
 });
 
 t("canceled_private: both-ends BOS-HYA / BUR-LAS; LAX-JFK no scheduled; drive/Amtrak", () => {

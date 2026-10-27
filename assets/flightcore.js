@@ -570,10 +570,16 @@
     return any ? { fltCat: worst, words, gust, possible: prob } : null;
   }
   const CAT_WORDS = { VFR: "Good visibility", MVFR: "Some low cloud or haze", IFR: "Low cloud or poor visibility", LIFR: "Very low cloud or fog" };
+  // FG is typically reported at < 5/8 SM. BR (mist) only matters when visibility is actually reduced.
+  // Never call 10 SM "fog" just because a reason string mentions visibility / LIFR / an IFR AIRMET.
+  const FOG_VIS_MAX = 5 / 8;   // statute miles
+  const LOW_VIS_MAX = 3;       // mist / "fog or very low cloud" delay threshold (matches routeWxFlags)
+  const isFogVis = v => v != null && isFinite(v) && v <= FOG_VIS_MAX;
+  const isLowVis = v => v != null && isFinite(v) && v < LOW_VIS_MAX;
 
   // ---------- SIGMETs on the route ----------
   const HAZ = { CONVECTIVE: "thunderstorms", TS: "thunderstorms", TSGR: "thunderstorms with hail", TURB: "turbulence", ICE: "icing", VA: "volcanic ash", TC: "tropical cyclone",
-    MTW: "mountain waves", IFR: "low cloud and fog", "MT OBSC": "mountains hidden in cloud", DS: "dust storm", SS: "sandstorm", RDOACT: "radioactive cloud" };
+    MTW: "mountain waves", IFR: "low ceilings or poor visibility", "MT OBSC": "mountains hidden in cloud", DS: "dust storm", SS: "sandstorm", RDOACT: "radioactive cloud" };
   function sigmetsOnLeg(list, leg, now, ac) {
     if (!leg || !Array.isArray(list)) return []; const pts = gcPoints(leg.from, leg.to, Math.max(20, Math.round(distNm(leg.from, leg.to) / 15)));
     const out = [];
@@ -766,17 +772,27 @@
       const cat = m.fltCat || fltCat(visNum(m.visib), ceiling(m.clouds));
       const words = wxWords(m.wxString), gust = m.wgst || 0, place = metarPlace(m), id = m.icaoId || place;
       const vis = visNum(m.visib);
-      const fogWord = /fog/.test(words.join(" "));
-      if ((fogWord || cat === "LIFR") && vis != null && vis < 3) {
+      const fogWord = /\bfog\b/.test(words.join(" ")); // FG / freezing fog — not BR "mist"
+      const mistWord = /\bmist\b/.test(words.join(" "));
+      // Fog by name only when visibility supports FG (<~5/8 SM) or FG is reported with truly low vis (< 3 SM).
+      if (fogWord && isFogVis(vis)) {
+        out.push({ lvl: 2, text: `Fog near ${place} along the route (visibility ${vis} mi).`,
+          full: `Fog near ${id} along the route (${cat}, visibility ${m.visib} mi).`, kind: "fog" });
+      } else if (fogWord && isLowVis(vis)) {
         out.push({ lvl: 2, text: `Fog or very low cloud near ${place} along the route (visibility ${vis} mi).`,
           full: `Fog or very low cloud near ${id} along the route (${cat}, visibility ${m.visib} mi).`, kind: "fog" });
-      } else if (cat === "LIFR" && (vis == null || vis >= 3)) {
+      } else if ((mistWord || cat === "LIFR") && isLowVis(vis)) {
+        // Mist / LIFR with reduced vis — real spacing risk, but not "fog" at 10 SM.
+        out.push({ lvl: 1, text: `Poor visibility near ${place} along the route (visibility ${vis} mi).`,
+          full: `Poor visibility near ${id} along the route (${cat}, visibility ${m.visib} mi).`, kind: "ifr" });
+      } else if (cat === "LIFR" && (vis == null || !isLowVis(vis))) {
         // Low ceiling, not fog — keep for All signals; milder main copy without claiming fog.
         out.push({ lvl: 1, text: `Very low ceilings near ${place} along the route.`,
           full: `Very low ceilings near ${id} along the route (${cat}${m.visib != null ? `, visibility ${m.visib} mi` : ""}).`, kind: "ifr" });
       } else if (cat === "IFR") {
-        out.push({ lvl: 1, text: `Low cloud or poor visibility near ${place} along the route.`,
-          full: `Low cloud or poor visibility near ${id} along the route (${cat}).`, kind: "ifr" });
+        // En-route IFR at a sampled airport (not where the flight lands) is context only — it doesn't raise delay risk.
+        out.push({ lvl: 0, text: `Low cloud or reduced visibility near ${place} along the route.`,
+          full: `Low cloud or reduced visibility near ${id} along the route (${cat}${m.visib != null ? `, visibility ${m.visib} mi` : ""}).`, kind: "ifr" });
       }
       if (words.some(w => /thunder/.test(w))) out.push({ lvl: 2, text: `Thunderstorms reported near ${place} along the route.`, full: `Thunderstorms reported near ${id} along the route.`, kind: "ts" });
       if (words.some(w => /freezing|snow|ice/.test(w))) out.push({ lvl: 1, text: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${place} along the route.`, full: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${id} along the route.`, kind: "ice" });
@@ -809,10 +825,21 @@
           `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${code} ${when}: de-icing and slower operations are common.`);
       const cat = [cur && cur.fltCat, win && win.fltCat].filter(Boolean).sort((a, b) => ["VFR", "MVFR", "IFR", "LIFR"].indexOf(b) - ["VFR", "MVFR", "IFR", "LIFR"].indexOf(a))[0];
       if (cat === "LIFR" || (cat === "IFR" && role === "arr")) {
-        const visBit = cur && cur.vis != null ? `, visibility ${cur.vis} mi` : "";
-        const whyWx = `${CAT_WORDS[cat]} at ${pl} ${when}${cur && cur.vis != null && cur.vis < 3 ? ` (visibility ${cur.vis} mi)` : ""}. Airports often space flights out in these conditions.`;
-        const fullWx = `${CAT_WORDS[cat]} at ${code} ${when} (${cat}${visBit}). Airports often space flights out in these conditions.`;
-        add(cat === "LIFR" ? 2 : 1, whyWx, "NWS/AWC", cat === "LIFR" ? "fog" : "ifr", fullWx);
+        const vis = cur && cur.vis != null ? cur.vis : null;
+        const hasFogCode = [...words].some(w => /\bfog\b/.test(w)); // FG — not BR mist
+        // Only label fog when visibility supports it; ceiling-only LIFR/IFR with 10 SM is low cloud, not fog.
+        const useFog = isLowVis(vis) && (hasFogCode || isFogVis(vis));
+        const visBit = vis != null ? `, visibility ${vis} mi` : "";
+        if (useFog) {
+          const whyWx = `Fog at ${pl} ${when} (visibility ${vis} mi). Airports often space flights out in these conditions.`;
+          const fullWx = `Fog at ${code} ${when} (${cat}${visBit}). Airports often space flights out in these conditions.`;
+          add(2, whyWx, "NWS/AWC", "fog", fullWx);
+        } else {
+          const label = cat === "LIFR" ? "Very low ceilings" : "Low ceilings";
+          const whyWx = `${label} at ${pl} ${when}. Airports often space flights out in these conditions.`;
+          const fullWx = `${label} at ${code} ${when} (${cat}${visBit}). Airports often space flights out in these conditions.`;
+          add(cat === "LIFR" ? 2 : 1, whyWx, "NWS/AWC", "ifr", fullWx);
+        }
       }
       const g = Math.max(cur && cur.gust || 0, win && win.gust || 0); if (g >= 35) add(1, `Wind gusts to ${g} kt at ${pl} ${when}.`, "NWS/AWC", "wind", `Wind gusts to ${g} kt at ${code} ${when}.`);
     }
@@ -856,15 +883,16 @@
     if (disagree) {
       const track = late != null && late < -5 ? `Tracking about ${fmtMin(-late)} early` : "Tracking about on time";
       const wxBits = [];
-      if (top && /fog|LIFR|visibility/i.test(top.text)) wxBits.push("Fog");
+      // Only say "Fog" when we actually classified a fog reason (visibility-gated). Never from "visibility"/"LIFR" substrings.
+      if (top && top.kind === "fog") wxBits.push("Fog");
       if (top && /thunder/i.test(top.text)) wxBits.push("Storms");
       if (de.faaMin || (top && /FAA|ground|delay|spacing/i.test(top.text))) wxBits.push("FAA spacing");
       if (!wxBits.length && top) wxBits.push("Weather");
       const who = wxBits.length ? wxBits.join(" and ") : "Conditions";
       headline = `${track}${de.etaMs ? " ({ETA})" : ""}. ${who} at ${destName || dest} could add ${fmtMin(lo)} to ${fmtMin(hi)}.`;
-    } else if (top && /fog|LIFR|visibility/i.test(top.text)) {
+    } else if (top && top.kind === "fog") {
       const vis = (c.wx && c.dest && c.wx[c.dest.icao] && c.wx[c.dest.icao].metar && c.wx[c.dest.icao].metar.vis);
-      headline = `Fog at ${dest}${vis != null ? ` (visibility ${vis} mile${vis === 1 ? "" : "s"})` : ""}.`;
+      headline = `Fog at ${dest}${isLowVis(vis) ? ` (visibility ${vis} mile${vis === 1 ? "" : "s"})` : ""}.`;
       if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
       else if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
     } else if (top && /thunder|SIGMET for thunderstorms/i.test(top.text)) {
@@ -933,6 +961,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);
