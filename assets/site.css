@@ -317,14 +317,15 @@ body:has(.playbar:not([hidden])){padding-bottom:calc(64px + env(safe-area-inset-
 /* Weather Trip Planner (/trip-planner/): Ask Atlas travel agent */
 .tp-hero .wrap{padding:36px 16px 40px;max-width:820px}.tp-hero h1{font-size:clamp(1.9rem,6vw,3rem);margin-bottom:.15em}.tp-hero .lead{margin:0 0 18px}
 .tp-card{background:var(--white);color:var(--slate);border-radius:22px;box-shadow:0 20px 50px rgba(2,6,23,.35);padding:18px}
-.tp-card p{color:var(--slate-3)}.tp-card .note{color:var(--mute)}
+.tp-card p{color:var(--slate-3)}.tp-card .note{color:var(--slate-3)}
 .tp-log{max-height:46vh;margin-bottom:12px}.tp-log .msg.atl{margin-top:0}
 .tp-card .quick input,.tp-f input,.tp-f select{font:inherit;font-size:16px;width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--slate);min-height:48px}
 .tp-card .quick input:focus,.tp-f input:focus,.tp-f select:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-l)}
+.tp-f input::placeholder,.tp-card .quick input::placeholder{color:var(--slate-3);opacity:1}
 .tp-fd{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}.tp-fd summary{cursor:pointer;font-weight:700;color:var(--sky-d);padding:6px 0;list-style-position:inside}
 .tp-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.tp-wide{grid-column:1/-1}
 @media(min-width:760px){.tp-form{grid-template-columns:2fr 2fr 1.2fr 1.2fr}.tp-f.tp-wide{grid-column:span 2}.tp-form .tp-f:nth-of-type(5),.tp-form .tp-f:nth-of-type(6){grid-column:span 2}}
-.tp-f{position:relative;display:flex;flex-direction:column;gap:4px;min-width:0}.tp-f>span{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}.tp-f small{text-transform:none;letter-spacing:0;font-weight:500}
+.tp-f{position:relative;display:flex;flex-direction:column;gap:4px;min-width:0}.tp-f>span{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-3)}.tp-f small{text-transform:none;letter-spacing:0;font-weight:500;color:var(--slate-3)}
 .tp-go{justify-content:center;font-size:1.05rem;padding:15px}.tp-form .err{margin:0;color:var(--red);font-weight:600;font-size:.9rem;min-height:0}.tp-form .err:empty{display:none}
 .tp-ac{position:absolute;top:100%;left:0;right:0;z-index:20;list-style:none;margin:4px 0 0;padding:6px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);max-height:300px;overflow:auto}
 .tp-ac li{display:flex;flex-direction:column;padding:9px 10px;border-radius:10px;cursor:pointer;line-height:1.3}.tp-ac li span{font-size:.82rem;color:var(--mute)}
@@ -360,23 +361,29 @@ body:has(.playbar:not([hidden])){padding-bottom:calc(64px + env(safe-area-inset-
 
 
 /* ---------- Live trip view (Trip Planner + /trip share) ---------- */
-.tp-flight { margin: 8px 0 0; border: 1px solid rgba(148,163,184,.25); border-radius: 12px; padding: 0 12px 12px; background: rgba(15,23,42,.35); }
-.tp-flight > summary { cursor: pointer; padding: 12px 0 4px; font-weight: 600; color: #e2e8f0; }
-.tp-flight > summary small { font-weight: 400; color: #94a3b8; }
+/* Light card panel: text uses slate-3 (≥4.5:1 on white/bg), matching the form. */
+.tp-flight { margin: 8px 0 0; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px 12px; background: var(--bg); }
+.tp-flight > summary { cursor: pointer; padding: 12px 0 4px; font-weight: 700; color: var(--slate); }
+.tp-flight > summary small { font-weight: 500; color: var(--slate-3); }
+.tp-flight .tp-f > span { color: var(--slate-3); }
+.tp-flight .tp-f small { color: var(--slate-3); }
+.tp-flight .note { color: var(--slate-3); }
+.tp-flight input::placeholder { color: var(--slate-3); opacity: 1; }
 .tp-flight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-top: 8px; }
 @media (max-width: 560px) { .tp-flight-grid { grid-template-columns: 1fr; } }
 .tp-live { border: 1px solid rgba(56,189,248,.28); background: linear-gradient(180deg, rgba(14,165,233,.08), transparent 120px); }
 .tp-live h2 { margin-top: 0; }
-.tp-live-frame-wrap { border-radius: 14px; overflow: hidden; border: 1px solid rgba(148,163,184,.2); background: #0b1220; min-height: 520px; }
+.tp-live .dim { color: var(--slate-3); }
+.tp-live-frame-wrap { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #0b1220; min-height: 520px; }
 .tp-live-frame { width: 100%; height: 720px; border: 0; display: block; background: #0b1220; }
 @media (max-width: 560px) { .tp-live-frame { height: 880px; } .tp-live-frame-wrap { min-height: 640px; } }
-.tp-live-shift { margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.35); }
-.tp-live-shift b { display: block; margin-bottom: 6px; color: #fde68a; }
-.tp-live-shift ul { margin: 6px 0 0; padding-left: 1.2em; }
-.tp-live-shift .est { font-size: .85rem; color: #94a3b8; margin-top: 8px; }
-.tp-itin li.shifted { box-shadow: inset 3px 0 0 #fbbf24; }
-.tp-itin .tp-shift-note { display: inline-block; margin-left: 8px; font-size: .8rem; color: #fbbf24; font-weight: 600; }
-.tp-live-countdown { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(15,23,42,.55); border: 1px solid rgba(148,163,184,.2); }
+.tp-live-shift { margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; background: #FFFBEB; border: 1px solid #FDE68A; color: var(--slate-3); }
+.tp-live-shift b { display: block; margin-bottom: 6px; color: var(--amber-d); }
+.tp-live-shift ul { margin: 6px 0 0; padding-left: 1.2em; color: var(--slate-3); }
+.tp-live-shift .est { font-size: .85rem; color: var(--slate-3); margin-top: 8px; }
+.tp-itin li.shifted { box-shadow: inset 3px 0 0 var(--amber); }
+.tp-itin .tp-shift-note { display: inline-block; margin-left: 8px; font-size: .8rem; color: var(--amber-d); font-weight: 600; }
+.tp-live-countdown { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
 .tp-live-countdown div { min-width: 120px; }
-.tp-live-countdown span { display: block; font-size: .75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; }
-.tp-live-countdown b { font-size: 1.15rem; color: #f8fafc; }
+.tp-live-countdown span { display: block; font-size: .75rem; color: var(--slate-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+.tp-live-countdown b { font-size: 1.15rem; color: var(--slate); }
