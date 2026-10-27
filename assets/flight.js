@@ -81,9 +81,8 @@
 
   async function start(t) {
     S.timers.forEach(clearInterval); S.timers = []; Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null });
-    const cbtn = $("fl-cancel-btn"), cpanel = $("fl-canceled");
-    if (cbtn) { cbtn.setAttribute("aria-pressed", "false"); }
-    if (cpanel) { cpanel.hidden = true; cpanel.open = false; }
+    const cpanel = $("fl-canceled");
+    if (cpanel) { cpanel.open = false; }
     const p = F.parseFlight(t.fn); $("fl-out").hidden = false; $("fl-status").innerHTML = `<p class="fl-big">Looking up ${E(t.fn)}…</p>`;
     if (p && p.unknownAirline) { $("fl-status").innerHTML = `<p class="fl-big">We don't know airline code ${E(p.iata)} yet.</p><p>Try the 3-letter airline code (for example DAL for Delta) followed by the number.</p>`; return; }
     // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
@@ -445,11 +444,11 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
       const P = F.plan({ now, depMs: dep, boardMin, secMin, places: near, apt: o }); S.plan = P;
       clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}">${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : "now"}</span>
 <small>From ${E(basis)} (${tm(dep)}), minus ${boardMin} min for boarding.${P.gateMin > 0 ? ` Leaving the airport? Allow ${secMin} min to get back through security, which leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : ""}</small></div>`;
-    } else clock = `<p class="fl-clock-miss">${dep ? "The departure time has passed. Check your airline app for the new time and add it above as the updated departure." : "Add your departure time above to see how much time you have."}</p>`;
-    const warn = `<p class="fl-warn">⚠️ Delays can shrink fast. Watch your airline app; this is an estimate.</p>`;
+    } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it above as the updated departure." : "Add your departure time above to see how much time you have left."}</p>`;
+    const warn = `<p class="fl-warn">Delays can change quickly. Confirm times in your airline app — this is an estimate.</p>`;
     const P = S.plan && dep && dep > now ? S.plan : null, short = !P || P.outMin < 60;
-    const airside = `<div class="fl-opt fl-air"><b>✈️ Stay inside the airport</b><span>Food, shops and lounges past security: no re-screening, nothing to miss. ${short ? "Best choice when time is short." : ""}</span>
-<a${ev("food_airside", "google_maps", code)} href="${LINK.gmaps(`restaurants inside ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Find food in ${E(code)} on Google Maps</a></div>`;
+    const airside = `<div class="fl-opt fl-air"><b>Stay inside the airport</b><span>Food, shops and lounges past security — no re-screening. ${short ? "Best when time is short." : ""}</span>
+<a${ev("food_airside", "google_maps", code)} href="${LINK.gmaps(`restaurants inside ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Food in ${E(code)} on Maps</a></div>`;
     const item = p => { const it = P ? P.items.find(x => x.osm === p.osm) : null, m = kmToMi(p.km), d = { lat: p.lat, lon: p.lon };
       const fit = it ? `<span class="fl-fit ${it.fit}">${it.fit === "fits" ? "fits" : it.fit === "tight" ? "tight" : "won't fit"}</span>` : "";
       const how = it ? (it.mode === "walk" ? `🚶 about ${it.oneWay} min walk each way` : `🚕 about ${it.oneWay} min by car each way`) + ` · allow ${it.visit} min there · <b>about ${F.fmtMin(it.total)} total</b>` : "";
@@ -459,49 +458,50 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     const list = (title, arr) => arr.length ? `<h3>${title}</h3><ul class="fl-pl">${arr.map(item).join("")}</ul>` : "";
     const TABS = [["dinner", `Dinner near ${code}`, by(["restaurant"], 8)], ["coffee", "Coffee & quick bites", by(["cafe", "fast_food"], 6)], ["todo", "Things to do", by(["museum", "attraction", "park", "cinema"], 8)]].filter(t => t[2].length);
     if (!TABS.some(t => t[0] === S.tab) && TABS.length) S.tab = TABS[0][0];
-    const places = S.places ? (TABS.length ? `<h3>Dinner near ${E(code)} and more</h3><div class="fl-tabs" role="tablist">${TABS.map(t => `<button type="button" role="tab" data-tab="${t[0]}" aria-selected="${t[0] === S.tab}">${E(t[1])} <small>${t[2].length}</small></button>`).join("")}</div>
-<ul class="fl-pl fl-swipe" id="fl-swipe">${(TABS.find(t => t[0] === S.tab) || TABS[0])[2].map(item).join("")}</ul><p class="dim small fl-swipe-h">Swipe for more · sorted by distance · no ratings</p>` : `<p class="dim">OpenStreetMap doesn't list named places near ${E(code)}.</p>`)
-      : `<p class="dim">${API ? (S.placesErr ? "Couldn't load nearby places from OpenStreetMap right now." : "Loading nearby places…") : "Nearby places need our relay, which isn't connected on this preview."} <a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`restaurants near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Restaurants near ${E(code)} on Google Maps</a></p>`;
-    const transport = `<h3>Getting around</h3><ul class="fl-modes">${F.modesFor(o).map(md => md.id === "walk" ? `<li>🚶 <b>Walk</b>: places within about 1 mile.</li>`
-        : md.id === "ride" ? `<li>🚕 <b>Rideshare or taxi</b>: check the price in the Uber or Lyft app. We don't show fares.</li>`
-        : md.id === "transit" ? (station ? `<li>🚆 <b>Train</b>: OpenStreetMap shows <b>${E(station.n)}</b> station ${kmToMi(station.km) < 1 ? "at the airport" : `${kmToMi(station.km).toFixed(1)} mi from the airport`}. Use the Transit link for times.</li>` : "")
-        : md.airports && (md.airports[o.iata] || md.airports[o.icao]) ? (x => `<li>${md.icon} <b>${E(md.label)}</b>: ${E(x.note)} <a${ev("rideshare", md.id, code)} href="${E(md.url)}" target="_blank" rel="noopener">${E(md.label)}</a> · <a href="${E(x.src)}" target="_blank" rel="noopener">airport info</a></li>`)(md.airports[o.iata] || md.airports[o.icao])
-        : `<li>${md.icon} <b>${E(md.label)}</b></li>`).join("")}</ul>`;
-    const stay = `<h3>If you're stuck overnight</h3><div class="fl-opt"><b>🏨 Hotels near ${E(code)}</b><span>Compare prices on Google, then book where you like. Your airline may cover a hotel if the delay is its fault.</span>
-<p class="fl-links"><a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Hotels on the map</a></p></div>
-<div class="fl-opt"><b>🚗 Rental cars at ${E(code)}</b><span>If the flight is cancelled and driving makes sense.</span>
-<p class="fl-links"><a${ev("car_rental", "google_search", code)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", code)} href="${LINK.gmaps(`car rental ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Rental desks on the map</a></p></div>`;
+    const places = S.places ? (TABS.length ? `<h3>Near ${E(code)}</h3><div class="fl-tabs" role="tablist">${TABS.map(t => `<button type="button" role="tab" data-tab="${t[0]}" aria-selected="${t[0] === S.tab}">${E(t[1])} <small>${t[2].length}</small></button>`).join("")}</div>
+<ul class="fl-pl fl-swipe" id="fl-swipe">${(TABS.find(t => t[0] === S.tab) || TABS[0])[2].map(item).join("")}</ul><p class="dim small fl-swipe-h">Sorted by distance · OpenStreetMap (no ratings)</p>` : `<p class="dim">No named places near ${E(code)} in OpenStreetMap.</p>`)
+      : `<p class="dim">${API ? (S.placesErr ? "Could not load nearby places from OpenStreetMap." : "Loading nearby places…") : "Nearby places need our relay, which is not connected on this preview."}</p><p class="fl-links"><a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`restaurants near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Restaurants near ${E(code)} on Maps</a></p>`;
+    const transport = `<h3>Getting around</h3><ul class="fl-modes">${F.modesFor(o).map(md => md.id === "walk" ? `<li><b>Walk</b> — places within about 1 mile.</li>`
+        : md.id === "ride" ? `<li><b>Rideshare or taxi</b> — check the fare in Uber or Lyft; we do not show prices.</li>`
+        : md.id === "transit" ? (station ? `<li><b>Train</b> — <b>${E(station.n)}</b> ${kmToMi(station.km) < 1 ? "at the airport" : `${kmToMi(station.km).toFixed(1)} mi away`} (OpenStreetMap). Use Transit for times.</li>` : "")
+        : md.airports && (md.airports[o.iata] || md.airports[o.icao]) ? (x => `<li><b>${E(md.label)}</b> — ${E(x.note)} <a${ev("rideshare", md.id, code)} href="${E(md.url)}" target="_blank" rel="noopener">${E(md.label)}</a> · <a href="${E(x.src)}" target="_blank" rel="noopener">airport info</a></li>`)(md.airports[o.iata] || md.airports[o.icao])
+        : `<li><b>${E(md.label)}</b></li>`).join("")}</ul>`;
+    const stay = `<h3>If you are staying overnight</h3><div class="fl-opt"><b>Hotels near ${E(code)}</b><span>Compare rates, then book where you prefer. Your airline may cover a hotel when the delay is its fault.</span>
+<p class="fl-links"><a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>
+<div class="fl-opt"><b>Rental cars at ${E(code)}</b><span>Useful when driving is a better option than waiting for a new flight.</span>
+<p class="fl-links"><a${ev("car_rental", "google_search", code)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", code)} href="${LINK.gmaps(`car rental ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>`;
     // Big top-pick cards (eye-catching) — same affiliate links as the lists below
     const dinner0 = by(["restaurant"], 1)[0], todo0 = by(["museum", "attraction", "park", "cinema"], 1)[0];
     const pick = (cls, title, body, links) => `<div class="fl-pick ${cls}"><b>${title}</b><span>${body}</span><p class="fl-links">${links}</p></div>`;
     const picks = `<div class="fl-stuck-picks" aria-label="Top picks while you wait">
-${pick("air", "✈️ Stay inside the airport", short ? "Best when time is short — food and shops past security, no re-screening." : "Food, shops and lounges past security so you don't risk missing the new time.",
+${pick("air", "Stay inside the airport", short ? "Best when time is short — food and shops past security, no re-screening." : "Food, shops and lounges past security so you do not risk missing the new time.",
   `<a${ev("food_airside", "google_maps", code)} href="${LINK.gmaps(`restaurants inside ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Food in ${E(code)}</a>`)}
-${dinner0 ? pick("food", `🍽️ Dinner near ${E(code)}`, `${E(dinner0.n)} · ${kmToMi(dinner0.km) < 0.95 ? kmToMi(dinner0.km).toFixed(1) : Math.round(kmToMi(dinner0.km))} mi away`,
+${dinner0 ? pick("food", `Dining near ${E(code)}`, `${E(dinner0.n)} · ${kmToMi(dinner0.km) < 0.95 ? kmToMi(dinner0.km).toFixed(1) : Math.round(kmToMi(dinner0.km))} mi away`,
   `<a${ev("place_map", "osm", code, dinner0.c)} href="${LINK.osm(dinner0.osm)}" target="_blank" rel="noopener">Map</a><a${ev("place_directions", "google_maps", code, dinner0.c)} href="${LINK.dir(o, { lat: dinner0.lat, lon: dinner0.lon }, "driving")}" target="_blank" rel="noopener">Directions</a><a${ev("rideshare", "uber", code, dinner0.c)} href="${LINK.uber(o, { lat: dinner0.lat, lon: dinner0.lon }, dinner0.n)}" target="_blank" rel="noopener">Uber</a>`)
-  : pick("food", `🍽️ Dinner near ${E(code)}`, "Find restaurants near the airport on the map.",
+  : pick("food", `Dining near ${E(code)}`, "Restaurants near the airport on the map.",
   `<a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`restaurants near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Restaurants on Maps</a>`)}
-${todo0 ? pick("todo", "🎯 Things to do", `${E(todo0.n)} · ${E(CATN[todo0.c] || "Nearby")}`,
+${todo0 ? pick("todo", "Things to do", `${E(todo0.n)} · ${E(CATN[todo0.c] || "Nearby")}`,
   `<a${ev("place_map", "osm", code, todo0.c)} href="${LINK.osm(todo0.osm)}" target="_blank" rel="noopener">Map</a><a${ev("place_directions", "google_maps", code, todo0.c)} href="${LINK.dir(o, { lat: todo0.lat, lon: todo0.lon }, "driving")}" target="_blank" rel="noopener">Directions</a>`)
-  : pick("todo", "🎯 Things to do", "Museums, parks and attractions near the airport.",
+  : pick("todo", "Things to do", "Museums, parks and attractions near the airport.",
   `<a${ev("food_nearby", "google_maps", code)} href="${LINK.gmaps(`things to do near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Explore on Maps</a>`)}
-${pick("hotel", `🏨 Hotels near ${E(code)}`, "Compare prices if you're stuck overnight. Your airline may cover a hotel if the delay is its fault.",
+${pick("hotel", `Hotels near ${E(code)}`, "Compare rates if you need to stay overnight. Your airline may cover a hotel when the delay is its fault.",
   `<a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a>`)}
-${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi — check the price in the app. We don't show fares.",
+${pick("ride", "Rides", "Uber, Lyft or taxi — check the fare in the app. We do not show prices.",
   `<a${ev("rideshare", "uber", code)} href="${LINK.uber(o, o, code + " airport")}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", code)} href="${LINK.lyft(o, o)}" target="_blank" rel="noopener">Lyft</a>`)}
 </div>`;
     // Overnight / canceled mode: hotels and rides first, then the rest.
     const overnight = S.canceled
-      ? (stay + `<div class="fl-stuck-picks" aria-label="Overnight picks">${pick("hotel", `🏨 Hotels near ${E(code)}`, "Compare prices near the airport for tonight.",
+      ? (stay + `<div class="fl-stuck-picks" aria-label="Overnight picks">${pick("hotel", `Hotels near ${E(code)}`, "Rates near the airport for tonight.",
   `<a${ev("hotel", "google_travel", code)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${code} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", code)} href="${LINK.gmaps(`hotels near ${code} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a>`)}
-${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi to a hotel or alternate airport — check the price in the app.",
+${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — check the fare in the app.",
   `<a${ev("rideshare", "uber", code)} href="${LINK.uber(o, o, code + " airport")}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", code)} href="${LINK.lyft(o, o)}" target="_blank" rel="noopener">Lyft</a>`)}</div>` + transport + airside + places)
       : (picks + airside + places + transport + stay);
     const html = clock + warn + overnight;
     const key = html.replace(/data-until="\d+"/g, ""); if (key === S.stuckKey && box.firstChild) return; S.stuckKey = key;
     const sl = $("fl-swipe") ? $("fl-swipe").scrollLeft : 0;
+    const mphCar = Math.round(F.MODES[1].kmh * 0.621371), mphWalk = Math.round(F.MODES[0].kmh * 0.621371);
     box.innerHTML = html +
-      `<p class="dim small">Travel times are rough: straight-line distance × ${F.ROAD} at about ${F.MODES[1].kmh} km/h by car (plus ${F.MODES[1].waitMin} min to get a ride) or ${F.MODES[0].kmh} km/h on foot. Time there is a planning allowance, not a measurement. "Fits" leaves at least 20 minutes spare. Places: © OpenStreetMap contributors (ODbL); OpenStreetMap doesn't rate places, so they're listed by distance.</p>`;
+      `<details class="fl-how-est"><summary>How we estimate</summary><p>Travel times are approximate: straight-line distance × ${F.ROAD} at about ${mphCar} mph by car (plus ${F.MODES[1].waitMin} min to get a ride) or about ${mphWalk} mph on foot. Time on site is a planning allowance, not a measurement. “Fits” leaves at least 20 minutes spare. Places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), listed by distance (no ratings). Airport status: <a href="https://nasstatus.faa.gov" target="_blank" rel="noopener">FAA NAS Status</a>.</p></details>`;
     const sw = $("fl-swipe"); if (sw) sw.scrollLeft = sl; tick();
   }
   $("fl-stuck-b").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; S.tab = b.dataset.tab; S.stuckKey = ""; renderStuck(); const sw = $("fl-swipe"); if (sw) sw.scrollLeft = 0; });
@@ -530,7 +530,7 @@ ${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi to a hotel or 
   }, true);
 
 
-  // ---------- Canceled? Here's your plan ----------
+  // ---------- Flight canceled? ----------
   async function loadRoutePeers() {
     if (S.routePeers) return S.routePeers;
     try {
@@ -572,10 +572,10 @@ ${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi to a hotel or 
   }
   async function renderCanceled() {
     const box = $("fl-canceled-b"); if (!box) return;
-    if (!S.t || !S.leg) { box.innerHTML = `<p class="dim">Track a flight first — then we can look up this route.</p>`; return; }
+    if (!S.t || !S.leg) { box.innerHTML = `<p class="dim">Track a flight to see rebooking options for this route.</p>`; return; }
     const o = S.leg.from, d = S.leg.to, oi = o.icao, di = d.icao;
     const oa = o.iata || oi, da = d.iata || di;
-    box.innerHTML = `<p class="dim">Looking up flights seen on ${E(oa)} → ${E(da)}…</p>`;
+    box.innerHTML = `<p class="dim">Looking up ${E(oa)} → ${E(da)}…</p>`;
     const [idx, apts, live] = await Promise.all([loadRoutePeers(), loadAirportsNa(), loadNearbyLive(o)]);
     const peers = F.peersForPair(idx || {}, oi, di).filter(p => p.cs !== (F.parseFlight(S.t.fn) || {}).cs);
     const matched = F.matchLivePeers(peers, live);
@@ -589,54 +589,60 @@ ${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi to a hotel or 
     const peerHtml = show.length
       ? `<ul class="fl-peers">${show.map(p => {
           const L = peerLabel(p);
-          const tag = p.live && p.live.airborne ? `<span class="tag air">Airborne now</span>`
-            : p.live ? `<span class="tag gnd">Seen on ground</span>` : `<span class="tag">Typical on this route</span>`;
+          const tag = p.live && p.live.airborne ? `<span class="tag air">Airborne</span>`
+            : p.live ? `<span class="tag gnd">On ground</span>` : `<span class="tag">Typical</span>`;
           return `<li class="fl-peer"><b>${E(L.name)} ${E(L.fn)}</b><span class="dim">${E(L.cs)}</span>${tag}</li>`;
         }).join("")}</ul>
-<p class="dim small">Flights seen on this route from adsb.lol standing route data (CC0) — not a schedule and not seat availability. “Airborne now” means a plane with that callsign was near ${E(oa)} in the last live check.</p>`
-      : `<p>No other flights turned up for ${E(oa)} → ${E(da)} in the route data we use. Try the airline rebooking link or a fare search below.</p>`;
+<p class="dim small">From adsb.lol standing route data (CC0) — not a schedule or seat inventory. “Airborne” means that callsign was near ${E(oa)} on the last live check.</p>`
+      : `<p class="dim">No other flights found for ${E(oa)} → ${E(da)} in our route data. Use airline rebooking or a fare search below.</p>`;
 
     const parsed = F.parseFlight(S.t.fn);
     const rb = F.rebookFor(parsed || {});
     const rebook = rb
-      ? `<p class="fl-links"><a${ev("rebook", rb.iata.toLowerCase(), oa)} href="${E(rb.url)}" target="_blank" rel="noopener">Manage / rebook on ${E(rb.name)}</a></p>`
-      : `<p class="dim">We don't have a direct rebooking link for this airline — use the airline's app or website.</p>`;
-    const tip = `<div class="fl-canceled-tip">Rebook in the airline app or by phone while you wait in line; you're usually owed a refund if you don't take a new flight (<a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT refunds rule</a>).</div>`;
+      ? `<p class="fl-links"><a${ev("rebook", rb.iata.toLowerCase(), oa)} href="${E(rb.url)}" target="_blank" rel="noopener">Manage booking on ${E(rb.name)}</a></p>`
+      : `<p class="dim">No direct rebooking link for this airline — use the airline app or website.</p>`;
+    const tip = `<div class="fl-canceled-tip">Rebook in the airline app or by phone while you wait. If you decline a new flight, you are usually owed a refund under the <a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT refunds rule</a>.</div>`;
 
     const date = (S.t.d || new Date().toISOString().slice(0, 10));
     const gf = F.googleFlightsUrl(oa, da, date);
     const alts = F.nearbyAirports(o, apts || [], 100);
     const altLinks = alts.length
-      ? `<p class="dim small">Nearby alternate airports (within ~100 mi):</p><ul class="fl-peers">${alts.map(a => {
+      ? `<p class="dim small">Alternate airports within about 100 mi:</p><ul class="fl-peers">${alts.map(a => {
           const url = F.googleFlightsUrl(a.iata, da, date);
           return `<li class="fl-peer"><b>${E(a.iata)}</b> <span class="dim">${E(a.name || "")} · ${Math.round(a.nm)} mi</span>
-<a${ev("fare_search_alt", "google_flights", a.iata)} href="${E(url)}" target="_blank" rel="noopener">Fares ${E(a.iata)} → ${E(da)}</a></li>`;
+<a${ev("fare_search_alt", "google_flights", a.iata)} href="${E(url)}" target="_blank" rel="noopener">${E(a.iata)} → ${E(da)}</a></li>`;
         }).join("")}</ul>`
       : `<p class="dim small">No alternate airports within about 100 miles in our list.</p>`;
 
-    const fares = `<p class="fl-links"><a${ev("fare_search", "google_flights", oa)} href="${E(gf)}" target="_blank" rel="noopener">Search other flights ${E(oa)} → ${E(da)} on Google Flights</a></p>${altLinks}`;
+    const fares = `<p class="fl-links"><a${ev("fare_search", "google_flights", oa)} href="${E(gf)}" target="_blank" rel="noopener">${E(oa)} → ${E(da)} on Google Flights</a></p>${altLinks}`;
 
-    box.innerHTML = `<h3>Flights seen on this route</h3>${peerHtml}
-<h3>Rebook with your airline</h3>${rebook}${tip}
-<h3>Search other flights</h3>${fares}
-<p class="dim small">Overnight options (hotels and rides) are at the top of <b>Stuck with a delay</b> while this panel is open.</p>`;
+    const stay = `<div class="fl-opt"><b>Hotels near ${E(oa)}</b><span>Compare rates near the airport for tonight. Your airline may cover a hotel when the cancellation is its fault.</span>
+<p class="fl-links"><a${ev("hotel", "google_travel", oa)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${oa} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", oa)} href="${LINK.gmaps(`hotels near ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>
+<div class="fl-opt"><b>Rides</b><span>Uber, Lyft or taxi to a hotel or alternate airport — check the fare in the app.</span>
+<p class="fl-links"><a${ev("rideshare", "uber", oa)} href="${LINK.uber(o, o, oa + " airport")}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", oa)} href="${LINK.lyft(o, o)}" target="_blank" rel="noopener">Lyft</a></p></div>
+<div class="fl-opt"><b>Rental cars at ${E(oa)}</b><span>When driving is a better option than waiting for a new flight.</span>
+<p class="fl-links"><a${ev("car_rental", "google_search", oa)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${oa} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", oa)} href="${LINK.gmaps(`car rental ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>`;
+
+    box.innerHTML = `<h3>Rebook with your airline</h3>${rebook}${tip}
+<h3>Alternate flights on this route</h3>${peerHtml}
+<h3>Search fares</h3>${fares}
+<h3>If you're staying overnight</h3>${stay}
+<p class="fl-canceled-attr">Route peers: adsb.lol standing data (CC0). Places © OpenStreetMap (ODbL). Refunds: <a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT</a>.</p>`;
   }
 
   async function openCanceled(on) {
-    S.canceled = !!on;
-    const btn = $("fl-cancel-btn"), panel = $("fl-canceled"), stuck = $("fl-stuck");
-    if (btn) btn.setAttribute("aria-pressed", S.canceled ? "true" : "false");
-    if (panel) { panel.hidden = !S.canceled; panel.open = S.canceled; }
-    if (S.canceled && stuck) { stuck.open = true; stuck.classList.add("hot"); delete stuck.dataset.userClosed; stuck.dataset.user = "1"; }
+    const next = !!on;
+    const panel = $("fl-canceled"), stuck = $("fl-stuck");
+    S.canceled = next;
+    if (panel && panel.open !== next) panel.open = next;
+    if (next && stuck) { stuck.open = true; stuck.classList.add("hot"); delete stuck.dataset.userClosed; stuck.dataset.user = "1"; }
     S.stuckKey = "";
     renderStuck();
-    if (S.canceled) await renderCanceled();
+    if (next) await renderCanceled();
   }
-  const cancelBtn = $("fl-cancel-btn");
-  if (cancelBtn) cancelBtn.addEventListener("click", () => openCanceled(!S.canceled));
   const cancelPanel = $("fl-canceled");
   if (cancelPanel) cancelPanel.addEventListener("toggle", () => {
-    if (!cancelPanel.open && S.canceled) { /* user collapsed; keep mode until button toggled */ }
+    if (cancelPanel.open !== S.canceled) openCanceled(cancelPanel.open);
   });
 
   // ---------- boot from #link ----------

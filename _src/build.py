@@ -725,9 +725,13 @@ def flight_page():
 <div id="fl-out" hidden>
 <div class="fl-alerts" id="fl-alerts" aria-live="assertive"></div>
 <section class="card fl-status" id="fl-status" aria-live="polite"></section>
+<details class="card fl-canceled" id="fl-canceled" data-sec="canceled">
+<summary class="fl-canceled-sum"><span class="fl-canceled-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm4.7 13.3a1 1 0 0 1-1.4 1.4L12 13.4l-3.3 3.3a1 1 0 0 1-1.4-1.4l3.3-3.3-3.3-3.3a1 1 0 0 1 1.4-1.4l3.3 3.3 3.3-3.3a1 1 0 0 1 1.4 1.4L13.4 12z"/></svg></span><span class="fl-canceled-txt"><b>Flight canceled?</b><em>Rebooking options, alternate flights and overnight plans</em></span></summary>
+<div class="fl-canceled-body" id="fl-canceled-b"><p class="dim">Track a flight to see rebooking options for this route.</p></div>
+</details>
 <details class="card fl-stuck" id="fl-stuck" data-sec="stuck"><summary class="fl-stuck-sum">
-<span class="fl-stuck-sum-hot"><b>Stuck with a delay? Here's what fits</b><em>Countdown, food, things to do, hotels and rides near the airport</em></span>
-<span class="fl-stuck-sum-idle"><b>Delayed? Plan your extra time</b><em>See what fits near the airport — or try a what-if delay</em>
+<span class="fl-stuck-sum-hot"><b>Delayed</b><em>Countdown, nearby options and overnight stays</em></span>
+<span class="fl-stuck-sum-idle"><b>Expecting a delay?</b><em>Options near the airport, or try a what-if delay</em>
 <span class="fl-whatif" role="group" aria-label="What if delay"><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button></span></span>
 </summary>
 <div class="fl-stuck-body">
@@ -736,11 +740,6 @@ def flight_page():
 <span class="fl-whatif fl-whatif-in" role="group" aria-label="What if delay"><span class="dim">What if</span><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button><button type="button" data-whatif="0" class="fl-whatif-clear">Clear</button></span>
 </div>
 <div id="fl-stuck-b"></div></div></details>
-<p class="fl-cancel-wrap"><button type="button" class="fl-cancel-btn" id="fl-cancel-btn">My flight got canceled</button></p>
-<details class="card fl-canceled" id="fl-canceled" data-sec="canceled" hidden>
-<summary class="fl-canceled-sum"><b>Canceled? Here's your plan</b><em>Other flights on this route, rebook with your airline, search fares, and overnight options</em></summary>
-<div class="fl-canceled-body" id="fl-canceled-b"><p class="dim">Track a flight first — then we can look up this route.</p></div>
-</details>
 <p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
 {flight_cta("after_estimate")}
 <section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>
