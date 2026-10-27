@@ -177,7 +177,9 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
   function aiCard(a, c) {
     const r = a.read || {}, late = r.lateMin, [lo, hi] = r.range || [0, 0];
     const meter = `<div class="fl-meter" aria-label="Delay risk ${E(r.label || a.label)}"><i class="on"></i><i class="${a.level >= 1 ? "on" : ""}"></i><i class="${a.level >= 2 ? "on" : ""}"></i><span>${E(r.label || a.label)}</span></div>`;
-    const range = (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
+    const spacing = r.rangeKind === "spacing" || r.faaAddMin;
+    const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> possible spacing on top of live ETA · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>`
+      : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
     const why = (r.why && r.why.length ? r.why : a.reasons.filter(x => x.lvl >= 1).map(x => x.text)).slice(0, 5);
     const eta = r.etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(r.etaMs)}</b><small>live track + approach buffer</small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
     // Auto-reset pulse when the estimate fingerprint changes

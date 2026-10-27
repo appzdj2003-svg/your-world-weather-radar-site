@@ -62,21 +62,54 @@ t("smooth plane: dead reckoning at reported speed, capped at 90 s, never on the 
   assert(!F.project({ ...ac, alt: "ground" }, 1e12 + 60e3).moved); assert(!F.project({ ...ac, gs: 20 }, 1e12 + 60e3).moved);
   const d = F.destPt({ lat: 0, lon: 0 }, 0, 60); assert(Math.abs(d.lat - 1) < 0.01 && Math.abs(d.lon) < 1e-9);
 });
-t("position ETA: approach buffer + delayEstimate takes larger of live vs FAA; AI read has Low/Medium/High", () => {
+t("position ETA: approach buffer; airborne live track primary over FAA; AI read has Low/Medium/High", () => {
   const mid = { lat: 35.5, lon: -100, gs: 450, alt: 34000, vs: 0 };
   const pr = F.progress(mid, L[0], NOW);
   assert(pr.etaMs && pr.bufferMin >= 12);
-  const lateish = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { ...pr, etaMs: NOW + 3600e3 + 50 * 60e3 }, origin: ATL, dest: SFO, nas: { groundStops: [], groundDelays: [], delays: [], closures: [] } });
-  assert.strictEqual(lateish.liveMin, 50); assert.strictEqual(lateish.source, "live track");
-  const faaWins = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { etaMs: NOW + 3600e3 + 10 * 60e3 }, origin: ATL, dest: SFO, nas });
+  const lateish = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { ...pr, etaMs: NOW + 3600e3 + 50 * 60e3, onGround: false }, origin: ATL, dest: SFO, nas: { groundStops: [], groundDelays: [], delays: [], closures: [] } });
+  assert.strictEqual(lateish.liveMin, 50); assert.strictEqual(lateish.source, "live track"); assert(lateish.airborne);
+  // Airborne with modest live delay + big FAA program: live stays primary, FAA becomes capped spacing cushion
+  const livePlusFaa = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { etaMs: NOW + 3600e3 + 10 * 60e3, onGround: false }, origin: ATL, dest: SFO, nas });
+  assert.strictEqual(livePlusFaa.source, "live track + FAA spacing");
+  assert.strictEqual(livePlusFaa.lateMin, 10);
+  assert(livePlusFaa.faaAddMin && livePlusFaa.faaAddMin[1] <= 30);
+  // Pre-takeoff (no solid airborne ETA): FAA still wins normally
+  const faaWins = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: null, origin: ATL, dest: SFO, nas });
   assert.strictEqual(faaWins.source, "FAA"); assert(faaWins.lateMin >= 60);
   const fog = F.assess({ now: NOW, origin: ATL, dest: SFO, arrMs: NOW + 3600e3,
     progress: { etaMs: NOW + 3600e3 + 40 * 60e3, bufferMin: 18, onGround: false },
     wx: { KSFO: { metar: { fltCat: "LIFR", vis: 0.25, wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null } },
     nas: { groundStops: [], groundDelays: [], delays: [], closures: [] }, sigmets: [] });
-  assert.strictEqual(fog.label, "High"); assert(fog.read); assert(/Fog|LIFR|visibility/i.test(fog.read.headline));
+  assert.strictEqual(fog.label, "High"); assert(fog.read); assert(/Fog|LIFR|visibility|behind|late/i.test(fog.read.headline));
   assert.strictEqual(fog.read.disclaimer, "AI estimate, not the airline's official status");
   assert.deepStrictEqual(F.LV, ["Low", "Medium", "High"]);
+});
+t("DEN fog: airborne early live ETA is primary; FAA arrival delay only as capped spacing; headline agrees with projected arrival", () => {
+  const DEN = { iata: "DEN", icao: "KDEN", countryiso2: "US", lat: 39.8561, lon: -104.6737, name: "Denver International Airport" };
+  const RIW = { iata: "RIW", icao: "KRIW", countryiso2: "US", lat: 43.0642, lon: -108.4597, name: "Riverton Regional" };
+  const arrMs = Date.parse("2026-10-27T15:08:00Z"); // 9:08 AM MT
+  const etaMs = Date.parse("2026-10-27T14:59:00Z"); // 8:59 AM — ~9 min early
+  const nasDen = { groundStops: [], groundDelays: [],
+    delays: [{ arpt: "DEN", reason: "WX:FG", min: "42 minutes", max: "1 hour and 44 minutes", trend: "increasing", type: "Arrival" }],
+    closures: [] };
+  const de = F.delayEstimate({ now: NOW, arrMs, progress: { etaMs, bufferMin: 18, onGround: false }, origin: RIW, dest: DEN, nas: nasDen });
+  assert(de.airborne); assert.strictEqual(de.liveMin, -9); assert.strictEqual(de.lateMin, -9);
+  assert.strictEqual(de.etaMs, etaMs); assert.notStrictEqual(de.source, "FAA");
+  assert(de.faaAddMin && de.faaAddMin[0] >= 5 && de.faaAddMin[1] <= 30);
+  const a = F.assess({ now: NOW, origin: RIW, dest: DEN, arrMs,
+    progress: { etaMs, bufferMin: 18, onGround: false },
+    wx: { KDEN: { metar: { fltCat: "LIFR", vis: 0.25, wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null } },
+    nas: nasDen, sigmets: [] });
+  assert.strictEqual(a.read.lateMin, -9);
+  assert.strictEqual(a.read.etaMs, etaMs);
+  assert.strictEqual(a.read.rangeKind, "spacing");
+  assert(a.read.range[1] <= 30, "spacing cushion capped");
+  assert(/Tracking about on time|early/i.test(a.read.headline), a.read.headline);
+  assert(/Fog|FAA spacing/i.test(a.read.headline), a.read.headline);
+  assert(!/Likely 42 min|1 h 44|Likely .* late/i.test(a.read.headline), "must not claim FAA-wide late when live is early: " + a.read.headline);
+  // Headline projected clock must match the same etaMs the card would show
+  const clock = new Date(etaMs).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  assert(a.read.headline.includes(clock), `headline should include ${clock}: ${a.read.headline}`);
 });
 (async () => {
   const tok = await F.encode({ v: 1, fn: "DL681", from: "SFO", to: "ATL", dep: "2026-10-27T03:45:00.000Z" });

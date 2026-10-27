@@ -190,10 +190,12 @@
     return out;
   }
 
-  // Minutes late(+) / early(−) from live track vs schedule, FAA programs, and pre-departure hold. Takes the larger delay.
+  // Minutes late(+) / early(−). Airborne with a solid position ETA: live track is primary.
+  // FAA arrival programs then add a capped holding/spacing cushion on top — they do not replace the live ETA.
+  // Before takeoff (or with no solid live ETA), the FAA program delay applies normally.
   function delayEstimate(c) {
-    const now = c.now, out = { liveMin: null, faaMin: null, lateMin: null, etaMs: null, source: "", basis: "" };
-    const pr = c.progress, code = a => a && (a.iata || a.icao) || "";
+    const now = c.now, out = { liveMin: null, faaMin: null, lateMin: null, etaMs: null, source: "", basis: "", faaAddMin: null, airborne: false };
+    const pr = c.progress;
     // Position-based (airborne)
     if (pr && pr.etaMs && c.arrMs) {
       out.liveMin = Math.round((pr.etaMs - c.arrMs) / 60e3);
@@ -205,7 +207,7 @@
       const stillHeld = !pr || (pr.onGround && pr.at === "origin") || (!pr && !c.inbound);
       if (stillHeld) {
         const hold = Math.round((now - c.depMs) / 60e3);
-        if (out.liveMin == null || hold > out.liveMin) { out.liveMin = hold; out.basis = "past scheduled departure, still on the ground"; }
+        if (out.liveMin == null || hold > out.liveMin) { out.liveMin = hold; out.basis = "past scheduled departure, still on the ground"; if (c.arrMs) out.etaMs = c.arrMs + hold * 60e3; }
       }
     }
     // Inbound aircraft still arriving for this departure
@@ -213,7 +215,7 @@
       const ready = c.inbound.etaMs + TURN_MIN * 60e3, late = Math.round((ready - c.depMs) / 60e3);
       if (late > 0 && (out.liveMin == null || late > out.liveMin)) { out.liveMin = late; out.basis = `inbound landing + ${TURN_MIN}-min turnaround`; }
     }
-    // FAA: take the largest published program minutes at origin/dest
+    // FAA: largest published program minutes at origin/dest
     let faa = 0, faaTxt = "";
     for (const apt of [c.origin, c.dest]) {
       for (const n of nasFor(c.nas, apt)) {
@@ -225,10 +227,31 @@
       }
     }
     out.faaMin = faa || null;
-    const live = out.liveMin, useFaa = faa && (live == null || faa > Math.max(0, live));
-    if (useFaa) { out.lateMin = faa; out.source = "FAA"; out.basis = faaTxt || "FAA program"; }
-    else if (live != null) { out.lateMin = live; out.source = live >= 0 && faa && faa >= live ? "live+FAA" : "live track"; }
-    else if (faa) { out.lateMin = faa; out.source = "FAA"; }
+    const live = out.liveMin;
+    // Solid airborne fix: in the air with a position-based ETA (not on the ground at origin/dest).
+    const airborne = !!(pr && !pr.onGround && pr.etaMs && c.arrMs && live != null);
+    out.airborne = airborne;
+    if (airborne) {
+      out.lateMin = live; // primary vs schedule — never replaced by airport-wide FAA minutes
+      out.source = "live track";
+      if (faa > 0) {
+        // Holding / spacing risk on top of the live ETA. Cap so a 46–60 min airport program
+        // becomes a modest 10–30 min cushion, not a rewritten arrival time.
+        const addLo = Math.min(10, Math.max(5, Math.round(faa * 0.15)));
+        const addHi = Math.min(30, Math.max(addLo + 10, Math.round(faa * 0.4)));
+        out.faaAddMin = [addLo, addHi];
+        out.source = "live track + FAA spacing";
+        out.basis = (out.basis ? out.basis + "; " : "") + "FAA spacing risk on top of live ETA";
+      }
+    } else if (faa && (live == null || faa > Math.max(0, live || 0))) {
+      out.lateMin = faa; out.source = "FAA"; out.basis = faaTxt || "FAA program";
+      if (!out.etaMs && c.arrMs) out.etaMs = c.arrMs + faa * 60e3;
+    } else if (live != null) {
+      out.lateMin = live; out.source = "live track";
+    } else if (faa) {
+      out.lateMin = faa; out.source = "FAA"; out.basis = faaTxt || "FAA program";
+      if (!out.etaMs && c.arrMs) out.etaMs = c.arrMs + faa * 60e3;
+    }
     return out;
   }
 
@@ -284,37 +307,65 @@
       if (late > 0) { add(late > 30 ? 2 : 1, `Your plane is still on its way in. Landing plus a typical ${TURN_MIN}-minute turnaround puts it about ${fmtMin(late)} past the scheduled departure.`, "adsb.lol", "inbound");
         todo.push("Your plane is running late on its way in. Your airline app will show the official new time."); } }
     if (pr && pr.onGround && pr.at === "origin" && c.depMs && now - c.depMs > 20 * 60e3) add(1, `Scheduled to leave ${fmtMin(Math.round((now - c.depMs) / 60e3))} ago and it's still on the ground at ${ap(c.origin)}.`, "adsb.lol", "hold");
-    // Weighted level: weather/FAA reasons + magnitude of combined delay
+    // Weighted level: weather/FAA reasons + magnitude of the *primary* delay (live when airborne)
     let level = R.reduce((m, r) => Math.max(m, r.lvl), 0);
     const late = de.lateMin;
+    // Only the primary lateMin (live when airborne) bumps level — not the raw airport-wide FAA minutes.
     if (late != null && late > 60) level = Math.max(level, 2);
     else if (late != null && late > 25) level = Math.max(level, 1);
     if (!R.length) R.push({ lvl: 0, text: "No FAA programs, storms, low visibility or SIGMETs found for this flight right now.", src: "" });
     if (!todo.length) todo.push(level ? "Keep your airline app handy; it has the official times and gate." : "Nothing to do for now. Your airline app has the official times and gate.");
-    // Likely-delay range (minutes): widen around the point estimate; weather adds cushion
-    let lo = 0, hi = 0;
-    if (late != null && late > 0) { lo = Math.max(5, Math.round(late * 0.7)); hi = Math.round(late * 1.4 + (level >= 2 ? 20 : 10)); }
+    // Likely-delay range. Airborne + FAA/weather disagreeing with an on-time live track → capped spacing cushion.
+    let lo = 0, hi = 0, rangeKind = "delay";
+    const disagree = de.airborne && late != null && late <= 10 && (de.faaAddMin || level >= 1);
+    if (disagree && de.faaAddMin) { lo = de.faaAddMin[0]; hi = de.faaAddMin[1]; rangeKind = "spacing"; }
+    else if (disagree) { lo = level >= 2 ? 10 : 10; hi = level >= 2 ? 30 : 20; rangeKind = "spacing"; }
+    else if (late != null && late > 0) { lo = Math.max(5, Math.round(late * 0.7)); hi = Math.round(late * 1.4 + (level >= 2 ? 20 : 10)); }
     else if (level >= 2) { lo = 30; hi = 90; }
     else if (level === 1) { lo = 15; hi = 45; }
-    // Plain-English headline from the top signal
+    // Plain-English headline. Must never contradict the projected arrival (live ETA) on the same card.
     const top = R.filter(r => r.lvl >= 1).sort((a, b) => b.lvl - a.lvl)[0];
     const dest = ap(c.dest) || "arrival", origin = ap(c.origin) || "departure";
+    const etaClock = de.etaMs ? new Date(de.etaMs).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+    const destName = (c.dest && (c.dest.name || "").replace(/\b(International|Intl\.?|Regional|Municipal|Airport)\b.*/i, "").trim()) || dest;
     let headline;
-    if (top && /fog|LIFR|visibility/i.test(top.text)) {
+    if (disagree) {
+      const track = late != null && late < -5 ? `Tracking about ${fmtMin(-late)} early` : "Tracking about on time";
+      const wxBits = [];
+      if (top && /fog|LIFR|visibility/i.test(top.text)) wxBits.push("Fog");
+      if (top && /thunder/i.test(top.text)) wxBits.push("Storms");
+      if (de.faaMin || (top && /FAA|ground|delay|spacing/i.test(top.text))) wxBits.push("FAA spacing");
+      if (!wxBits.length && top) wxBits.push("Weather");
+      const who = wxBits.length ? wxBits.join(" and ") : "Conditions";
+      headline = `${track}${etaClock ? ` (${etaClock})` : ""}. ${who} at ${destName || dest} could add ${fmtMin(lo)} to ${fmtMin(hi)}.`;
+    } else if (top && /fog|LIFR|visibility/i.test(top.text)) {
       const vis = (c.wx && c.dest && c.wx[c.dest.icao] && c.wx[c.dest.icao].metar && c.wx[c.dest.icao].metar.vis);
       headline = `Fog at ${dest}${vis != null ? ` (visibility ${vis} mile${vis === 1 ? "" : "s"})` : ""}.`;
-    } else if (top && /thunder|SIGMET for thunderstorms/i.test(top.text)) headline = `Thunderstorms near ${/origin|dep/i.test(top.text) ? origin : dest}.`;
-    else if (top && /FAA|ground (stop|delay)|closed/i.test(top.text)) headline = top.text.replace(/\.$/, "") + ".";
-    else if (late != null && late > 15) headline = `Running about ${fmtMin(late)} behind on the live track.`;
-    else if (top) headline = top.text.replace(/\.$/, "") + ".";
-    else headline = "No major delay signals right now.";
-    if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
-    else if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
-    else headline += " Looking close to on time.";
-    if (level >= 2) headline += " Rising risk.";
-    else if (level === 1) headline += " Watch closely.";
-    const read = { headline, level, label: LV[level], lateMin: late, range: [lo, hi], why: why.slice(0, 5),
+      if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
+      else if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
+    } else if (top && /thunder|SIGMET for thunderstorms/i.test(top.text)) {
+      headline = `Thunderstorms near ${/origin|dep/i.test(top.text) ? origin : dest}.`;
+      if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
+      else if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
+    } else if (top && /FAA|ground (stop|delay)|closed/i.test(top.text) && !de.airborne) {
+      headline = top.text.replace(/\.$/, "") + ".";
+      if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
+    } else if (late != null && late > 15) {
+      headline = `Running about ${fmtMin(late)} behind on the live track. Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
+    } else if (top) {
+      headline = top.text.replace(/\.$/, "") + ".";
+      if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
+      else headline += " Looking close to on time.";
+    } else {
+      headline = "No major delay signals right now. Looking close to on time.";
+    }
+    if (!disagree) {
+      if (level >= 2) headline += " Rising risk.";
+      else if (level === 1) headline += " Watch closely.";
+    }
+    const read = { headline, level, label: LV[level], lateMin: late, range: [lo, hi], rangeKind, why: why.slice(0, 5),
       source: de.source || (level ? "weather/rules" : "clear"), basis: de.basis, etaMs: de.etaMs, faaMin: de.faaMin, liveMin: de.liveMin,
+      faaAddMin: de.faaAddMin, airborne: de.airborne,
       disclaimer: "AI estimate, not the airline's official status" };
     return { level, label: LV[level], reasons: R.sort((a, b) => b.lvl - a.lvl), todo: [...new Set(todo)], delay: de, read };
   }
