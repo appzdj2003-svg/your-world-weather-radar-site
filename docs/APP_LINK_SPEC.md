@@ -33,7 +33,7 @@ Without the app, the https link just loads the web page, which shows the plan an
   (`java.util.zip.Inflater(true)`, nowrap = deflate-raw RFC 1951), then UTF-8 JSON.
 - Cap the decoded size (for example at 8 KB) and catch every exception, so a bad link never crashes the app.
 - Plan JSON: `{v:1, loc?:String, lat?, lon?, act:GENERAL|HIKE|BOAT|FISH|BEACH|CAMP|EVENT|COMMUTE|FLY|GARDEN, sd:"YYYY-MM-DD", d:1..10, al:[SEVERE|RAIN|LIGHTNING|WIND|HEAT|COLD|SNOW|FLOOD|HURRICANE|MARINE|AIR]}`
-- Trip JSON: `{v:1, from?, to?, lat?, lon?, stops?:[≤8 names], sd, d:1..30, act:SIGHTSEEING|HIKE|BEACH|SKI|CAMP|FISH|BOAT|EVENT|BUSINESS|FAMILY, mode:CAR|RV|FLY|BOAT|MOTORCYCLE|BIKE|FOOT}`
+- Trip JSON: `{v:1, from?, to?, lat?, lon?, stops?:[≤8 names], sd, d:1..30, act:SIGHTSEEING|HIKE|BEACH|SKI|CAMP|FISH|BOAT|EVENT|BUSINESS|FAMILY, mode:CAR|RV|FLY|BOAT|MOTORCYCLE|BIKE|FOOT, fn?, fd?, fdep?, farr?, fndep?, ffrom?, fto?}` — optional `fn` (+ date/times) enables the site Live trip view; unknown keys stay ignored by older app builds.
 - Unknown keys: ignore. Unknown enum values: use the default (GENERAL, SIGHTSEEING or CAR).
 - Behavior: geocode `loc`/`to` with the existing city search, then show a confirm sheet ("Add plan: Asheville, NC · Hiking · Oct 17–18 · alerts: ..."),
   which saves it as a saved place plus a watch window with those alert types. Nothing should be saved without a tap.

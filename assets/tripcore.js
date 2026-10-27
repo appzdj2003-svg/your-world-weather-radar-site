@@ -171,6 +171,28 @@
     if (mm != null) { r.rainMm = mm; r.rainIn = Math.round(mm / 25.4 * 100) / 100; }   // MET Norway's daily rain amount (NWS gives a chance instead)
     return r;
   }
-  const api = { windowScore, summary, iso, addDays, daysBetween, fmt, fmtRange, norm, label, suggest, resolve, hasNws, days, risk, score, bestWindow, itinerary, links, isBookingAsk, sourcedAnswer, emoji };
+
+  /* ---------- Live trip: rule-based day-1 shift when flight looks delayed (estimate) ---------- */
+  function delayShiftSuggestions(delayMin, itin, opts) {
+    const out = { applied: false, delayMin: null, label: "estimate", tips: [], day1: null };
+    const d = delayMin == null ? null : Math.round(+delayMin);
+    if (d == null || !isFinite(d) || d < 30) return out;   // only act on a likely delay (≥30 min)
+    out.applied = true; out.delayMin = d;
+    const day1 = itin && itin[0] ? { ...itin[0], tips: (itin[0].tips || []).slice() } : null;
+    const lateH = Math.round(d / 60 * 10) / 10;
+    const tips = [];
+    tips.push(`Your flight looks about ${d >= 60 ? Math.floor(d / 60) + " h" + (d % 60 ? " " + (d % 60) + " min" : "") : d + " min"} late (estimate from the live track and weather rules — not the airline).`);
+    tips.push("Shift outdoor or timed stops on day 1 later by that amount, or drop the first tight stop if check-in or dinner is locked to a time.");
+    if (d >= 90) tips.push("With a delay over about 90 minutes, consider moving a morning outdoor plan to day 2 and keeping day 1 flexible near the airport or hotel.");
+    else tips.push("Keep the first evening flexible: a lighter dinner or nearby option is easier than a fixed reservation right after landing.");
+    if (day1) {
+      day1.tips = tips.concat(day1.tips || []);
+      day1.shifted = true;
+      day1.shiftNote = `Day 1 shifted for an estimated ~${d}-minute late arrival`;
+    }
+    out.tips = tips; out.day1 = day1;
+    return out;
+  }
+  const api = { windowScore, summary, iso, addDays, daysBetween, fmt, fmtRange, norm, label, suggest, resolve, hasNws, days, risk, score, bestWindow, itinerary, links, isBookingAsk, sourcedAnswer, emoji, delayShiftSuggestions };
   root.YWTripCore = api; if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : this);

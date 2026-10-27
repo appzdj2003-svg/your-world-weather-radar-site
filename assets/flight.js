@@ -14,6 +14,13 @@
   // Same minute string the AI headline clock uses — must match the time portion of tmd/tm for a given etaMs.
   const clockOnly = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", wx: {}, routeWx: [], nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null, estKey: "", pulse: false };
+  // Live trip view embeds this page in an iframe (?embed=1). One poller; parent listens via postMessage.
+  const EMBED = /(?:^|[?&])embed=1(?:&|$)/.test(location.search);
+  if (EMBED) {
+    const mark = () => { try { document.documentElement.classList.add("fl-embed"); if (document.body) document.body.classList.add("fl-embed"); } catch (_) {} };
+    mark();
+    if (!document.body) document.addEventListener("DOMContentLoaded", mark, { once: true });
+  }
 
   async function getJSON(url, opt) { const r = await fetch(url, opt); if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { status: r.status }); return r.json(); }
   const api = p => getJSON(API + p);
@@ -158,6 +165,25 @@
   function render() {
     const c = context(), st = statusLine(c), a = F.assess(c), code = x => x.iata || x.icao;
     watch(c, a);
+    if (EMBED && window.parent && window.parent !== window) {
+      try {
+        const late = a && a.delay && (a.delay.lateMin != null ? a.delay.lateMin : a.delay.liveMin);
+        parent.postMessage({
+          type: "yw-flight-live",
+          level: a && a.level,
+          label: a && a.label,
+          lateMin: late != null ? late : null,
+          range: a && a.read && a.read.range,
+          headline: a && a.read && a.read.headline,
+          etaMs: (a && a.delay && a.delay.etaMs) || (c.progress && c.progress.etaMs) || c.arrMs || null,
+          arrMs: c.arrMs || null,
+          from: c.origin && (c.origin.iata || c.origin.icao) || "",
+          to: c.dest && (c.dest.iata || c.dest.icao) || "",
+          canceled: !!S.canceled,
+          disclaimer: "AI estimate, not the airline's official status"
+        }, location.origin);
+      } catch (_) {}
+    }
     const pr = c.progress, ib = c.inbound;
     let eta = "";
     if (pr && pr.etaMs) eta = `<div class="fl-eta"><div><span>Estimated arrival</span><b data-live="eta">${tmd(pr.etaMs)}</b><small>live track + approach buffer</small></div>${c.arrMs ? `<div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${pr.etaMs - c.arrMs > 5 * 60e3 ? fmtLate(pr.etaMs - c.arrMs) + " later" : c.arrMs - pr.etaMs > 5 * 60e3 ? fmtLate(c.arrMs - pr.etaMs) + " earlier" : "about on time"}</small></div>` : ""}</div>`;

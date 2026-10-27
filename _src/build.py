@@ -503,6 +503,15 @@ def trip_planner(path):
 <label class="tp-f"><span>End</span><input id="f-ed" type="date"></label>
 <label class="tp-f"><span>Trip type</span><select id="f-act"></select></label>
 <label class="tp-f"><span>Getting there</span><select id="f-mode"></select></label>
+<details class="tp-flight tp-wide" id="tp-flight"><summary>Add your flight <small>(optional — Live trip view)</small></summary>
+<div class="tp-flight-grid">
+<label class="tp-f"><span>Flight number</span><input id="f-fn" type="text" placeholder="e.g. DL809 or JSX101" autocomplete="off" inputmode="text"></label>
+<label class="tp-f"><span>Flight date</span><input id="f-fd" type="date"></label>
+<label class="tp-f"><span>Scheduled depart <small>(optional)</small></span><input id="f-fdep" type="datetime-local"></label>
+<label class="tp-f"><span>Scheduled arrive <small>(optional)</small></span><input id="f-farr" type="datetime-local"></label>
+</div>
+<p class="note">Same as Track my flight. With a flight number, your plan gets a Live trip view: plane on the radar, weather at both airports, countdown to landing, then day 1.</p>
+</details>
 <p class="err tp-wide" id="terr" role="alert"></p>
 <button class="btn primary tp-go tp-wide">Plan my trip</button></form></details>
 <p class="note">Tap 🎤 to speak. Atlas runs in your browser: it reads the National Weather Service forecast for US destinations and never books, holds or prices anything. Voice uses your browser's own speech service.</p></div></div></section>'''
@@ -517,8 +526,8 @@ def trip_planner(path):
 <p class="note" style="text-align:center">Don't have the app? {play_btn("trip", "dark", "planner", "Get it on Google Play")}</p>
 <p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US).{' Forecasts elsewhere: <a href="https://www.met.no/en" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), summarized into daily values by us.' if METNO else ""} Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
     page(path, title, "Weather trip planner with Ask Atlas, your travel agent: the forecast for your trip days (NWS in the US, MET Norway worldwide), best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
-         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"),
-         head_extra=SHOW_CSS("../"))
+         scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "flightcore.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"),
+         head_extra=SHOW_CSS("../") + f'<link rel="stylesheet" href="../assets/{V("flight.css")}">')
 
 def ask():
     import askdata

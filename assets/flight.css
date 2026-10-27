@@ -206,3 +206,39 @@
 .fl-drive-card>span{display:block;font-size:.9rem;color:var(--slate-3);margin-bottom:8px}
 .fl-drive-card .fl-opt{background:#fff;border-radius:10px;margin-top:8px}
 .fl-drive-skip{margin:10px 0}
+
+
+/* ---------- Live trip embed (iframe on Trip Planner /trip) ---------- */
+html.fl-embed .site-header,
+html.fl-embed header.top,
+html.fl-embed .topbar,
+html.fl-embed .site-footer,
+html.fl-embed footer,
+html.fl-embed .playbar,
+html.fl-embed .fl-promo,
+html.fl-embed .hero .kicker,
+html.fl-embed nav,
+body.fl-embed .site-header,
+body.fl-embed header.top,
+body.fl-embed .site-footer,
+body.fl-embed footer,
+body.fl-embed .playbar { display: none !important; }
+html.fl-embed body,
+body.fl-embed { background: #0b1220; }
+html.fl-embed .hero,
+body.fl-embed .hero { padding-top: 12px; padding-bottom: 8px; }
+html.fl-embed .hero h1 { font-size: 1.35rem; }
+html.fl-embed .fl-card { margin-top: 0; }
+
+html.fl-embed .fl-form,
+html.fl-embed .fl-how,
+html.fl-embed .fl-cta,
+html.fl-embed .owo-attr,
+html.fl-embed .fl-hero .lead,
+body.fl-embed .fl-form,
+body.fl-embed .fl-how,
+body.fl-embed .fl-cta,
+body.fl-embed .owo-attr { display: none !important; }
+html.fl-embed .fl-hero h1::after { content: " · Live trip"; font-weight: 500; font-size: .7em; opacity: .7; }
+html.fl-embed .fl-mapw, body.fl-embed .fl-mapw { min-height: 220px; }
+html.fl-embed .fl-map, body.fl-embed .fl-map { min-height: 220px; height: 260px; }

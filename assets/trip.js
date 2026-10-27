@@ -41,11 +41,26 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     try { sessionStorage.setItem(key, JSON.stringify({ exp, v: res.v })); } catch (e) {} return res.v;
   }
   /* ---------- form <-> state ---------- */
-  function toForm() { $("f-to").value = st.to || ""; $("f-from").value = st.from || ""; $("f-sd").value = st.sd || ""; $("f-ed").value = st.sd ? C.addDays(st.sd, (+st.d || 1) - 1) : ""; $("f-act").value = st.act; $("f-mode").value = st.mode; }
+  const toLocalInput = iso => { if (!iso) return ""; const d = new Date(iso); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+  const fromLocalInput = v => v ? new Date(v).toISOString() : undefined;
+  function toForm() {
+    $("f-to").value = st.to || ""; $("f-from").value = st.from || ""; $("f-sd").value = st.sd || ""; $("f-ed").value = st.sd ? C.addDays(st.sd, (+st.d || 1) - 1) : ""; $("f-act").value = st.act; $("f-mode").value = st.mode;
+    if ($("f-fn")) {
+      $("f-fn").value = st.fn || ""; $("f-fd").value = st.fd || ""; $("f-fdep").value = toLocalInput(st.fdep); $("f-farr").value = toLocalInput(st.farr);
+      const open = !!(st.fn || st.mode === "FLY"); if ($("tp-flight")) $("tp-flight").open = open;
+    }
+  }
   function fromForm() {
     const sd = $("f-sd").value, ed = $("f-ed").value || sd;
     Object.assign(st, { to: $("f-to").value.trim(), from: $("f-from").value.trim() || undefined, sd: sd || undefined, act: $("f-act").value, mode: $("f-mode").value });
     st.d = sd ? Math.max(1, Math.min(30, C.daysBetween(sd, ed < sd ? sd : ed) + 1)) : undefined;
+    if ($("f-fn")) {
+      const fn = ($("f-fn").value || "").trim().toUpperCase().replace(/\s/g, "");
+      if (fn) {
+        st.fn = fn; st.fd = $("f-fd").value || undefined;
+        st.fdep = fromLocalInput($("f-fdep").value); st.farr = fromLocalInput($("f-farr").value);
+      } else { delete st.fn; delete st.fd; delete st.fdep; delete st.farr; delete st.fndep; delete st.ffrom; delete st.fto; }
+    }
   }
   /* ---------- destination autocomplete (combobox) ---------- */
   function combo(inp) {
@@ -113,16 +128,19 @@ window.YW_ATL_IMG = window.YW_ATL_IMG || (() => `<img class="atl-ic" src="${(typ
     if (id !== runId) return;
     const itin = C.itinerary(st, ds, place, today()), wx = C.summary(ds, st);
     $("tp-days").innerHTML = wxNote + (ds ? (metMeta ? metCards(itin, ds, metMeta) : wxCards(itin, ds)) : "") + alertsHtml(alerts);
-    $("tp-rest").innerHTML = best(ds) + days(itin) + book() + pack() + phone();
+    st._itin = itin; st._ds = ds;
+    $("tp-rest").innerHTML = liveBlock() + best(ds) + days(itin) + book() + pack() + phone();
     if ($("tp-retry")) $("tp-retry").onclick = () => plan(true);
     if (window.YWTripGear) YWTripGear.mount(st, $("tp-gear"), wx);
     if (!$("tgear")) $("tp-gear").innerHTML = `<p><a href="/gear/">See weather gear for your trip →</a></p>`;
+    await mountLive();
     await phoneLink();
     if (!quiet) say("bot", `<p>${E(headline(dest, itin, ds, alerts, place))}</p><p><a class="btn dark" href="#tres">See my trip plan ↓</a></p>`);
   }
   function head(dest) {
-    return `<div class="tp-head"><div><span class="kicker">Your trip</span><h2>${E(dest)}</h2><p>${E(C.fmtRange(st.sd, st.d))} · ${st.d} day${st.d > 1 ? "s" : ""} · ${E(nm(ACT, st.act))} · ${E(nm(MODE, st.mode))}${st.from ? " · from " + E(st.from) : ""}</p></div><a class="btn" href="#tp">Edit trip</a></div>
-<nav class="tp-jump" aria-label="Trip sections"><a href="#tp-wx">Weather</a><a href="#tp-plan">Day by day</a><a href="#tp-book">Book</a><a href="#tp-pack">Pack</a><a href="#tp-phone">Send to phone</a></nav>`;
+    const liveJump = st.fn ? `<a href="#tp-live">Live trip</a>` : "";
+    return `<div class="tp-head"><div><span class="kicker">Your trip</span><h2>${E(dest)}</h2><p>${E(C.fmtRange(st.sd, st.d))} · ${st.d} day${st.d > 1 ? "s" : ""} · ${E(nm(ACT, st.act))} · ${E(nm(MODE, st.mode))}${st.from ? " · from " + E(st.from) : ""}${st.fn ? " · flight " + E(st.fn) : ""}</p></div><a class="btn" href="#tp">Edit trip</a></div>
+<nav class="tp-jump" aria-label="Trip sections">${liveJump}<a href="#tp-wx">Weather</a><a href="#tp-plan">Day by day</a><a href="#tp-book">Book</a><a href="#tp-pack">Pack</a><a href="#tp-phone">Share trip</a></nav>`;
   }
   function headline(dest, itin, ds, alerts, place) {
     const w = itin.filter(x => x.w);
@@ -169,7 +187,7 @@ ${same ? `<p class="tp-ok">✅ Your dates are already among the best ${n > 1 ? n
 <p class="note">Ranked by ${ds[0].src === "metno" && ds.every(d => d.pop == null) ? "rain amount, thunder, wind and temperature in the MET Norway forecast" : `rain chance, thunderstorms, wind and temperature in the ${ds[0].src === "metno" ? "MET Norway" : "NWS"} forecast`}. Forecasts change, so check again closer to the trip.</p></section>`;
   }
   function days(itin) {
-    return `<section class="tp-sec" id="tp-plan"><h2>🗓️ Day by day</h2><ol class="tp-itin">${itin.map(x => `<li><div class="tp-ih"><b>Day ${x.i}</b><span>${E(x.label)}</span>${x.w ? `<span class="tp-iw">${x.w.icon} ${x.w.hi != null ? x.w.hi + "°" : ""}</span>${pill(x.w.risk)}` : ""}</div>${x.tips.map(t => `<p>${E(t)}</p>`).join("")}</li>`).join("")}</ol>
+    return `<section class="tp-sec" id="tp-plan"><h2>🗓️ Day by day</h2><ol class="tp-itin" id="tp-itin">${itin.map(x => `<li class="${x.shifted ? "shifted" : ""}" data-day="${x.i}"><div class="tp-ih"><b>Day ${x.i}</b><span>${E(x.label)}</span>${x.shiftNote ? `<span class="tp-shift-note">${E(x.shiftNote)}</span>` : ""}${x.w ? `<span class="tp-iw">${x.w.icon} ${x.w.hi != null ? x.w.hi + "°" : ""}</span>${pill(x.w.risk)}` : ""}</div>${x.tips.map(t => `<p>${E(t)}</p>`).join("")}</li>`).join("")}</ol>
 ${itin.some(x => x.w && x.w.risk.k === "storm") ? `<p class="note">Storms in the forecast: read <a href="/guides/lightning-safety.html">lightning safety</a>.</p>` : ""}</section>`;
   }
   function book() {
@@ -179,23 +197,114 @@ ${itin.some(x => x.w && x.w.risk.k === "storm") ? `<p class="note">Storms in the
   }
   const pack = () => `<section class="tp-sec" id="tp-pack"><h2>🎒 Pack for the weather</h2><div id="tp-gear"></div></section>`;
   const phone = () => `<section class="tp-sec" id="tp-phone"><h2>📱 Take it on your phone</h2><div id="tp-ph" class="tp-ph"></div></section>`;
+  function tripPayload() {
+    const o = { v: 1, from: st.from, to: st.to, sd: st.sd, d: st.d, act: st.act, mode: st.mode, stops: st.stops };
+    if (st.fn) { o.fn = st.fn; if (st.fd) o.fd = st.fd; if (st.fdep) o.fdep = st.fdep; if (st.farr) o.farr = st.farr;
+      if (st.fndep) o.fndep = st.fndep; if (st.ffrom) o.ffrom = st.ffrom; if (st.fto) o.fto = st.fto; }
+    return o;
+  }
   async function phoneLink() {
     const box = $("tp-ph"); if (!box) return;
-    let tok; try { tok = await YWTrip.encode({ v: 1, from: st.from, to: st.to, sd: st.sd, d: st.d, act: st.act, mode: st.mode, stops: st.stops }); } catch (e) { box.innerHTML = `<p class="err">${E(e.message)}</p>`; return; }
+    let tok; try { tok = await YWTrip.encode(tripPayload()); } catch (e) { box.innerHTML = `<p class="err">${E(e.message)}</p>`; return; }
     const url = YWTrip.webUrl(tok), android = /Android/i.test(navigator.userAgent);
-    box.innerHTML = `<p>Open this trip in Your World Weather Radar for the full forecast, radar and alerts along the way.</p>
-${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl(tok))}">Open in the app</a></div>` : `<div class="tp-qrw"><div class="qr" id="qr"></div><p class="note">Scan with your Android phone to open it there.</p></div>`}
+    const liveNote = st.fn ? `<p>This share link includes your flight <b>${E(st.fn)}</b> so family can open the same Live trip view (plane on radar, weather, day plan) — everything is packed in the link; nothing is uploaded.</p>` : `<p>Open this trip in Your World Weather Radar for the full forecast, radar and alerts along the way.</p>`;
+    box.innerHTML = `${liveNote}
+${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl(tok))}" data-app-open="1">Open in the app</a></div>` : `<div class="tp-qrw"><div class="qr" id="qr"></div><p class="note">Scan with your Android phone to open it there.</p></div>`}
 <p class="note">Your link (everything is inside the link itself; nothing is uploaded):</p><div class="linkbox" id="lk">${E(url)}</div>
-<div class="btns"><button class="btn" id="copy">Copy link</button>${navigator.share ? `<button class="btn" id="share">Share</button>` : ""}<a class="btn dark" href="${E(YWTrip.PLAY)}" target="_blank" rel="noopener">Get the app on Google Play</a></div>
-<p class="note">Open on your Android phone with Your World Weather Radar installed. If the app isn't installed yet, the link opens this page with a Google Play button.</p>`;
+<div class="btns"><button class="btn" id="copy">Copy link</button>${navigator.share ? `<button class="btn" id="share">Share</button>` : ""}<a class="btn dark" href="${E(YWTrip.PLAY)}" target="_blank" rel="noopener" data-app-open="1">Get the app on Google Play</a></div>
+<p class="note">Open on your Android phone with Your World Weather Radar installed. If the app isn't installed yet, the link opens this page with a Google Play button. The app button stays gated to devices that can install it.</p>`;
     if (!android && window.qrcode) { const q = qrcode(0, "L"); q.addData(url); q.make(); $("qr").innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); }
-    $("copy").onclick = () => navigator.clipboard.writeText(url).then(() => $("copy").textContent = "Copied ✓");
-    if ($("share")) $("share").onclick = () => navigator.share({ title: "My weather trip", url });
+    $("copy").onclick = () => navigator.clipboard.writeText(url).then(() => { $("copy").textContent = "Copied ✓"; if (window.gtag) gtag("event", "share", { method: "copy", content_type: "trip", item_id: st.fn || st.to || "" }); });
+    if ($("share")) $("share").onclick = () => { navigator.share({ title: st.fn ? "Live trip · " + st.fn : "My weather trip", url }); if (window.gtag) gtag("event", "share", { method: "navigator", content_type: "trip", item_id: st.fn || st.to || "" }); };
     history.replaceState(null, "", "#" + tok);
   }
+
+  /* ---------- Live trip view (reuses /flight tracker in one iframe; no second poller on this page) ---------- */
+  function liveBlock() {
+    if (!st.fn) return "";
+    return `<section class="tp-sec tp-live" id="tp-live"><h2>✈️ Live trip</h2>
+<p class="dim">Your plane on the radar (same Track my flight module), weather at both airports and along the route, countdown to landing, then your first days. Open <b>Flight canceled?</b> inside the tracker for rebook, alternates, private/semi-private and drive options.</p>
+<div class="tp-live-countdown" id="tp-live-cd" hidden></div>
+<div id="tp-live-shift"></div>
+<div class="tp-live-frame-wrap"><iframe class="tp-live-frame" id="tp-live-frame" title="Live flight tracker" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+<p class="note">One live tracker — this page embeds Track my flight once (no duplicate polling here). Delay tips below are a rule-based estimate, not the airline.</p>
+<div id="tp-live-day1" class="tp-live-day1"></div></section>`;
+  }
+  function flightToken() {
+    if (!st.fn || !window.YWFlight) return null;
+    try {
+      const t = window.YWFlight.validate({ v: 1, fn: st.fn, d: st.fd, dep: st.fdep, arr: st.farr, ndep: st.fndep, from: st.ffrom, to: st.fto });
+      return t;
+    } catch (e) { return { v: 1, fn: st.fn, d: st.fd }; }
+  }
+  async function mountLive() {
+    const frame = $("tp-live-frame"); if (!frame || !st.fn) return;
+    let hash = encodeURIComponent(st.fn);
+    try {
+      const t = flightToken();
+      if (t && window.YWFlight && window.YWFlight.encode) hash = await window.YWFlight.encode(t);
+    } catch (e) {}
+    frame.src = "/flight/?embed=1#" + hash;
+    if (window.gtag) gtag("event", "trip_live_view", { flight: st.fn, destination: st.to || "" });
+    paintLiveDay1(null);
+  }
+  function paintLiveDay1(msg) {
+    const box = $("tp-live-day1"); if (!box) return;
+    const itin = st._itin || [];
+    const first = itin.slice(0, 2);
+    const arrHint = msg && msg.etaMs ? `<p class="note">Forecast below is for your trip days; aim outdoor stops after the estimated landing (${new Date(msg.etaMs).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}).</p>` : "";
+    box.innerHTML = arrHint + (first.length ? `<h3>First stops after you land</h3><ol class="tp-itin">${first.map(x => `<li class="${x.shifted ? "shifted" : ""}"><div class="tp-ih"><b>Day ${x.i}</b><span>${E(x.label)}</span>${x.w ? `<span class="tp-iw">${x.w.icon} ${x.w.hi != null ? x.w.hi + "°" : ""}</span>${pill(x.w.risk)}` : ""}${x.shiftNote ? `<span class="tp-shift-note">${E(x.shiftNote)}</span>` : ""}</div>${(x.tips || []).slice(0, 4).map(t => `<p>${E(t)}</p>`).join("")}</li>`).join("")}</ol>` : "");
+  }
+  function applyFlightLive(msg) {
+    if (!msg || msg.type !== "yw-flight-live") return;
+    const cd = $("tp-live-cd");
+    if (cd) {
+      const bits = [];
+      if (msg.from || msg.to) bits.push(`<div><span>Route</span><b>${E([msg.from, msg.to].filter(Boolean).join(" → ") || "—")}</b></div>`);
+      if (msg.etaMs) {
+        const left = msg.etaMs - Date.now();
+        const land = new Date(msg.etaMs).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+        let leftTxt = "—";
+        if (isFinite(left)) {
+          if (left <= 0) leftTxt = "Landed / due";
+          else { const m = Math.round(left / 60e3); leftTxt = m >= 60 ? Math.floor(m / 60) + " h " + (m % 60) + " min" : m + " min"; }
+        }
+        bits.push(`<div><span>Countdown to landing</span><b>${E(leftTxt)}</b></div>`);
+        bits.push(`<div><span>Estimated landing</span><b>${E(land)}</b></div>`);
+      }
+      if (msg.label) bits.push(`<div><span>Delay read</span><b>${E(msg.label)}${msg.lateMin != null && msg.lateMin > 0 ? " · ~" + Math.round(msg.lateMin) + " min" : ""}</b></div>`);
+      cd.hidden = !bits.length; cd.innerHTML = bits.join("");
+    }
+    const shift = C.delayShiftSuggestions(msg.lateMin, st._itin || []);
+    const box = $("tp-live-shift");
+    if (box) {
+      if (shift.applied) {
+        box.innerHTML = `<b>Day 1 adjusted for a likely delay</b><ul>${shift.tips.map(t => `<li>${E(t)}</li>`).join("")}</ul><p class="est">Labelled estimate from the live track and weather rules — not the airline’s official status. Confirm times in your airline app.</p>`;
+        if (st._itin && st._itin[0] && shift.day1) {
+          st._itin[0] = { ...st._itin[0], tips: shift.day1.tips, shifted: true, shiftNote: shift.day1.shiftNote };
+          const ol = $("tp-itin");
+          if (ol) {
+            const rewritten = days(st._itin);
+            const tmp = document.createElement("div"); tmp.innerHTML = rewritten;
+            const neu = tmp.querySelector("#tp-itin");
+            if (neu) ol.replaceWith(neu);
+          }
+        }
+      } else box.innerHTML = "";
+    }
+    paintLiveDay1(msg);
+  }
+  window.addEventListener("message", e => {
+    if (e.origin !== location.origin) return;
+    if (!e.data || e.data.type !== "yw-flight-live") return;
+    applyFlightLive(e.data);
+  });
+
   /* ---------- wire up ---------- */
   $("f-act").innerHTML = ACT.map(([k, t]) => `<option value="${k}">${E(t)}</option>`).join(""); $("f-mode").innerHTML = MODE.map(([k, t]) => `<option value="${k}">${E(t)}</option>`).join("");
-  $("f-sd").min = today(); $("f-ed").min = today(); toForm(); combo($("f-to"));
+  $("f-sd").min = today(); $("f-ed").min = today(); if ($("f-fd")) $("f-fd").min = today();
+  $("f-mode").addEventListener("change", () => { if ($("tp-flight") && $("f-mode").value === "FLY") $("tp-flight").open = true; });
+  toForm(); combo($("f-to"));
   $("f-sd").addEventListener("change", () => { if (!$("f-ed").value || $("f-ed").value < $("f-sd").value) $("f-ed").value = $("f-sd").value; $("f-ed").min = $("f-sd").value; });
   $("tform").addEventListener("submit", e => { e.preventDefault(); fromForm(); const miss = !st.to ? "f-to" : !st.sd ? "f-sd" : null;
     if (miss) { $("terr").textContent = miss === "f-to" ? "Where are you headed?" : "Pick your dates."; $(miss).focus(); return; } $("terr").textContent = ""; awaiting = null;

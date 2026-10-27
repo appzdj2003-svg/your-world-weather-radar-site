@@ -81,3 +81,19 @@ t("links: honest prefilled searches", () => {
 });
 t("dates", () => { assert.strictEqual(C.addDays("2026-10-31", 1), "2026-11-01"); assert.strictEqual(C.daysBetween("2026-10-30", "2026-11-01"), 2); assert.strictEqual(C.fmt("2026-10-23"), "Fri Oct 23"); assert.strictEqual(C.fmtRange("2026-10-30", 3), "Fri Oct 30 – Sun Nov 1"); });
 console.log(`All ${n} trip core test groups passed`);
+
+t("delayShiftSuggestions idle under 30 min", () => {
+  const r = C.delayShiftSuggestions(15, [{ i: 1, label: "Day 1", tips: ["a"] }]);
+  assert.strictEqual(r.applied, false);
+});
+t("delayShiftSuggestions shifts day 1 at 45+ min", () => {
+  const r = C.delayShiftSuggestions(45, [{ i: 1, label: "Fri", tips: ["pack"] }]);
+  assert(r.applied); assert.strictEqual(r.delayMin, 45); assert(r.tips.length >= 2);
+  assert(r.day1 && r.day1.shifted && /estimate|late/i.test(r.day1.shiftNote));
+  assert(r.day1.tips[0].includes("late"));
+});
+t("delayShiftSuggestions 90 min suggests move outdoor", () => {
+  const r = C.delayShiftSuggestions(95, [{ i: 1, tips: [] }]);
+  assert(r.tips.some(x => /90|day 2|flexible/i.test(x)));
+});
+console.log(`tripcore: ${n} tests ok`);
