@@ -91,6 +91,182 @@
     return `https://www.google.com/travel/flights?q=${q}`;
   }
 
+  // Semi-private / regional carriers with publicly listed airports (IATA). Matched when origin or dest
+  // is within ~60 mi of any listed airport. URLs are public booking/home pages — never claim seats.
+  const SEMI_PRIVATE = [
+    { id: "cape_air", name: "Cape Air", kind: "regional", url: "https://www.capeair.com/",
+      airports: ["ACK","AUG","AXA","BHB","BIL","BOS","CPX","EIS","EWB","GDV","GGW","HPN","HVR","HYA","ISP","JFK","LEB","MAZ","MVY","NEV","OLF","OWD","PVC","RKD","RUT","SBH","SDY","SJU","SKB","SLK","STT","STX","VIJ","VQS"] },
+    { id: "jsx", name: "JSX", kind: "semi-private", url: "https://www.jsx.com/",
+      airports: ["APA","APC","APF","BCT","BJC","BUR","CCR","CLD","DAL","DSI","EDC","FXE","GUC","HOU","HPN","LAS","LAX","MMU","MRY","OAK","OPF","PBI","RNO","SAF","SCF","SLC","SMO","SNA","TEB","TSM"] },
+    { id: "southern", name: "Southern Airways Express", kind: "regional", url: "https://www.iflysouthern.com/",
+      airports: ["BFD","BNA","DFW","DUJ","HNM","HNL","HOT","HRO","IAD","IPL","JBR","JHM","KOA","LAX","LNY","LUP","MEM","MKK","MUE","OGG","PHX","PIT","STL"] },
+    { id: "boutique", name: "Boutique Air", kind: "regional", url: "https://www.boutiqueair.com/",
+      airports: ["BOS","MSS","PDT","PDX"] },
+    { id: "contour", name: "Contour Airlines", kind: "regional", url: "https://www.contourairlines.com/",
+      airports: ["ABQ","AOO","BKW","BNA","BRL","CGI","CKB","CLT","CNM","CNY","DFW","ELD","GLH","IAD","IRK","LAX","LWB","MBL","MCE","MCN","MSL","ORD","OWB","PAH","PBG","PGA","PHX","PKB","SHD","SOW","TBN","TUP","UIN","VEL"] },
+    { id: "advanced", name: "Advanced Air", kind: "regional", url: "https://advancedairlines.com/",
+      airports: ["ABQ","AXX","CEC","CLD","GUP","HHR","IPL","LAX","MMH","OAK","PHX","SVC"] },
+    { id: "aero", name: "Aero", kind: "semi-private", url: "https://aero.com/",
+      airports: ["APC","ASE","CSL","LAS","OGG","SJD","SUN","TEB","TRM","VNY"] }
+  ];
+  // Charter marketplaces. Blade only when near its NYC-area airports; general search always available.
+  const CHARTER_OPTS = [
+    { id: "blade", name: "Blade", url: "https://www.blade.com/",
+      airports: ["JFK","EWR","LGA","HPN","TEB"],
+      blurb: "NYC-area airport transfers and charter — check availability on their site." },
+    { id: "charter_search", name: "On-demand charter search", url: "https://www.google.com/search?q=private+jet+charter+near+me",
+      airports: null,
+      blurb: "Compare charter operators near you — pricing is on their sites." }
+  ];
+  // Amtrak: airport IATA → station code + city. Only claim a corridor when both ends are in AMTRAK_ROUTES.
+  const AMTRAK_NEAR = {    BOS: { stn: "BOS", city: "Boston" }, PVD: { stn: "PVD", city: "Providence" },
+    BDL: { stn: "NYP", city: "New York" }, // Hartford trains continue; use NYP corridor carefully — map HFD separately
+    HFD: { stn: "HFD", city: "Hartford" }, NHV: { stn: "NHV", city: "New Haven" },
+    JFK: { stn: "NYP", city: "New York" }, LGA: { stn: "NYP", city: "New York" }, EWR: { stn: "NYP", city: "New York" },
+    TEB: { stn: "NYP", city: "New York" }, HPN: { stn: "NYP", city: "New York" }, ISP: { stn: "NYP", city: "New York" },
+    PHL: { stn: "PHL", city: "Philadelphia" }, BWI: { stn: "BAL", city: "Baltimore" },
+    DCA: { stn: "WAS", city: "Washington" }, IAD: { stn: "WAS", city: "Washington" }, WAS: { stn: "WAS", city: "Washington" },
+    RIC: { stn: "RVR", city: "Richmond" }, ORF: { stn: "NFK", city: "Norfolk" },
+    CLT: { stn: "CLT", city: "Charlotte" }, RDU: { stn: "RGH", city: "Raleigh" },
+    ATL: { stn: "ATL", city: "Atlanta" }, SAV: { stn: "SAV", city: "Savannah" }, JAX: { stn: "JAX", city: "Jacksonville" },
+    TPA: { stn: "TPA", city: "Tampa" }, MIA: { stn: "MIA", city: "Miami" }, FLL: { stn: "FTL", city: "Fort Lauderdale" },
+    MSY: { stn: "NOL", city: "New Orleans" }, MEM: { stn: "MEM", city: "Memphis" }, BNA: { stn: "NASH", city: "Nashville" },
+    CHI: { stn: "CHI", city: "Chicago" }, ORD: { stn: "CHI", city: "Chicago" }, MDW: { stn: "CHI", city: "Chicago" },
+    DET: { stn: "DET", city: "Detroit" }, DTW: { stn: "DET", city: "Detroit" }, CLE: { stn: "CLE", city: "Cleveland" },
+    PIT: { stn: "PGH", city: "Pittsburgh" }, CMH: { stn: "COL", city: "Columbus" },
+    STL: { stn: "STL", city: "St. Louis" }, KAN: { stn: "KCY", city: "Kansas City" }, MCI: { stn: "KCY", city: "Kansas City" },
+    MSP: { stn: "MSP", city: "Minneapolis" }, DEN: { stn: "DEN", city: "Denver" },
+    ABQ: { stn: "ABQ", city: "Albuquerque" }, PHX: { stn: "PHX", city: "Phoenix" },
+    LAX: { stn: "LAX", city: "Los Angeles" }, BUR: { stn: "BUR", city: "Burbank" }, SNA: { stn: "IRV", city: "Irvine" },
+    SAN: { stn: "SAN", city: "San Diego" }, SBA: { stn: "SBA", city: "Santa Barbara" },
+    SFO: { stn: "SFC", city: "San Francisco" }, OAK: { stn: "OKJ", city: "Oakland" }, SJC: { stn: "SJC", city: "San Jose" },
+    SAC: { stn: "SAC", city: "Sacramento" }, SMF: { stn: "SAC", city: "Sacramento" },
+    PDX: { stn: "PDX", city: "Portland" }, SEA: { stn: "SEA", city: "Seattle" },
+    DAL: { stn: "DAL", city: "Dallas" }, DFW: { stn: "DAL", city: "Dallas" }, AUS: { stn: "AUS", city: "Austin" },
+    HOU: { stn: "HOU", city: "Houston" }, IAH: { stn: "HOU", city: "Houston" }, SAT: { stn: "SAS", city: "San Antonio" },
+    MSY: { stn: "NOL", city: "New Orleans" }
+  };
+  // Verified Amtrak corridors (station codes). Pair is unordered.
+  const AMTRAK_ROUTES = [
+    { a: "BOS", b: "NYP", name: "Northeast Corridor" },
+    { a: "NYP", b: "PHL", name: "Northeast Corridor" },
+    { a: "NYP", b: "WAS", name: "Northeast Corridor" },
+    { a: "PHL", b: "WAS", name: "Northeast Corridor" },
+    { a: "BAL", b: "WAS", name: "Northeast Corridor" },
+    { a: "BAL", b: "NYP", name: "Northeast Corridor" },
+    { a: "WAS", b: "RVR", name: "Northeast Corridor / Carolinian" },
+    { a: "WAS", b: "CLT", name: "Carolinian / Crescent" },
+    { a: "NYP", b: "CHI", name: "Lake Shore Limited" },
+    { a: "BOS", b: "CHI", name: "Lake Shore Limited" },
+    { a: "CHI", b: "STL", name: "Lincoln Service" },
+    { a: "CHI", b: "MSP", name: "Empire Builder / Borealis" },
+    { a: "CHI", b: "DEN", name: "California Zephyr / Southwest Chief" },
+    { a: "CHI", b: "NOL", name: "City of New Orleans" },
+    { a: "CHI", b: "DET", name: "Wolverine" },
+    { a: "DEN", b: "SFC", name: "California Zephyr" },
+    { a: "LAX", b: "SFC", name: "Coast Starlight / Pacific Surfliner connections" },
+    { a: "LAX", b: "SAN", name: "Pacific Surfliner" },
+    { a: "LAX", b: "ABQ", name: "Southwest Chief" },
+    { a: "SEA", b: "PDX", name: "Cascades" },
+    { a: "SEA", b: "SFC", name: "Coast Starlight" },
+    { a: "PDX", b: "SFC", name: "Coast Starlight" },
+    { a: "NYP", b: "MIA", name: "Silver Service" },
+    { a: "WAS", b: "MIA", name: "Silver Service" },
+    { a: "NYP", b: "NOL", name: "Crescent" },
+    { a: "DAL", b: "CHI", name: "Texas Eagle" },
+    { a: "DAL", b: "SAS", name: "Texas Eagle" },
+    { a: "SAS", b: "LAX", name: "Sunset Limited / Texas Eagle" },
+    { a: "NOL", b: "LAX", name: "Sunset Limited" },
+    { a: "SAC", b: "SFC", name: "Capitol Corridor" },
+    { a: "OKJ", b: "SAC", name: "Capitol Corridor" },
+    { a: "BUR", b: "SAN", name: "Pacific Surfliner" },
+    { a: "IRV", b: "LAX", name: "Pacific Surfliner" }
+  ];
+
+  function airportIndex(list) {
+    const by = {};
+    for (const a of list || []) {
+      if (a.iata) by[String(a.iata).toUpperCase()] = a;
+      if (a.icao) by[String(a.icao).toUpperCase()] = a;
+    }
+    return by;
+  }
+  function resolveApt(code, by, tips) {
+    const c = String(code || "").toUpperCase();
+    if (by[c]) return by[c];
+    if (by["K" + c]) return by["K" + c];
+    for (const p of tips || []) {
+      if (!p) continue;
+      if ((p.iata || "").toUpperCase() === c) return p;
+      if ((p.icao || "").toUpperCase() === c || (p.icao || "").toUpperCase() === "K" + c) return p;
+    }
+    return null;
+  }
+  // Carriers whose network touches within maxMi of origin or destination.
+  function carriersNear(origin, dest, carriers, airportsList, maxMi) {
+    const lim = (maxMi == null ? 60 : maxMi) / 1.15078; // mi → nm
+    const by = airportIndex(airportsList);
+    const tips = [origin, dest];
+    return (carriers || []).filter(c => {
+      for (const code of c.airports || []) {
+        if (tips.some(p => p && ((p.iata || "").toUpperCase() === code || (p.icao || "").replace(/^K/i, "").toUpperCase() === code))) return true;
+        const apt = resolveApt(code, by, tips);
+        if (!apt || !isFinite(apt.lat)) continue;
+        for (const p of tips) if (p && isFinite(p.lat) && distNm(p, apt) <= lim) return true;
+      }
+      return false;
+    }).map(c => {
+      // nearest listed airport to either end (for display)
+      let best = null;
+      for (const code of c.airports || []) {
+        const apt = resolveApt(code, by, tips);
+        if (!apt || !isFinite(apt.lat)) continue;
+        for (const p of tips) {
+          if (!p || !isFinite(p.lat)) continue;
+          const nm = distNm(p, apt);
+          if (!best || nm < best.nm) best = { code, nm, mi: nm * 1.15078, near: (p.iata || p.icao), name: apt.name };
+        }
+      }
+      return { ...c, nearest: best };
+    });
+  }
+  function charterNear(origin, dest, airportsList, maxMi) {
+    const always = CHARTER_OPTS.filter(c => !c.airports);
+    const gated = carriersNear(origin, dest, CHARTER_OPTS.filter(c => c.airports), airportsList, maxMi);
+    return gated.concat(always);
+  }
+
+  // Drive vs next-flight estimate. Road ≈ 1.25 × GC at 60 mph. No OSRM / paid APIs.
+  const DRIVE_ROAD = 1.25, DRIVE_MPH = 60, AIRPORT_OVERHEAD_MIN = 90, REBOOK_WAIT_MIN = [240, 360];
+  function driveVsFly(origin, dest, opts) {
+    opts = opts || {};
+    if (!origin || !dest || !isFinite(origin.lat) || !isFinite(dest.lat)) return null;
+    const gcNm = distNm(origin, dest), gcMi = gcNm * 1.15078;
+    const roadMi = gcMi * DRIVE_ROAD;
+    const driveMin = Math.round(roadMi / DRIVE_MPH * 60);
+    // Cruise ~450 mph → nm/min ≈ 7.5
+    const flightMin = Math.max(25, Math.round(gcNm / 7.5));
+    let waitMin = opts.nextFlightWaitMin;
+    if (waitMin == null || !isFinite(waitMin)) waitMin = Math.round((REBOOK_WAIT_MIN[0] + REBOOK_WAIT_MIN[1]) / 2);
+    const overheadMin = AIRPORT_OVERHEAD_MIN;
+    const flyTotal = waitMin + flightMin + overheadMin;
+    const delta = driveMin - flyTotal;
+    return {
+      gcMi: Math.round(gcMi), roadMi: Math.round(roadMi), driveMin, flightMin, waitMin, overheadMin, flyTotal,
+      driveFaster: driveMin <= flyTotal, withinHour: Math.abs(delta) <= 60,
+      showDrive: driveMin <= flyTotal + 60, hide: driveMin > flyTotal + 180,
+      mapsUrl: `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lon}&destination=${dest.lat},${dest.lon}&travelmode=driving`
+    };
+  }
+  function amtrakFor(origin, dest) {
+    const oa = (origin && (origin.iata || "")).toUpperCase(), da = (dest && (dest.iata || "")).toUpperCase();
+    const A = AMTRAK_NEAR[oa], B = AMTRAK_NEAR[da];
+    const q = encodeURIComponent(`${(A && A.city) || oa} to ${(B && B.city) || da}`);
+    const searchUrl = `https://www.amtrak.com/home.html?q=${q}`;
+    if (!A || !B || A.stn === B.stn) return { linked: !!(A || B), route: null, searchUrl, cityA: A && A.city, cityB: B && B.city };
+    const hit = AMTRAK_ROUTES.find(r => (r.a === A.stn && r.b === B.stn) || (r.a === B.stn && r.b === A.stn));
+    return { linked: true, route: hit ? hit.name : null, searchUrl, cityA: A.city, cityB: B.city };
+  }
 
   function parseFlight(s) {
     s = String(s || "").toUpperCase().replace(/[\s\-]/g, "");
@@ -573,7 +749,7 @@
   const api = Object.assign(base, {
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
-    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
+    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
     wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

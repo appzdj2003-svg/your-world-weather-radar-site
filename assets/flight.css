@@ -200,3 +200,9 @@
 .fl-canceled-tip{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:.92rem;line-height:1.45;color:var(--slate-3)}
 .fl-canceled-tip a{font-weight:600}
 .fl-canceled-attr{margin:14px 0 0;font-size:.78rem;color:var(--mute);line-height:1.4}
+
+.fl-drive-card{margin:14px 0;padding:14px 16px;border-radius:14px;border:1px solid #FCD34D;background:linear-gradient(180deg,#FFFBEB,#FEF3C7);color:var(--slate)}
+.fl-drive-card>b{display:block;font-size:1.05rem;margin-bottom:4px;color:#92400E}
+.fl-drive-card>span{display:block;font-size:.9rem;color:var(--slate-3);margin-bottom:8px}
+.fl-drive-card .fl-opt{background:#fff;border-radius:10px;margin-top:8px}
+.fl-drive-skip{margin:10px 0}

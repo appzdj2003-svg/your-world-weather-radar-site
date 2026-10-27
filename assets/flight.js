@@ -74,6 +74,16 @@
     const live = F.liveLeg(L, S.ac);
     if (!leg && !(S.t.from || S.t.to)) leg = live || (L.length === 1 ? L[0] : null);
     if (!leg && (S.t.from || S.t.to)) leg = null;
+    // Share link named both airports but standing route JSON missing: still build a leg for canceled/drive options.
+    if (!leg && S.t && S.t.from && S.t.to && S.airportsNa) {
+      const by = {};
+      for (const a of S.airportsNa) {
+        if (a.iata) by[a.iata] = a;
+        if (a.icao) by[a.icao] = a;
+      }
+      const o = by[S.t.from] || by["K" + S.t.from], d = by[S.t.to] || by["K" + S.t.to];
+      if (o && d && isFinite(o.lat) && isFinite(d.lat)) leg = { from: o, to: d, i: 0 };
+    }
     S.leg = leg; S.liveLeg = live;
     // The live plane may be flying the leg before yours (it's your inbound aircraft).
     S.inbound = leg && live && live !== leg && F.aptMatch(live.to, leg.from.icao) ? live : null;
@@ -87,6 +97,7 @@
     if (p && p.unknownAirline) { $("fl-status").innerHTML = `<p class="fl-big">We don't know airline code ${E(p.iata)} yet.</p><p>Try the 3-letter airline code (for example DAL for Delta) followed by the number.</p>`; return; }
     // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
     if (S.sim) { pickLeg(); render(); }
+    await loadAirportsNa();
     S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); pickLeg();
     await Promise.all([loadWx(), loadNas(), loadSig(), loadRouteWx()]); render(); loadPlaces().then(renderStuck);
     const every = (ms, fn) => S.timers.push(setInterval(() => { if (!document.hidden) fn(); }, ms));
@@ -638,12 +649,60 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
 <p class="fl-links"><a${ev("hotel", "google_travel", oa)} href="https://www.google.com/travel/search?q=${encodeURIComponent(`hotels near ${oa} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("hotel", "google_maps", oa)} href="${LINK.gmaps(`hotels near ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>
 <div class="fl-opt"><b>Rides</b><span>Uber, Lyft or taxi to a hotel or alternate airport — check the fare in the app.</span>
 <p class="fl-links"><a${ev("rideshare", "uber", oa)} href="${LINK.uber(o, o, oa + " airport")}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", oa)} href="${LINK.lyft(o, o)}" target="_blank" rel="noopener">Lyft</a></p></div>
-<div class="fl-opt"><b>Rental cars at ${E(oa)}</b><span>When driving is a better option than waiting for a new flight.</span>
+<div class="fl-opt"><b>Rental cars at ${E(oa)}</b><span>When driving is a better option than waiting for a new flight. One-way rentals are often available — confirm drop-off fees on the rental site.</span>
 <p class="fl-links"><a${ev("car_rental", "google_search", oa)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${oa} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", oa)} href="${LINK.gmaps(`car rental ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>`;
 
+    // Private & semi-private: only carriers whose listed airports are within ~60 mi of origin or dest.
+    const semis = F.carriersNear(o, d, F.SEMI_PRIVATE, apts || [], 60);
+    const charters = F.charterNear(o, d, apts || [], 60);
+    const privItems = [
+      ...semis.map(c => {
+        const near = c.nearest ? ` · near ${E(c.nearest.code)}${c.nearest.mi < 1 ? "" : ` (${Math.round(c.nearest.mi)} mi)`}` : "";
+        return `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.kind === "semi-private" ? "Semi-private" : "Regional")}${near}</span>
+<a${ev("semi_private", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">Check ${E(c.name)}</a></li>`;
+      }),
+      ...charters.map(c => `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.blurb || "Charter")}</span>
+<a${ev("charter", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">${c.id === "charter_search" ? "Search charters" : `Check ${E(c.name)}`}</a></li>`)
+    ];
+    const privateSec = `<div data-sec="canceled_private"><h3>Private &amp; semi-private</h3>
+<p class="dim small">Options to check; availability and pricing are on their site. We never claim seats are open.</p>
+${privItems.length ? `<ul class="fl-peers">${privItems.join("")}</ul>` : `<p class="dim">No listed semi-private or regional carriers within about 60 miles of ${E(oa)} or ${E(da)} right now. You can still search charters below.</p>
+<ul class="fl-peers">${charters.map(c => `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.blurb || "")}</span>
+<a${ev("charter", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">${c.id === "charter_search" ? "Search charters" : `Check ${E(c.name)}`}</a></li>`).join("")}</ul>`}
+</div>`;
+
+    // Drive instead? GC × 1.25 at 60 mph vs assumed rebook wait + flight + airport overhead.
+    const DRV_NOTE = `great-circle × ${F.DRIVE_ROAD} at ~${F.DRIVE_MPH} mph average`;
+    const nextWait = show.length && show.some(p => p.live && p.live.airborne) ? 180 : null; // rough: airborne peer → ~3 h assumed next option; else 4–6 h mid
+    const drv = F.driveVsFly(o, d, { nextFlightWaitMin: nextWait });
+    let driveSec = "";
+    if (drv && !drv.hide) {
+      const am = F.amtrakFor(o, d);
+      if (drv.showDrive) {
+        const train = am.route
+          ? `<div class="fl-opt"><b>Train (Amtrak)</b><span>${E(am.cityA)} and ${E(am.cityB)} are on Amtrak’s ${E(am.route)}. Check times and seats on Amtrak — we do not sell tickets.</span>
+<p class="fl-links"><a${ev("amtrak", "amtrak", oa)} href="${E(am.searchUrl)}" target="_blank" rel="noopener">Search Amtrak</a></p></div>`
+          : `<div class="fl-opt"><b>Train (Amtrak)</b><span>See whether Amtrak serves this trip. Availability is on their site.</span>
+<p class="fl-links"><a${ev("amtrak", "amtrak", oa)} href="${E(am.searchUrl)}" target="_blank" rel="noopener">Search Amtrak</a></p></div>`;
+        driveSec = `<div class="fl-drive-card">
+<b>Driving may be faster: about ${E(F.fmtMin(drv.driveMin))}</b>
+<span>About ${drv.roadMi} road miles (estimate: ${DRV_NOTE}). Waiting for a rebooked flight is often ${E(F.fmtMin(drv.waitMin))} plus ~${E(F.fmtMin(drv.flightMin))} in the air and 1.5 h airport time (~${E(F.fmtMin(drv.flyTotal))} total).</span>
+<p class="fl-links"><a${ev("drive_maps", "google_maps", oa)} href="${E(drv.mapsUrl)}" target="_blank" rel="noopener">See route in Google Maps</a></p>
+<div class="fl-opt"><b>One-way rental car</b><span>Compare rentals at ${E(oa)}. Confirm one-way / drop-off fees on the rental site.</span>
+<p class="fl-links"><a${ev("car_rental", "google_search", oa)} href="https://www.google.com/search?q=${encodeURIComponent(`one way rental car ${oa} to ${da}`)}" target="_blank" rel="noopener">Compare one-way rentals</a><a${ev("car_rental", "google_maps", oa)} href="${LINK.gmaps(`car rental ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>
+<div class="fl-opt"><b>Rides</b><span>Uber or Lyft for shorter hops — check the fare in the app (we do not show prices).</span>
+<p class="fl-links"><a${ev("rideshare", "uber", oa)} href="${LINK.uber(o, d, da)}" target="_blank" rel="noopener">Uber</a><a${ev("rideshare", "lyft", oa)} href="${LINK.lyft(o, d)}" target="_blank" rel="noopener">Lyft</a></p></div>
+${train}
+</div>`;
+      } else {
+        driveSec = `<p class="fl-drive-skip dim small">Flying is still faster on this route: driving is about ${E(F.fmtMin(drv.driveMin))} (${drv.roadMi} mi estimate) vs roughly ${E(F.fmtMin(drv.flyTotal))} including a typical rebooking wait. <a${ev("drive_maps", "google_maps", oa)} href="${E(drv.mapsUrl)}" target="_blank" rel="noopener">See route in Google Maps</a></p>`;
+      }
+    }
     box.innerHTML = `<h3>Rebook with your airline</h3>${rebook}${tip}
 <h3>Alternate flights on this route</h3>${peerHtml}
 <h3>Search fares</h3>${fares}
+${privateSec}
+${driveSec}
 <h3>If you're staying overnight</h3>${stay}
 <p class="fl-canceled-attr">Flight data: adsb.lol (CC0). Places © OpenStreetMap (ODbL). Refunds: <a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT</a>.</p>`;
   }

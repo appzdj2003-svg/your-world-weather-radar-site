@@ -184,3 +184,34 @@ t("polish2: route fog only when visibility under 3 mi; names not ICAO", () => {
   assert(ceil.length >= 1, "Madison low ceiling still noted");
   assert(!/fog/i.test(ceil[0].text), "Madison must not claim fog with 10+ mi: " + ceil[0].text);
 });
+
+t("canceled_private: Cape Air near BOS/HYA; JSX near DAL; drive shorter on short hop", () => {
+  const BOS = { iata: "BOS", icao: "KBOS", lat: 42.364, lon: -71.005, name: "Boston" };
+  const HYA = { iata: "HYA", icao: "KHYA", lat: 41.669, lon: -70.280, name: "Hyannis" };
+  const DAL = { iata: "DAL", icao: "KDAL", lat: 32.847, lon: -96.852, name: "Dallas Love" };
+  const AUS = { iata: "AUS", icao: "KAUS", lat: 30.194, lon: -97.670, name: "Austin" };
+  const LAX = { iata: "LAX", icao: "KLAX", lat: 33.943, lon: -118.408, name: "Los Angeles" };
+  const JFK = { iata: "JFK", icao: "KJFK", lat: 40.640, lon: -73.779, name: "JFK" };
+  const apts = [BOS, HYA, DAL, AUS, LAX, JFK, { iata: "BUR", icao: "KBUR", lat: 34.201, lon: -118.359 }];
+  const cape = F.carriersNear(BOS, HYA, F.SEMI_PRIVATE, apts, 60);
+  assert(cape.some(c => c.id === "cape_air"), "Cape Air should match BOS-HYA: " + cape.map(c => c.id));
+  const jsx = F.carriersNear(DAL, AUS, F.SEMI_PRIVATE, apts, 60);
+  assert(jsx.some(c => c.id === "jsx"), "JSX should match DAL: " + jsx.map(c => c.id));
+  const DEN = { iata: "DEN", icao: "KDEN", lat: 39.862, lon: -104.673, name: "Denver" };
+  const SEA = { iata: "SEA", icao: "KSEA", lat: 47.450, lon: -122.309, name: "Seattle" };
+  const none = F.carriersNear(DEN, SEA, F.SEMI_PRIVATE.filter(c => c.id === "cape_air"), apts.concat([DEN, SEA]), 60);
+  assert.strictEqual(none.length, 0, "Cape Air should not match DEN-SEA");
+  const ch = F.charterNear(JFK, BOS, apts, 60);
+  assert(ch.some(c => c.id === "blade"), "Blade near JFK");
+  assert(ch.some(c => c.id === "charter_search"), "general charter always");
+  const short = F.driveVsFly(BOS, HYA, { nextFlightWaitMin: 300 });
+  assert(short && short.showDrive, "BOS-HYA drive should show: " + JSON.stringify(short));
+  assert(short.roadMi > 50 && short.roadMi < 120, "road mi sane: " + short.roadMi);
+  const long = F.driveVsFly(LAX, JFK, {});
+  assert(long && (long.hide || !long.showDrive), "LAX-JFK should not promote drive");
+  const am = F.amtrakFor(BOS, JFK);
+  assert.strictEqual(am.route, "Northeast Corridor");
+  const am2 = F.amtrakFor(HYA, DAL);
+  assert(!am2.route, "no false Amtrak claim");
+  assert(am2.searchUrl.includes("amtrak.com"));
+});
