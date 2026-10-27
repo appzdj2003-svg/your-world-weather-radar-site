@@ -229,15 +229,74 @@
   // ---------- FAA NAS (US airports only) ----------
   const faaCode = apt => apt && apt.countryiso2 === "US" ? (apt.iata || (apt.icao || "").replace(/^K/, "")) : null;
   const toMin = s => { s = String(s || ""); let m = 0, h = s.match(/(\d+)\s*hour/), mm = s.match(/(\d+)\s*minute/); if (h) m += 60 * h[1]; if (mm) m += +mm[1]; return h || mm ? m : null; };
+  // Short place label for AI copy: prefer town/airport name over raw ICAO.
+  function shortPlaceName(name, fallback) {
+    let s = String(name || "").trim();
+    if (!s || /^null\b/i.test(s)) return fallback || "";
+    s = s.split(",")[0].trim().split("/")[0].trim();
+    s = s.replace(/\b(International|Intl\.?|Regional|Municipal|Muni|Airport|Fld|Field|Cnty|County|AFB|Air Force Base)\b\.?/gi, "").replace(/\s+/g, " ").trim();
+    return s || fallback || "";
+  }
+  function aptPlace(apt) {
+    if (!apt) return "";
+    return shortPlaceName(apt.name, "") || apt.iata || apt.icao || "";
+  }
+  // AWC METAR name → town; fall back to ICAO only if no name.
+  function metarPlace(m) {
+    if (!m) return "en route";
+    return shortPlaceName(m.name, "") || m.icaoId || "en route";
+  }
+  // Strip FAA ARTCC center codes (ZDV, ZAU, …) from reason text for passenger copy.
+  function cleanFaaReason(r) {
+    if (!r) return "";
+    let s = String(r).replace(/\bZ[A-Z]{2}\s*\/\s*/g, "").trim();
+    s = s.replace(/^WX:\s*/i, "").trim();
+    if (!s) return "";
+    // "Fog" / "FG" → fog
+    const low = s.toLowerCase();
+    if (/^(fg|fog)$/i.test(s)) return "fog";
+    if (/thunder|ts\b/i.test(s)) return "thunderstorms";
+    if (/wind/i.test(s)) return "wind";
+    if (/snow|ice|freezing/i.test(s)) return low;
+    return low;
+  }
+  function fmtFaaSpan(minStr, maxStr) {
+    const a = toMin(minStr), b = toMin(maxStr);
+    if (a != null && b != null) return `${fmtMin(a)} to ${fmtMin(b)}`;
+    if (a != null) return fmtMin(a);
+    if (b != null) return fmtMin(b);
+    const raw = [minStr, maxStr].filter(Boolean);
+    return raw.length ? raw.join(" to ") : "";
+  }
   function nasFor(nas, apt) {
     const c = faaCode(apt); if (!nas || !c) return [];
+    const place = aptPlace(apt) || c;
     const out = [];
-    for (const g of nas.groundStops || []) if (g.arpt === c) out.push({ kind: "stop", lvl: 2, text: `FAA ground stop at ${c}${g.reason ? ` (${g.reason})` : ""}${g.until ? `, listed until ${g.until}` : ""}.` });
+    for (const g of nas.groundStops || []) if (g.arpt === c) {
+      const rawR = g.reason || "", cleanR = cleanFaaReason(rawR);
+      const full = `FAA ground stop at ${c}${rawR ? ` (${rawR})` : ""}${g.until ? `, listed until ${g.until}` : ""}.`;
+      const why = `FAA ground stop at ${place}${cleanR ? ` (${cleanR})` : ""}${g.until ? `, listed until ${g.until}` : ""}.`;
+      out.push({ kind: "stop", lvl: 2, text: full, why });
+    }
     for (const g of nas.groundDelays || []) if (g.arpt === c) { const avg = toMin(g.avg);
-      out.push({ kind: "gdp", lvl: avg !== null && avg >= 45 ? 2 : 1, text: `FAA ground delay program for flights into ${c}${g.reason ? ` (${g.reason})` : ""}: average ${g.avg}${g.max ? `, max ${g.max}` : ""} (FAA figures).` }); }
+      const rawR = g.reason || "", cleanR = cleanFaaReason(rawR);
+      const avgFmt = avg != null ? fmtMin(avg) : (g.avg || "");
+      const maxM = toMin(g.max), maxFmt = maxM != null ? fmtMin(maxM) : (g.max || "");
+      const full = `FAA ground delay program for flights into ${c}${rawR ? ` (${rawR})` : ""}: average ${g.avg}${g.max ? `, max ${g.max}` : ""} (FAA figures).`;
+      const why = `FAA ground delay program for flights into ${place}${cleanR ? ` (${cleanR})` : ""}: average ${avgFmt}${maxFmt ? `, max ${maxFmt}` : ""} (FAA figures).`;
+      out.push({ kind: "gdp", lvl: avg !== null && avg >= 45 ? 2 : 1, text: full, why }); }
     for (const d of nas.delays || []) if (d.arpt === c) { const mx = toMin(d.max);
-      out.push({ kind: "delay", dir: (d.type || "").toLowerCase(), lvl: mx !== null && mx >= 45 ? 2 : 1, text: `FAA reports ${(d.type || "general").toLowerCase()} delays at ${c}${d.min ? `: ${d.min}${d.max ? ` to ${d.max}` : ""}` : ""}${d.trend ? `, ${d.trend.toLowerCase()}` : ""}${d.reason ? ` (${d.reason})` : ""}.` }); }
-    for (const a of nas.closures || []) if (a.arpt === c && !a.gaOnly) out.push({ kind: "closure", lvl: 2, text: `FAA lists ${c} as closed${a.reopen ? `, reopening ${a.reopen.replace(/\.$/, "")}` : ""}.` });
+      const rawR = d.reason || "", cleanR = cleanFaaReason(rawR);
+      const span = fmtFaaSpan(d.min, d.max);
+      const spanRaw = d.min ? `${d.min}${d.max ? ` to ${d.max}` : ""}` : "";
+      const full = `FAA reports ${(d.type || "general").toLowerCase()} delays at ${c}${spanRaw ? `: ${spanRaw}` : ""}${d.trend ? `, ${d.trend.toLowerCase()}` : ""}${rawR ? ` (${rawR})` : ""}.`;
+      const why = `FAA reports ${(d.type || "general").toLowerCase()} delays at ${place}${span ? `: ${span}` : ""}${d.trend ? `, ${d.trend.toLowerCase()}` : ""}${cleanR ? ` (${cleanR})` : ""}.`;
+      out.push({ kind: "delay", dir: (d.type || "").toLowerCase(), lvl: mx !== null && mx >= 45 ? 2 : 1, text: full, why }); }
+    for (const a of nas.closures || []) if (a.arpt === c && !a.gaOnly) {
+      const full = `FAA lists ${c} as closed${a.reopen ? `, reopening ${a.reopen.replace(/\.$/, "")}` : ""}.`;
+      const why = `FAA lists ${place} as closed${a.reopen ? `, reopening ${a.reopen.replace(/\.$/, "")}` : ""}.`;
+      out.push({ kind: "closure", lvl: 2, text: full, why });
+    }
     return out;
   }
 
@@ -342,40 +401,63 @@
   const LV = ["Low", "Medium", "High"];
   function routeWxFlags(list) {
     // METARs sampled along the GC route (from /route-wx). Flag fog/LIFR, low ceilings, TS, gusts, snow/ice.
+    // Fog bullets only when visibility is actually under 3 mi (LIFR from ceiling alone is not "fog").
     const out = []; if (!Array.isArray(list)) return out;
     for (const m of list) {
       const cat = m.fltCat || fltCat(visNum(m.visib), ceiling(m.clouds));
-      const words = wxWords(m.wxString), gust = m.wgst || 0, id = m.icaoId || m.name || "en route";
-      if (cat === "LIFR" || /fog/.test(words.join(" "))) out.push({ lvl: 2, text: `Fog or very low cloud near ${id} along the route (${cat}${m.visib != null ? `, visibility ${m.visib} mi` : ""}).`, kind: "fog" });
-      else if (cat === "IFR") out.push({ lvl: 1, text: `Low cloud or poor visibility near ${id} along the route (${cat}).`, kind: "ifr" });
-      if (words.some(w => /thunder/.test(w))) out.push({ lvl: 2, text: `Thunderstorms reported near ${id} along the route.`, kind: "ts" });
-      if (words.some(w => /freezing|snow|ice/.test(w))) out.push({ lvl: 1, text: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${id} along the route.`, kind: "ice" });
-      if (gust >= 35) out.push({ lvl: 1, text: `Wind gusts to ${gust} kt near ${id} along the route.`, kind: "wind" });
+      const words = wxWords(m.wxString), gust = m.wgst || 0, place = metarPlace(m), id = m.icaoId || place;
+      const vis = visNum(m.visib);
+      const fogWord = /fog/.test(words.join(" "));
+      if ((fogWord || cat === "LIFR") && vis != null && vis < 3) {
+        out.push({ lvl: 2, text: `Fog or very low cloud near ${place} along the route (visibility ${vis} mi).`,
+          full: `Fog or very low cloud near ${id} along the route (${cat}, visibility ${m.visib} mi).`, kind: "fog" });
+      } else if (cat === "LIFR" && (vis == null || vis >= 3)) {
+        // Low ceiling, not fog — keep for All signals; milder main copy without claiming fog.
+        out.push({ lvl: 1, text: `Very low ceilings near ${place} along the route.`,
+          full: `Very low ceilings near ${id} along the route (${cat}${m.visib != null ? `, visibility ${m.visib} mi` : ""}).`, kind: "ifr" });
+      } else if (cat === "IFR") {
+        out.push({ lvl: 1, text: `Low cloud or poor visibility near ${place} along the route.`,
+          full: `Low cloud or poor visibility near ${id} along the route (${cat}).`, kind: "ifr" });
+      }
+      if (words.some(w => /thunder/.test(w))) out.push({ lvl: 2, text: `Thunderstorms reported near ${place} along the route.`, full: `Thunderstorms reported near ${id} along the route.`, kind: "ts" });
+      if (words.some(w => /freezing|snow|ice/.test(w))) out.push({ lvl: 1, text: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${place} along the route.`, full: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${id} along the route.`, kind: "ice" });
+      if (gust >= 35) out.push({ lvl: 1, text: `Wind gusts to ${gust} kt near ${place} along the route.`, full: `Wind gusts to ${gust} kt near ${id} along the route.`, kind: "wind" });
     }
     return out;
   }
   function assess(c) {
-    const R = [], todo = [], why = [], now = c.now, add = (lvl, text, src, kind) => { R.push({ lvl, text, src, kind: kind || "" }); if (lvl >= 1) why.push(text); };
+    const R = [], todo = [], why = [], now = c.now;
+    // text = passenger-facing (why bullets); full (optional) = All signals with codes.
+    const add = (lvl, text, src, kind, full) => { R.push({ lvl, text: full || text, src, kind: kind || "" }); if (lvl >= 1) why.push(text); };
     const ap = x => x && (x.iata || x.icao);
+    const place = x => aptPlace(x) || ap(x) || "";
     for (const [apt, role] of [[c.origin, "dep"], [c.dest, "arr"]]) {
       if (!apt) continue;
       for (const n of nasFor(c.nas, apt)) { if (n.kind === "delay" && n.dir && n.dir !== "general" && ((role === "dep") !== (n.dir === "departure"))) n.lvl = Math.min(n.lvl, 1);
-        add(n.lvl, n.text, "FAA", n.kind);
-        if (n.kind === "stop") todo.push(c.progress && !c.progress.onGround && role === "arr" ? `Ground stop at ${ap(apt)}. Planes already in the air may hold or divert. Follow your airline app.` : `Ground stop at ${ap(apt)}. Check your airline app for a new departure time or rebooking.`);
-        else if (n.kind === "gdp") todo.push(`Flights into ${ap(apt)} are being held by the FAA. Check your airline app before heading to the gate.`);
-        else if (n.kind === "closure") todo.push(`${ap(apt)} is listed as closed. Contact your airline about rebooking.`); }
+        add(n.lvl, n.why || n.text, "FAA", n.kind, n.text);
+        if (n.kind === "stop") todo.push(c.progress && !c.progress.onGround && role === "arr" ? `Ground stop at ${place(apt)}. Planes already in the air may hold or divert. Follow your airline app.` : `Ground stop at ${place(apt)}. Check your airline app for a new departure time or rebooking.`);
+        else if (n.kind === "gdp") todo.push(`Flights into ${place(apt)} are being held by the FAA. Check your airline app before heading to the gate.`);
+        else if (n.kind === "closure") todo.push(`${place(apt)} is listed as closed. Contact your airline about rebooking.`); }
       const w = c.wx && c.wx[apt.icao]; if (!w) continue;
       const tWin = role === "dep" ? c.depMs : c.arrMs, win = tafWindow(w.taf, (tWin || now) - 3600e3, (tWin || now) + 3600e3), cur = w.metar;
       const words = new Set([...(cur ? wxWords(cur.wxString) : []), ...(win ? win.words : [])]);
       const when = tWin ? (role === "dep" ? "around departure" : "around arrival") : "now or in the next hours";
-      if ([...words].some(x => /thunder/.test(x))) { add(1, `Thunderstorms ${cur && /TS/.test(cur.wxString || "") ? "reported" : "forecast" + (win && win.possible ? " (possible)" : "")} at ${ap(apt)} ${when}.`, "NWS/AWC", "ts");
-        todo.push(`Storms at ${ap(apt)} can pause ramp work and cause holding. Keep an eye on your airline app.`); }
-      if ([...words].some(x => /freezing|snow|ice pellets/.test(x))) add(1, `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${ap(apt)} ${when}: de-icing and slower operations are common.`, "NWS/AWC", "ice");
+      const pl = place(apt), code = ap(apt);
+      if ([...words].some(x => /thunder/.test(x))) { add(1, `Thunderstorms ${cur && /TS/.test(cur.wxString || "") ? "reported" : "forecast" + (win && win.possible ? " (possible)" : "")} at ${pl} ${when}.`, "NWS/AWC", "ts",
+          `Thunderstorms ${cur && /TS/.test(cur.wxString || "") ? "reported" : "forecast" + (win && win.possible ? " (possible)" : "")} at ${code} ${when}.`);
+        todo.push(`Storms at ${pl} can pause ramp work and cause holding. Keep an eye on your airline app.`); }
+      if ([...words].some(x => /freezing|snow|ice pellets/.test(x))) add(1, `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${pl} ${when}: de-icing and slower operations are common.`, "NWS/AWC", "ice",
+          `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${code} ${when}: de-icing and slower operations are common.`);
       const cat = [cur && cur.fltCat, win && win.fltCat].filter(Boolean).sort((a, b) => ["VFR", "MVFR", "IFR", "LIFR"].indexOf(b) - ["VFR", "MVFR", "IFR", "LIFR"].indexOf(a))[0];
-      if (cat === "LIFR" || (cat === "IFR" && role === "arr")) add(cat === "LIFR" ? 2 : 1, `${CAT_WORDS[cat]} at ${ap(apt)} ${when} (${cat}${cur && cur.vis != null ? `, visibility ${cur.vis} mi` : ""}). Airports often space flights out in these conditions.`, "NWS/AWC", cat === "LIFR" ? "fog" : "ifr");
-      const g = Math.max(cur && cur.gust || 0, win && win.gust || 0); if (g >= 35) add(1, `Wind gusts to ${g} kt at ${ap(apt)} ${when}.`, "NWS/AWC", "wind");
+      if (cat === "LIFR" || (cat === "IFR" && role === "arr")) {
+        const visBit = cur && cur.vis != null ? `, visibility ${cur.vis} mi` : "";
+        const whyWx = `${CAT_WORDS[cat]} at ${pl} ${when}${cur && cur.vis != null && cur.vis < 3 ? ` (visibility ${cur.vis} mi)` : ""}. Airports often space flights out in these conditions.`;
+        const fullWx = `${CAT_WORDS[cat]} at ${code} ${when} (${cat}${visBit}). Airports often space flights out in these conditions.`;
+        add(cat === "LIFR" ? 2 : 1, whyWx, "NWS/AWC", cat === "LIFR" ? "fog" : "ifr", fullWx);
+      }
+      const g = Math.max(cur && cur.gust || 0, win && win.gust || 0); if (g >= 35) add(1, `Wind gusts to ${g} kt at ${pl} ${when}.`, "NWS/AWC", "wind", `Wind gusts to ${g} kt at ${code} ${when}.`);
     }
-    for (const f of routeWxFlags(c.routeWx)) add(f.lvl, f.text, "AWC route sample", f.kind);
+    for (const f of routeWxFlags(c.routeWx)) add(f.lvl, f.text, "AWC route sample", f.kind, f.full);
     for (const s of c.sigmets || []) { if (s.ahead === false) continue; const strong = /volcanic|tropical|thunder/.test(s.words);
       add(strong ? 2 : 1, `${s.type === "AIRMET" || s.type === "G-AIRMET" ? "AIRMET" : "SIGMET"} for ${s.words} along the route, about ${Math.round(s.alongNm * 1.15078)} mi from ${ap(c.origin) || "the origin"}${s.ahead ? ", ahead of the plane" : ""}. Flights may reroute or hold.`, "AWC", /thunder/.test(s.words) ? "ts" : "sig"); }
     const de = delayEstimate(c), pr = c.progress;
@@ -492,6 +574,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

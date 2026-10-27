@@ -74,6 +74,7 @@
 .fl-pick.food{background:#FFF7ED;border-color:#FDBA74}.fl-pick.todo{background:#F5F3FF;border-color:#C4B5FD}
 .fl-pick.hotel{background:#ECFDF5;border-color:#6EE7B7}.fl-pick.ride{background:#F8FAFC;border-color:#CBD5E1}
 .fl-set{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0;font-size:.92rem;align-items:center}.fl-set select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line)}
+.fl-set-lab{display:inline-flex;align-items:center;flex-wrap:nowrap;gap:6px;white-space:nowrap}.fl-set-lab span{white-space:nowrap}
 .fl-clock{background:var(--slate);color:#fff;border-radius:14px;padding:14px 16px}
 .fl-clock>span{display:block;color:#CBD5E1;font-weight:600}.fl-clock b{display:block;font-size:2.1rem;line-height:1.1}.fl-clock .fl-cd{font-size:1.2rem;color:#FBBF24;font-weight:800}
 .fl-clock small{display:block;margin-top:6px;color:#CBD5E1;font-size:.88rem}.fl-clock small b{display:inline;font-size:1em;color:#fff}

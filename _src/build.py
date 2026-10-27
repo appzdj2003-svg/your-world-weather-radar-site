@@ -735,8 +735,8 @@ def flight_page():
 <span class="fl-whatif" role="group" aria-label="What if delay"><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button></span></span>
 </summary>
 <div class="fl-stuck-body">
-<div class="fl-set"><label>Boarding starts <select id="s-board"><option value="30">30</option><option value="35">35</option><option value="40" selected>40</option></select> min before departure</label>
-<label>Getting back through security <select id="s-sec"><option value="30">30</option><option value="45" selected>45</option><option value="60">60</option><option value="90">90</option></select> min</label>
+<div class="fl-set"><label class="fl-set-lab">Boarding starts <select id="s-board"><option value="30">30</option><option value="35">35</option><option value="40" selected>40</option></select> <span>min before departure</span></label>
+<label class="fl-set-lab">Getting back through security <select id="s-sec"><option value="30">30</option><option value="45" selected>45</option><option value="60">60</option><option value="90">90</option></select> <span>min</span></label>
 <span class="fl-whatif fl-whatif-in" role="group" aria-label="What if delay"><span class="dim">What if</span><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button><button type="button" data-whatif="0" class="fl-whatif-clear">Clear</button></span>
 </div>
 <div id="fl-stuck-b"></div></div></details>

@@ -155,3 +155,32 @@ t("canceled helpers: peers, rebook, nearby airports, Google Flights URL", () => 
   let bad = false; try { const r = await F.decode("v1.garbage"); bad = !r; } catch (e) { bad = true; } assert(bad);
   console.log(`flightcore: ${n} tests passed`);
 })().catch(e => { console.error(e); process.exit(1); });
+
+t("polish2: FAA why uses place names + neat durations, All signals keep center codes", () => {
+  const DEN = { iata: "DEN", icao: "KDEN", countryiso2: "US", lat: 39.86, lon: -104.67, name: "Denver International Airport" };
+  const ATL = { iata: "ATL", icao: "KATL", countryiso2: "US", lat: 33.64, lon: -84.43, name: "Hartsfield-Jackson Atlanta International" };
+  const nas = { groundStops: [], groundDelays: [],
+    delays: [{ arpt: "DEN", reason: "ZDV / WX:Fog", min: "1 hour and 1 minute", max: "1 hour and 15 minutes", trend: "increasing", type: "Arrival" }],
+    closures: [] };
+  const a = F.assess({ now: NOW, origin: ATL, dest: DEN, nas, wx: {}, sigmets: [] });
+  const why = a.read.why.join(" | ");
+  assert(/Denver/i.test(why), "why should name Denver: " + why);
+  assert(!/\bZDV\b/.test(why), "why must drop ARTCC code: " + why);
+  assert(/1 h 1 min to 1 h 15 min/.test(why), "why neat duration: " + why);
+  const all = a.reasons.map(r => r.text).join(" | ");
+  assert(/\bZDV\b/.test(all), "All signals keep ZDV: " + all);
+  assert(/\bDEN\b/.test(all), "All signals keep DEN: " + all);
+});
+t("polish2: route fog only when visibility under 3 mi; names not ICAO", () => {
+  const flags = F.routeWxFlags([
+    { icaoId: "KMDS", name: "Madison Muni, SD, US", fltCat: "LIFR", visib: "10+", wxString: null, clouds: [{ cover: "VV", base: 200 }] },
+    { icaoId: "KMVE", name: "Montevideo/Chippewa Cnty, MN, US", fltCat: "LIFR", visib: "2.5", wxString: "BR", clouds: [{ cover: "VV", base: 100 }] },
+  ]);
+  const fog = flags.filter(f => f.kind === "fog");
+  assert.strictEqual(fog.length, 1, "only low-vis fog: " + JSON.stringify(flags));
+  assert(/Montevideo/i.test(fog[0].text), fog[0].text);
+  assert(!/\bKMVE\b/.test(fog[0].text), fog[0].text);
+  const ceil = flags.filter(f => /Madison/i.test(f.text));
+  assert(ceil.length >= 1, "Madison low ceiling still noted");
+  assert(!/fog/i.test(ceil[0].text), "Madison must not claim fog with 10+ mi: " + ceil[0].text);
+});

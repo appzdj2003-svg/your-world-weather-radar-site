@@ -190,8 +190,8 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     if (etaMs) S.etaMs = etaMs;
     const meter = `<div class="fl-meter" aria-label="Delay risk ${E(r.label || a.label)}"><i class="on"></i><i class="${a.level >= 1 ? "on" : ""}"></i><i class="${a.level >= 2 ? "on" : ""}"></i><span>${E(r.label || a.label)}</span></div>`;
     const spacing = r.rangeKind === "spacing" || r.faaAddMin;
-    const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> possible spacing on top of live ETA · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>`
-      : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
+    const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} to ${E(F.fmtMin(hi))}` : "—"}</b> possible spacing on top of live ETA · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>`
+      : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} to ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
     const why = (r.why && r.why.length ? r.why : a.reasons.filter(x => x.lvl >= 1).map(x => x.text)).slice(0, 5);
     const eta = etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(etaMs)}</b><small>live track + approach buffer · <span class="fl-cd" data-until-eta data-until="${etaMs}"></span></small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
     const headRaw = r.headline || a.label + " delay risk";
@@ -324,7 +324,14 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
       else { const heard = ac && ac.seenAt ? (now - ac.seenAt) / 1000 : null, next = Math.max(0, Math.ceil((S.acAt + 20e3 - now) / 1000));
         const cls = heard === null ? "off" : heard <= 30 ? "ok" : heard <= 120 ? "warn" : "off";
         fr.innerHTML = `<i class="dot ${cls}"></i> ${ac ? `Position heard ${ago(heard || 0)} ago${x && x.moved && x.sec > 2 ? " · moving it forward at its reported speed until the next fix" : ""}` : `Checked ${ago((now - S.acAt) / 1000)} ago`} · next check ${document.hidden ? "when you're back" : `in ${next} s`}`; } }
-    document.querySelectorAll("[data-until]").forEach(el => { const ms = +el.dataset.until - now; el.textContent = ms > 0 ? hms(ms) + " left" : "Time's up: head to the gate"; el.classList.toggle("late", ms < 15 * 60e3); });
+    document.querySelectorAll("[data-until]").forEach(el => {
+      const ms = +el.dataset.until - now;
+      if (ms > 0) el.textContent = hms(ms) + " left";
+      else if (el.hasAttribute("data-until-eta")) el.textContent = "now";
+      else if (el.dataset.est === "1") el.textContent = "Confirm boarding in your airline app";
+      else el.textContent = "Time's up: head to the gate";
+      el.classList.toggle("late", ms < 15 * 60e3);
+    });
     document.querySelectorAll("[data-ago]").forEach(el => { el.textContent = ago((now - +el.dataset.ago) / 1000) + " ago"; });
   }
   const hms = ms => { const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), r = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(r).padStart(2, "0"); };
@@ -440,10 +447,21 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     const near = (S.places || []).map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).filter(p => p.c !== "station");
     const station = (S.places || []).filter(p => p.c === "station").map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).sort((x, y) => x.km - y.km)[0];
     let clock = "";
+    // Estimated when AI delay / inbound / what-if pushed departure past the typed schedule.
+    const estimated = !!(dLate != null && dLate > 0) || !!S.whatIfMin || !!(c.inbound && c.inbound.etaMs);
     if (dep && dep > now) {
       const P = F.plan({ now, depMs: dep, boardMin, secMin, places: near, apt: o }); S.plan = P;
-      clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}">${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : "now"}</span>
-<small>From ${E(basis)} (${tm(dep)}), minus ${boardMin} min for boarding.${P.gateMin > 0 ? ` Leaving the airport? Allow ${secMin} min to get back through security, which leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : ""}</small></div>`;
+      const basisLine = estimated
+        ? `Based on an estimated departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`
+        : S.t.ndep
+          ? `Based on your updated departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`
+          : `Based on the scheduled departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`;
+      const outBit = P.gateMin > 0 ? ` Leaving the airport? That leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : "";
+      const upMsg = estimated ? "Confirm boarding in your airline app" : "Time's up: head to the gate";
+      clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}"${estimated ? ' data-est="1"' : ""}>${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : upMsg}</span>
+<small>${basisLine}${outBit}</small></div>`;
+    } else if (dep && estimated) {
+      clock = `<p class="fl-clock-miss">Estimated departure window may have started. Confirm the time and gate in your airline app, or enter an updated departure above.</p>`;
     } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it above as the updated departure." : "Add your departure time above to see how much time you have left."}</p>`;
     const warn = `<p class="fl-warn">Delays can change quickly. Confirm times in your airline app — this is an estimate.</p>`;
     const P = S.plan && dep && dep > now ? S.plan : null, short = !P || P.outMin < 60;
@@ -627,7 +645,7 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
 <h3>Alternate flights on this route</h3>${peerHtml}
 <h3>Search fares</h3>${fares}
 <h3>If you're staying overnight</h3>${stay}
-<p class="fl-canceled-attr">Route peers: adsb.lol standing data (CC0). Places © OpenStreetMap (ODbL). Refunds: <a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT</a>.</p>`;
+<p class="fl-canceled-attr">Flight data: adsb.lol (CC0). Places © OpenStreetMap (ODbL). Refunds: <a${ev("dot_refunds", "dot", oa)} href="${E(F.DOT_REFUNDS)}" target="_blank" rel="noopener">US DOT</a>.</p>`;
   }
 
   async function openCanceled(on) {
