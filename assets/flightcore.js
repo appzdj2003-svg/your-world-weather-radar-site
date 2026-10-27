@@ -183,9 +183,22 @@
     { a: "IRV", b: "LAX", name: "Pacific Surfliner" }
   ];
 
+  // Coords for carrier airports not in airports-na.json (public FAA/ourairports).
+  const EXTRA_AIRPORTS = [
+    { iata: "TEB", icao: "KTEB", name: "Teterboro", lat: 40.8501, lon: -74.0608 },
+    { iata: "VNY", icao: "KVNY", name: "Van Nuys", lat: 34.2098, lon: -118.490 },
+    { iata: "APC", icao: "KAPC", name: "Napa County", lat: 38.2132, lon: -122.281 },
+    { iata: "SMO", icao: "KSMO", name: "Santa Monica", lat: 34.0158, lon: -118.451 },
+    { iata: "HHR", icao: "KHHR", name: "Hawthorne Municipal", lat: 33.9228, lon: -118.335 },
+    { iata: "MSS", icao: "KMSS", name: "Massena International", lat: 44.9358, lon: -74.8455 },
+    { iata: "PDT", icao: "KPDT", name: "Eastern Oregon Regional", lat: 45.6951, lon: -118.841 },
+    { iata: "MMU", icao: "KMMU", name: "Morristown Municipal", lat: 40.7994, lon: -74.4149 },
+    { iata: "BFD", icao: "KBFD", name: "Bradford Regional", lat: 41.8031, lon: -78.6401 },
+    { iata: "HOT", icao: "KHOT", name: "Memorial Field Hot Springs", lat: 34.4780, lon: -93.0962 }
+  ];
   function airportIndex(list) {
     const by = {};
-    for (const a of list || []) {
+    for (const a of EXTRA_AIRPORTS.concat(list || [])) {
       if (a.iata) by[String(a.iata).toUpperCase()] = a;
       if (a.icao) by[String(a.icao).toUpperCase()] = a;
     }
