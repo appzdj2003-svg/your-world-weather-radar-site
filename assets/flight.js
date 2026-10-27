@@ -13,7 +13,8 @@
   const tmd = ms => { const d = new Date(ms), same = d.toDateString() === new Date().toDateString(); return (same ? "" : d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + ", ") + tm(ms); };
   // Same minute string the AI headline clock uses — must match the time portion of tmd/tm for a given etaMs.
   const clockOnly = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", wx: {}, routeWx: [], nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null, estKey: "", pulse: false };
+  const ago = s => s < 60 ? `${Math.round(s)} s` : s < 3600 ? `${Math.floor(s / 60)} min` : `${Math.floor(s / 3600)} h`;
+  const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, liveTimer: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null, estKey: "", pulse: false };
   // Live trip view embeds this page in an iframe (?embed=1). One poller; parent listens via postMessage.
   const EMBED = /(?:^|[?&])embed=1(?:&|$)/.test(location.search);
   if (EMBED) {
@@ -22,7 +23,19 @@
     if (!document.body) document.addEventListener("DOMContentLoaded", mark, { once: true });
   }
 
-  async function getJSON(url, opt) { const r = await fetch(url, opt); if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { status: r.status }); return r.json(); }
+  async function getJSON(url, opt) {
+    const r = await fetch(url, opt);
+    if (!r.ok) {
+      const err = Object.assign(new Error("HTTP " + r.status), { status: r.status });
+      const ra = r.headers.get("Retry-After");
+      if (ra) {
+        const n = +ra;
+        err.retryAfterMs = isFinite(n) && n >= 0 ? n * 1000 : Math.max(0, Date.parse(ra) - Date.now());
+      }
+      throw err;
+    }
+    return r.json();
+  }
   const api = p => getJSON(API + p);
 
   // ---------- form & link ----------
@@ -46,11 +59,81 @@
   async function loadRoute(cs) {
     try { const j = await getJSON(`${ROUTES}${cs.slice(0, 2)}/${cs}.json`); return j && j._airports ? j : null; } catch (e) { return null; }
   }
+  function posKey(fn) { return "yw-fl-pos:" + String(fn || "").toUpperCase(); }
+  function savePos(ac, fn) {
+    if (!ac || !isFinite(ac.lat) || !isFinite(ac.lon) || !fn) return;
+    const payload = { ac: { lat: ac.lat, lon: ac.lon, alt: ac.alt, gs: ac.gs, track: ac.track, vs: ac.vs, type: ac.type, reg: ac.reg, hex: ac.hex, flight: ac.flight, seen: ac.seen, seenAt: ac.seenAt }, seenAt: ac.seenAt || Date.now(), savedAt: Date.now(), fn };
+    try { sessionStorage.setItem(posKey(fn), JSON.stringify(payload)); } catch (e) {}
+    try { localStorage.setItem(posKey(fn), JSON.stringify(payload)); } catch (e) {}
+  }
+  function loadPos(fn) {
+    for (const store of [sessionStorage, localStorage]) {
+      try {
+        const raw = store.getItem(posKey(fn)); if (!raw) continue;
+        const j = JSON.parse(raw);
+        if (j && j.ac && isFinite(j.ac.lat) && isFinite(j.ac.lon) && j.seenAt) return j;
+      } catch (e) {}
+    }
+    return null;
+  }
+  function restoreLastPos() {
+    if (S.ac && isFinite(S.ac.lat)) { S.acStale = true; return true; }
+    const cached = loadPos(S.t && S.t.fn); if (!cached) return false;
+    S.ac = cached.ac; if (!S.ac.seenAt) S.ac.seenAt = cached.seenAt; S.acStale = true; return true;
+  }
   async function loadLive() {
     const p = F.parseFlight(S.t.fn); if (!API || !p || !p.cs) return;
-    try { const j = await api(`/flight?cs=${encodeURIComponent(p.cs)}`); S.ac = (j.ac || [])[0] || null; S.acAt = Date.now(); S.acErr = "";
-      if (S.ac) { const base = j.now ? (j.now > 1e12 ? j.now : j.now * 1000) : Date.now(); S.ac.seenAt = Math.min(Date.now(), base - (S.ac.seen || 0) * 1000); } }
-    catch (e) { S.acErr = e.status === 503 ? "budget" : e.status === 429 ? "busy" : "down"; }
+    try {
+      const r = await fetch(API + `/flight?cs=${encodeURIComponent(p.cs)}`);
+      if (!r.ok) {
+        const err = Object.assign(new Error("HTTP " + r.status), { status: r.status });
+        const ra = r.headers.get("Retry-After");
+        if (ra) { const n = +ra; err.retryAfterMs = isFinite(n) && n >= 0 ? n * 1000 : Math.max(0, Date.parse(ra) - Date.now()); }
+        throw err;
+      }
+      const j = await r.json();
+      const cache = (r.headers.get("X-Cache") || "").toUpperCase();
+      S.ac = (j.ac || [])[0] || null; S.acAt = Date.now(); S.acErr = ""; S.retryAfterMs = 0;
+      if (S.ac) {
+        const base = j.now ? (j.now > 1e12 ? j.now : j.now * 1000) : Date.now();
+        S.ac.seenAt = Math.min(Date.now(), base - (S.ac.seen || 0) * 1000);
+        const xf = r.headers.get("X-Fetched");
+        if (cache === "STALE" && xf) { const ft = Date.parse(xf); if (isFinite(ft)) S.ac.seenAt = Math.min(S.ac.seenAt || ft, ft); }
+        S.acStale = cache === "STALE";
+        savePos(S.ac, S.t.fn);
+      } else { S.acStale = false; }
+    } catch (e) {
+      S.acErr = e.status === 503 ? "budget" : e.status === 429 ? "busy" : "down";
+      S.retryAfterMs = Math.max(0, e.retryAfterMs || 0);
+      restoreLastPos();
+    }
+  }
+  function forceBusySim() {
+    // Preview-only: calm 429 / last-seen state without inventing a live fix.
+    if (!S.ac && S.leg) {
+      const a = S.leg.from, b = S.leg.to;
+      S.ac = { lat: a.lat * 0.4 + b.lat * 0.6, lon: a.lon * 0.4 + b.lon * 0.6, alt: 34000, gs: 430, track: 45, type: "B738", hex: "SIMBUSY", flight: S.t.fn, seen: 125 };
+    }
+    if (S.ac) { S.ac.seenAt = Date.now() - 125 * 1000; S.acStale = true; savePos(S.ac, S.t.fn); }
+    S.acErr = "busy"; S.acAt = Date.now() - 5e3; S.retryAfterMs = 20e3;
+  }
+  function clearLiveTimer() { if (S.liveTimer) { clearTimeout(S.liveTimer); S.liveTimer = null; } }
+  function scheduleLive() {
+    clearLiveTimer();
+    let wait = 20e3;
+    if (S.acErr === "busy" || S.acErr === "down") {
+      wait = S.retryAfterMs > 0 ? Math.min(Math.max(S.retryAfterMs, 5e3), 300e3) : Math.min((S.liveBackoff || 15e3) * 1.6, 120e3);
+      S.liveBackoff = wait;
+    } else if (S.acErr === "budget") {
+      wait = S.retryAfterMs > 0 ? Math.min(Math.max(S.retryAfterMs, 60e3), 3600e3) : 15 * 60e3;
+    } else { S.liveBackoff = 15e3; wait = 20e3; }
+    S.nextLiveAt = Date.now() + wait;
+    S.liveTimer = setTimeout(async () => {
+      if (!S.t) return;
+      if (document.hidden) { scheduleLive(); return; }
+      if (S.sim === "busy") { forceBusySim(); pickLeg(); render(); scheduleLive(); return; }
+      await loadLive(); pickLeg(); render(); scheduleLive();
+    }, wait);
   }
   async function loadWx() {
     const apts = airports(); if (!apts.length) return; const ids = [...new Set(apts.map(a => a.icao))];
@@ -97,7 +180,7 @@
   }
 
   async function start(t) {
-    S.timers.forEach(clearInterval); S.timers = []; Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null });
+    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null });
     const cpanel = $("fl-canceled");
     if (cpanel) { cpanel.open = false; }
     const p = F.parseFlight(t.fn); $("fl-out").hidden = false; document.body.classList.add("fl-tracking");
@@ -108,15 +191,18 @@
     if (S.sim) { pickLeg(); render(); }
     await loadAirportsNa();
     S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); pickLeg();
+    if (S.sim === "busy") forceBusySim();
     await Promise.all([loadWx(), loadNas(), loadSig(), loadRouteWx()]); render(); loadPlaces().then(renderStuck);
     const every = (ms, fn) => S.timers.push(setInterval(() => { if (!document.hidden) fn(); }, ms));
-    every(20e3, async () => { await loadLive(); pickLeg(); render(); });
+    scheduleLive();
     every(5 * 60e3, async () => { await loadWx(); await loadSig(); await loadRouteWx(); render(); });
     every(2 * 60e3, async () => { await loadNas(); render(); });
     every(30e3, renderStuck);
     S.onVis && document.removeEventListener("visibilitychange", S.onVis);
     S.onVis = async () => { if (document.hidden || !S.t) return; const now = Date.now();
-      if (now - S.acAt > 20e3) { await loadLive(); pickLeg(); }
+      if (S.sim === "busy") { forceBusySim(); pickLeg(); }
+      else if (now - S.acAt > 20e3) { await loadLive(); pickLeg(); }
+      scheduleLive();
       if (now - (S.fetched.wx || 0) > 5 * 60e3) await Promise.all([loadWx(), loadSig(), loadRouteWx()]);
       if (now - (S.fetched.nas || 0) > 2 * 60e3) await loadNas(); render(); };
     document.addEventListener("visibilitychange", S.onVis);
@@ -133,7 +219,7 @@
     if (S.sim) c = applySim(c, S.sim);
     return c;
   }
-  // Preview-only sims (?sim=high|landed). Clearly labelled in the UI.
+  // Preview-only sims (?sim=high|landed|busy). Clearly labelled in the UI.
   function applySim(c, kind) {
     if (kind !== "high" && kind !== "landed") return c;
     const dest = c.dest || { iata: "DEN", icao: "KDEN", name: "Denver", countryiso2: "US", lat: 39.86, lon: -104.67 };
@@ -159,7 +245,11 @@
     const pr = c.progress, ac = S.ac, code = a => a.iata || a.icao;
     if (!API) return { big: "Live position isn't connected on this preview yet.", sub: "Route, weather and the delay estimate below still work." };
     if (S.acErr === "budget" && !ac) return { big: "Live position is paused for now.", sub: "We use a free live-data source with a daily limit, and today's share is used up. Weather, FAA status and the delay estimate below still work." };
-    if (S.acErr && !ac) return { big: "Live tracking is busy right now.", sub: "We'll try again in a few seconds." };
+    // Calm busy / rate-limit / STALE: keep last known spot + real age (never invented).
+    if (ac && (S.acStale || S.acErr === "busy" || S.acErr === "down") && (ac.seenAt || S.acAt)) {
+      return { big: "Live position updating, last seen {LAST}", sub: "Keeping that spot on the map until a fresh fix arrives.", lastSeenMs: ac.seenAt || S.acAt, calmBusy: true };
+    }
+    if (S.acErr && !ac) return { big: "Live position will appear shortly.", sub: "The plane may not be airborne yet or out of receiver range.", calmBusy: true };
     if (!S.leg && S.legs.length > 1) return { big: "This flight number flies more than one leg.", sub: "Pick yours below." };
     if (S.inbound && c.inbound) { const ib = c.inbound;
       return { big: ib.onGround ? `Your plane is on the ground at ${code(S.inbound.from)}` : `Your plane is on its way in to ${code(S.leg.from)}`,
@@ -202,7 +292,10 @@
     const legPick = !S.leg && S.legs.length > 1 ? `<div class="fl-legs">${S.legs.map(l => `<button type="button" class="btn" data-leg="${l.i}">${E(code(l.from))} → ${E(code(l.to))}</button>`).join("")}</div>` : "";
     const nonUS = S.leg && [S.leg.from, S.leg.to].some(x => x.countryiso2 !== "US");
     const live = (k, v) => `<span data-live="${k}">${v}</span>`;
-    const big = E(st.big).replace("{DIST}", live("dist", pr ? mi(pr.toNm).toLocaleString() : "")), sub = E(st.sub || "").replace("{IDIST}", live("idist", ib ? mi(ib.toNm).toLocaleString() : "")).replace("{IETA}", live("ieta", ib && ib.etaMs ? tm(ib.etaMs) : ""));
+    const lastHtml = st.lastSeenMs ? `<span data-ago="${st.lastSeenMs}">${ago((Date.now() - st.lastSeenMs) / 1000)} ago</span>` : "";
+    const big = E(st.big).replace("{DIST}", live("dist", pr ? mi(pr.toNm).toLocaleString() : "")).replace("{LAST}", lastHtml);
+    const sub = E(st.sub || "").replace("{IDIST}", live("idist", ib ? mi(ib.toNm).toLocaleString() : "")).replace("{IETA}", live("ieta", ib && ib.etaMs ? tm(ib.etaMs) : ""));
+    const busyCls = st.calmBusy ? " fl-calm-busy" : "";
     const pct = pr && !pr.onGround ? Math.max(2, Math.min(98, 100 * pr.fromNm / Math.max(1, pr.fromNm + pr.toNm))) : pr && pr.at === "dest" ? 100 : 0;
     const pass = S.leg ? `<div class="fl-pass"><div class="fl-pa"><b>${E(code(S.leg.from))}</b><span>${E(city(S.leg.from))}</span></div>
 <div class="fl-track" aria-hidden="true"><i class="fl-bar" style="width:${pct}%"></i><i class="fl-dot" style="left:${pct}%">✈</i></div>
@@ -211,7 +304,7 @@
     const pill = statusPill(a, pr, st);
     const phase = flightPhase(pr, c);
     $("fl-status").innerHTML = `<div class="fl-top"><p class="fl-head">${E(S.t.fn)}${S.ac && S.ac.type ? ` <span class="dim">· ${E(S.ac.type)}</span>` : ""}</p><span class="fl-top-right">${pill}<span class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}" title="Alert me">${S.alertsOn ? "🔔" : "🔔"}</button><button type="button" class="fl-chip" id="fl-share" title="Share">↗</button></span></span></div>
-${pass}${landed}<p class="fl-big">${big}</p>${sub ? `<p class="fl-sub">${sub}</p>` : ""}
+${pass}${landed}<p class="fl-big${busyCls}">${big}</p>${sub ? `<p class="fl-sub${busyCls}">${sub}</p>` : ""}
 ${eta}${legPick}
 <p class="fl-fresh" id="fl-fresh"></p>`;
     const nums = pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : "";
@@ -407,10 +500,10 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
   document.addEventListener("click", e => { const j = e.target.closest("[data-jump-seg]"); if (j) { setSeg(j.dataset.jumpSeg, true); const st = $("fl-stuck"); if (st) { st.open = true; st.scrollIntoView({ block: "nearest" }); } } });
 
   // ---------- 1-second tick: smooth plane, live numbers, freshness, countdowns ----------
-  const ago = s => s < 60 ? `${Math.round(s)} s` : s < 3600 ? `${Math.floor(s / 60)} min` : `${Math.floor(s / 3600)} h`;
   function tick() {
     if (!S.t) return; const now = Date.now(), ac = S.ac;
-    const x = ac ? F.project(ac, now, 90) : null, lg = S.liveLeg;
+    const hold = !!(S.acStale || (S.acErr && (S.acErr === "busy" || S.acErr === "down")));
+    const x = ac ? (hold ? { lat: ac.lat, lon: ac.lon, moved: false, sec: 0 } : F.project(ac, now, 90)) : null, lg = S.liveLeg;
     if (x && S.proj) { const pl = $("fl-pl"); if (pl) pl.style.transform = `translate(${S.proj.X(x.lon).toFixed(1)}px,${S.proj.Y(x.lat).toFixed(1)}px) rotate(${S.rot || 0}deg) scale(1.6)`; }
     if (x && x.moved && lg) { const to = F.distNm(x, lg.to), gs = ac.gs; const set = (k, v) => document.querySelectorAll(`[data-live="${k}"]`).forEach(el => el.textContent = v);
       // Shared ETA: same liveEtaMs (GC + approach buffer) for projected arrival, headline clock, and countdown.
@@ -426,9 +519,20 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
     const fr = $("fl-fresh");
     if (fr) { if (!API) fr.innerHTML = `<i class="dot off"></i> Live position isn't connected on this preview.`;
       else if (!S.acAt) fr.innerHTML = `<i class="dot off"></i> Checking live tracking…`;
-      else { const heard = ac && ac.seenAt ? (now - ac.seenAt) / 1000 : null, next = Math.max(0, Math.ceil((S.acAt + 20e3 - now) / 1000));
-        const cls = heard === null ? "off" : heard <= 30 ? "ok" : heard <= 120 ? "warn" : "off";
-        fr.innerHTML = `<i class="dot ${cls}"></i> ${ac ? `Position heard ${ago(heard || 0)} ago${x && x.moved && x.sec > 2 ? " · moving it forward at its reported speed until the next fix" : ""}` : `Checked ${ago((now - S.acAt) / 1000)} ago`} · next check ${document.hidden ? "when you're back" : `in ${next} s`}`; } }
+      else {
+        const heard = ac && ac.seenAt ? (now - ac.seenAt) / 1000 : null;
+        const nextAt = S.nextLiveAt || (S.acAt + 20e3);
+        const next = Math.max(0, Math.ceil((nextAt - now) / 1000));
+        const nextTxt = document.hidden ? "when you're back" : `in ${next} s`;
+        if (hold && ac) {
+          fr.innerHTML = `<i class="dot warn"></i> Last seen ${ago(heard || 0)} ago · next check ${nextTxt}`;
+        } else if (S.acErr && !ac) {
+          fr.innerHTML = `<i class="dot off"></i> Waiting for a live position · next check ${nextTxt}`;
+        } else {
+          const cls = heard === null ? "off" : heard <= 30 ? "ok" : heard <= 120 ? "warn" : "off";
+          fr.innerHTML = `<i class="dot ${cls}"></i> ${ac ? `Position heard ${ago(heard || 0)} ago${x && x.moved && x.sec > 2 ? " · moving it forward at its reported speed until the next fix" : ""}` : `Checked ${ago((now - S.acAt) / 1000)} ago`} · next check ${nextTxt}`;
+        }
+      } }
     document.querySelectorAll("[data-until]").forEach(el => {
       const ms = +el.dataset.until - now;
       if (ms > 0) el.textContent = hms(ms) + " left";
@@ -446,7 +550,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
   function renderMap(c) {
     const box = $("fl-map"), leg = S.leg || S.liveLeg; if (!leg && !S.ac) { box.innerHTML = ""; box.hidden = true; S.mapKey = ""; S.proj = null; return; } box.hidden = false;
     const sig = c.sigmets || [], acIn = S.ac && S.proj && S.proj.inside(S.ac);
-    const key = [leg ? leg.i : "", S.leg ? S.leg.i : "", S.inbound ? S.inbound.i : "", sig.map(s => s.raw ? s.raw.length : s.hazard).join(","), S.ac ? (acIn ? "in" : Math.round(S.ac.lat) + "," + Math.round(S.ac.lon)) : "-"].join("|");
+    const key = [leg ? leg.i : "", S.leg ? S.leg.i : "", S.inbound ? S.inbound.i : "", sig.map(s => s.raw ? s.raw.length : s.hazard).join(","), S.ac ? (acIn ? "in" : Math.round(S.ac.lat) + "," + Math.round(S.ac.lon)) : "-", (S.acStale || S.acErr === "busy" || S.acErr === "down") ? "stale" : "live"].join("|");
     if (key !== S.mapKey) { S.mapKey = key;
       const pts = []; if (leg) pts.push(leg.from, leg.to); if (S.inbound) pts.push(S.inbound.from); if (S.ac) pts.push({ lat: S.ac.lat, lon: S.ac.lon });
       let n = Math.max(...pts.map(p => p.lat)), s = Math.min(...pts.map(p => p.lat)), w = Math.min(...pts.map(p => p.lon)), e = Math.max(...pts.map(p => p.lon));
@@ -465,10 +569,11 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
       if (leg) { svg += line(leg.from, leg.to, "fl-rt"); svg += `<polyline id="fl-done" class="fl-rt done" points=""/>`; }
       const apts = leg ? [leg.from, leg.to] : []; if (S.inbound) apts.unshift(S.inbound.from);
       apts.forEach((a, i) => { svg += `<g class="fl-apt" data-tip="apt:${E(a.icao)}" tabindex="0"><circle class="hit" cx="${X(a.lon)}" cy="${Y(a.lat)}" r="30"/><circle cx="${X(a.lon)}" cy="${Y(a.lat)}" r="9"/><text x="${X(a.lon)}" y="${Y(a.lat) - 16}">${E(a.iata || a.icao)}</text></g>`; });
-      if (S.ac) svg += `<g id="fl-pl" class="fl-plane" data-tip="plane" tabindex="0"><circle class="halo" r="26"/><circle class="hit" r="34"/><path d="M0,-22 L4,-8 L20,2 L20,6 L4,1 L3,14 L9,19 L9,22 L0,19 L-9,22 L-9,19 L-3,14 L-4,1 L-20,6 L-20,2 L-4,-8 Z"/></g>`;
-      box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of the route${S.ac ? " and the plane's live position" : ""}. Tap the plane, an airport or a red area for details."><image href="${img}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>${svg}</svg>
+      const planeStale = !!(S.ac && (S.acStale || S.acErr === "busy" || S.acErr === "down"));
+      if (S.ac) svg += `<g id="fl-pl" class="fl-plane${planeStale ? " stale" : ""}" data-tip="plane" tabindex="0"><circle class="halo" r="26"/><circle class="hit" r="34"/><path d="M0,-22 L4,-8 L20,2 L20,6 L4,1 L3,14 L9,19 L9,22 L0,19 L-9,22 L-9,19 L-3,14 L-4,1 L-20,6 L-20,2 L-4,-8 Z"/>${planeStale ? `<text class="fl-last" x="0" y="38" text-anchor="middle">last seen</text>` : ""}</g>`;
+      box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of the route${S.ac ? (planeStale ? " and the plane's last seen position" : " and the plane's live position") : ""}. Tap the plane, an airport or a red area for details."><image href="${img}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>${svg}</svg>
 <div class="fl-pop" id="fl-pop" hidden></div>
-<p class="fl-legend">${S.ac ? "✈️ live position · " : ""}<span class="k rt"></span> route${S.inbound ? ' · <span class="k in"></span> your plane\'s inbound leg' : ""}${sig.length ? ' · <span class="k sg"></span> SIGMET area' : ""} · <span class="dim">tap for details</span></p>`;
+<p class="fl-legend">${S.ac ? (planeStale ? "✈️ last seen · " : "✈️ live position · ") : ""}<span class="k rt"></span> route${S.inbound ? ' · <span class="k in"></span> your plane\'s inbound leg' : ""}${sig.length ? ' · <span class="k sg"></span> SIGMET area' : ""} · <span class="dim">tap for details</span></p>`;
       const pl = $("fl-pl"); if (pl) { pl.style.transition = "none"; requestAnimationFrame(() => { pl.style.transition = ""; }); }
     }
     // Every refresh: rotate toward the new track the short way round, extend the flown part to the plane.
@@ -480,7 +585,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
     const code = a => a.iata || a.icao;
     if (t === "plane" && S.ac) { const a = S.ac; return `<b>${E(S.t.fn)}${a.flight && a.flight !== S.t.fn ? ` (${E(a.flight)})` : ""}</b><span>${E([a.type, a.reg].filter(Boolean).join(" · "))}</span>
 <span>${a.alt === "ground" ? "On the ground" : isFinite(a.alt) ? Math.round(a.alt).toLocaleString() + " ft" : ""}${a.gs ? ` · ${Math.round(a.gs * 1.15078)} mph` : ""}${isFinite(a.track) ? ` · heading ${Math.round(a.track)}°` : ""}${isFinite(a.vs) && Math.abs(a.vs) > 300 ? ` · ${a.vs > 0 ? "climbing" : "descending"} ${Math.abs(Math.round(a.vs / 100) * 100).toLocaleString()} ft/min` : ""}</span>
-<small>adsb.lol live data · hex ${E(a.hex || "")}</small>`; }
+<small>${S.acStale || S.acErr === "busy" || S.acErr === "down" ? "Last seen position · " : "adsb.lol live data · "}hex ${E(a.hex || "")}</small>`; }
     if (t.startsWith("apt:")) { const id = t.slice(4), a = [S.leg && S.leg.from, S.leg && S.leg.to, S.inbound && S.inbound.from].find(x => x && x.icao === id); if (!a) return "";
       const w = S.wx[id], m = w && w.metar, faa = F.nasFor(S.nas, a);
       return `<b>${E(code(a))} · ${E(a.name)}</b>${m ? `<span>${E(F.CAT_WORDS[m.fltCat] || "")}${F.wxWords(m.wxString).length ? " · " + E(F.wxWords(m.wxString).join(", ")) : ""}</span>` : ""}
