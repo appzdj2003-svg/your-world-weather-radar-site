@@ -215,6 +215,17 @@ TAG = {"free": '<span class="tag free">Free</span>', "prem": '<span class="tag p
 def feature_cards():
     return '<div class="grid">' + "".join(f'<div class="card"><div class="ico">{i}</div><h3>{E(t)} {TAG[k]}</h3><p>{E(d)}</p></div>' for i, t, k, d in FEATURES) + "</div>"
 
+
+def flight_home():
+    """Premium Track-my-flight card on the home page (right after the hero). Honest copy: estimate + US FAA."""
+    return ('<a class="fl-promo" href="flight/" data-ev="flight_page" data-sec="home">'
+            '<span class="fl-promo-i" aria-hidden="true">✈️</span><span class="fl-promo-b">'
+            '<span class="fl-promo-k">Free on this site</span>'
+            '<h2>Track my flight</h2>'
+            '<p>Watch your plane live on the radar, with weather at both airports, US FAA delay programs, '
+            "a plain-English delay estimate, and what to do if you're delayed.</p>"
+            '<span class="fl-promo-go">Open Track my flight →</span></span></a>')
+
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
@@ -224,7 +235,7 @@ def home():
 {trial_line("trial on-dark")}
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own, no ad tracking, and we never sell your data. Optional anonymous crash and usage reports can be turned off in Settings.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
-    b = f'''{sun_feature()}{ftl_home()}{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
+    b = f'''{flight_home()}{sun_feature()}{ftl_home()}{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
 <div class="tabs"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>3D</span><span>4D</span><span>5D</span><span>7D</span><span>10D</span></div>
 <p>Tap a tab and get a short, plain-English summary of that window. Built-in briefings are written on your phone from forecast data. With Premium you can download Gemma to write them on-device, or use your own AI provider key.</p>
@@ -488,18 +499,18 @@ def trip_planner(path):
 <p class="err tp-wide" id="terr" role="alert"></p>
 <button class="btn primary tp-go tp-wide">Plan my trip</button></form></details>
 <p class="note">Tap 🎤 to speak. Atlas runs in your browser: it reads the National Weather Service forecast for US destinations and never books, holds or prices anything. Voice uses your browser's own speech service.</p></div></div></section>'''
-    b = f'''<div id="tres" class="tp-res" hidden></div>
+    b = f'''<a class="tp-fl" href="../flight/" data-ev="flight_page" data-sec="trip_planner"><span class="tp-fl-i" aria-hidden="true">✈️</span><span class="tp-fl-t"><b>Track my flight</b><span>Flying? Follow your plane live, with the weather and FAA delays at both airports and a plain-English delay estimate. Free.</span></span><span class="tp-fl-go" aria-hidden="true">→</span></a>
+<div id="tres" class="tp-res" hidden></div>
 <section class="tp-why"><h2>Why plan with Atlas</h2><div class="tp-wg">
 <div><b>🌦️ Weather first</b><span>See each trip day's forecast before you pick dates or book: National Weather Service with active alerts in the US, MET Norway worldwide.</span></div>
 <div><b>🏆 Best days</b><span>Atlas points out the driest, calmest stretch in the forecast and moves your dates in one tap.</span></div>
 <div><b>🧳 Book where you like</b><span>One tap opens Google Flights, Booking.com, Airbnb, Kayak or Google Maps with your trip filled in. No account, no fees.</span></div>
 <div><b>📱 Take it with you</b><span>Send the trip to Your World Weather Radar for radar and alerts on the road.</span></div></div>
-<a class="tp-fl" href="../flight/" data-ev="flight_page" data-sec="trip_planner"><span class="tp-fl-i" aria-hidden="true">✈️</span><span class="tp-fl-t"><b>Track my flight</b><span>Flying? Follow your plane live, with the weather and FAA delays at both airports and a plain-English delay estimate. Free.</span></span><span class="tp-fl-go" aria-hidden="true">→</span></a>
 <p class="note" style="text-align:center">Don't have the app? {play_btn("trip", "dark", "planner", "Get it on Google Play")}</p>
 <p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US).{' Forecasts elsewhere: <a href="https://www.met.no/en" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), summarized into daily values by us.' if METNO else ""} Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
     page(path, title, "Weather trip planner with Ask Atlas, your travel agent: the forecast for your trip days (NWS in the US, MET Norway worldwide), best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
          scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"),
-         head_extra='<style>.tp-fl{display:flex;align-items:center;gap:12px;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;color:inherit;text-decoration:none}'
+         head_extra='<style>.tp-fl{display:flex;align-items:center;gap:12px;margin:16px 0 8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;color:inherit;text-decoration:none}'
                     '.tp-fl:hover{border-color:var(--sky,#2b7bd8)}.tp-fl-i{font-size:1.6rem}.tp-fl-t{flex:1;min-width:0}.tp-fl b{display:block;margin-bottom:2px}'
                     '.tp-fl-t span{color:var(--slate-3);font-size:.95rem}.tp-fl-go{font-size:1.3rem;font-weight:700}</style>')
 

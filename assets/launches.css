@@ -78,6 +78,17 @@
 .ftlh .btn.dark{background:#fff;color:var(--slate);border-color:#fff}
 @media(min-width:820px){.sunf{grid-template-columns:280px 1fr;padding:28px}.ftlh{grid-template-columns:320px 1fr;padding:28px}.sunf .btns .btn,.ftlh .btns .btn{flex:none}}
 .ftl-end{pointer-events:none}.ftl-end a,.ftl-end button{pointer-events:auto}
+
+/* home: Track-my-flight feature (right after the hero) */
+.fl-promo{display:flex;gap:16px;align-items:flex-start;margin:28px 0 12px;padding:22px 18px;border-radius:24px;text-decoration:none;color:#fff;background:linear-gradient(145deg,#0B4F8A 0%,#0EA5E9 55%,#38BDF8 100%);border:1px solid rgba(14,165,233,.45);box-shadow:0 12px 36px rgba(14,165,233,.28);transition:transform .15s,box-shadow .15s}
+.fl-promo:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(14,165,233,.38);color:#fff}
+.fl-promo-i{font-size:2.6rem;line-height:1;flex:none;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
+.fl-promo-b{flex:1;min-width:0}
+.fl-promo-k{display:inline-block;font:800 .72rem system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#E0F2FE;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px}
+.fl-promo h2{color:#fff;margin:.45em 0 .35em;font-size:clamp(1.35rem,3.5vw,1.75rem)}
+.fl-promo p{color:#E0F2FE;margin:0 0 14px;font-size:1.02rem;line-height:1.5}
+.fl-promo-go{display:inline-block;font-weight:800;color:#0C4A6E;background:#fff;padding:10px 16px;border-radius:12px;font-size:.95rem}
+@media(min-width:820px){.fl-promo{padding:28px;align-items:center}.fl-promo-i{font-size:3.2rem}}
 /* /launches/ showcase: the teaser right under the header, compact on phones */
 .ln-show{background:linear-gradient(160deg,#1E1B4B,#0F172A 75%);color:#fff}
 .ln-show-in{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;padding-top:16px;padding-bottom:16px}

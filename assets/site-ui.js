@@ -78,6 +78,17 @@
     });
     if (G.eu && !G.choice) show(false);
   }
+
+  // Track-my-flight home card: store section so /flight can fire flight_page_click on arrival (GA4 can drop same-tab hits)
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest('a[data-ev="flight_page"]');
+    if (!t) return;
+    var sec = t.getAttribute("data-sec") || "home";
+    var plain = !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button);
+    if (plain) { try { sessionStorage.setItem("yw-flight-from", sec); } catch (x) {} }
+    else if (window.gtag) gtag("event", "flight_page_click", { section: sec });
+  });
+
   var _init = init; init = function () { _init(); initYT(); initConsent(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
