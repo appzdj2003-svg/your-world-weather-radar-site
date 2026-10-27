@@ -131,7 +131,7 @@
 <div class="fl-pa r"><b>${E(code(S.leg.to))}</b><span>${E(city(S.leg.to))}</span></div></div>` : "";
     const landed = pr && pr.onGround && pr.at === "dest" ? `<div class="fl-landed${S.justLanded ? " pop" : ""}"><b>Landed!</b><span>${S.landedAt ? `Seen on the ground at ${E(code(S.leg.to))} at ${tm(S.landedAt)} (live tracking)` : `On the ground at ${E(code(S.leg.to))} (live tracking)`}. Gate and baggage info is in the airline app.</span></div>` : "";
     $("fl-status").innerHTML = `<div class="fl-top"><p class="fl-head">${E(S.t.fn)}${S.ac && S.ac.type ? ` <span class="dim">· ${E(S.ac.type)}${S.ac.reg ? " " + E(S.ac.reg) : ""}</span>` : ""}</p>
-<div class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}">${S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me"}</button><button type="button" class="fl-chip" id="fl-share">↗ Share my flight</button></div></div>
+<div class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}">${S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me"}</button><button type="button" class="fl-chip" id="fl-share">↗ Share my flight</button>${appOpenBtn()}</div></div>
 ${pass}${landed}<p class="fl-big">${big}</p>${sub ? `<p class="fl-sub">${sub}</p>` : ""}
 ${pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : ""}
 ${legPick}${eta}
@@ -203,7 +203,29 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     toast(n === "granted" ? "Alerts on. We'll chime and notify you while this page stays open." : "Alerts on. We'll chime and show a banner while this page stays open.");
     if (window.gtag) gtag("event", "flight_alerts_on", { notif: n }); render();
   }
-  $("fl-status").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.id === "fl-share") share(); else if (b.id === "fl-alert") toggleAlerts(); });
+
+  // Gated "Open on the radar in the app" — only when build.py FLIGHT_APP_OPEN is on (Production-ready app).
+  function appOpenEnabled() { return ($("fl") || {}).dataset?.appOpen === "1"; }
+  function appOpenBtn() {
+    if (!appOpenEnabled()) return "";
+    return `<button type="button" class="fl-chip fl-open-app" id="fl-open-app">Open on the radar in the app</button>`;
+  }
+  async function openInApp() {
+    if (!S || !S.t) return;
+    const p = F.parseFlight(S.t.fn) || {};
+    const ac = S.ac || {};
+    const payload = { v: 1, fn: S.t.fn };
+    if (p.cs) payload.cs = p.cs;
+    else if (ac.flight) payload.cs = String(ac.flight).toUpperCase().replace(/\s/g, "");
+    if (isFinite(ac.lat) && isFinite(ac.lon)) { payload.lat = +ac.lat; payload.lon = +ac.lon; }
+    if (ac.alt === "ground") payload.alt = 0;
+    else if (isFinite(ac.alt)) payload.alt = +ac.alt;
+    const tok = await F.encode(payload);
+    const url = F.intentUrl(tok);
+    if (window.gtag) gtag("event", "select_content", { content_type: "flight_open_app", item_id: S.t.fn });
+    location.href = url;
+  }
+  $("fl-status").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.id === "fl-share") share(); else if (b.id === "fl-alert") toggleAlerts(); else if (b.id === "fl-open-app") openInApp(); });
 
   // ---------- 1-second tick: smooth plane, live numbers, freshness, countdowns ----------
   const ago = s => s < 60 ? `${Math.round(s)} s` : s < 3600 ? `${Math.floor(s / 60)} min` : `${Math.floor(s / 3600)} h`;

@@ -34,6 +34,17 @@
     if (!core.isDate(t.d)) delete t.d;
     for (const k of ["dep", "arr", "ndep"]) if (!isIso(t[k])) delete t[k];
     for (const k of ["from", "to"]) { if (t[k]) t[k] = String(t[k]).toUpperCase(); if (!isApt(t[k])) delete t[k]; }
+    // Optional open-in-app extras (ignored by the web UI when absent).
+    if (t.cs) { t.cs = String(t.cs).toUpperCase().replace(/\s/g, ""); if (!t.cs) delete t.cs; } else delete t.cs;
+    for (const k of ["lat", "lon", "alt"]) {
+      if (t[k] == null || t[k] === "") { delete t[k]; continue; }
+      const n = +t[k];
+      if (!isFinite(n)) { delete t[k]; continue; }
+      if (k === "lat" && (n < -90 || n > 90)) { delete t[k]; continue; }
+      if (k === "lon" && (n < -180 || n > 180)) { delete t[k]; continue; }
+      t[k] = n;
+    }
+    if (t.lat == null || t.lon == null) { delete t.lat; delete t.lon; }
     return t;
   }
 

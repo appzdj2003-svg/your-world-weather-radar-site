@@ -681,6 +681,8 @@ def static_fire_page():
 
 # ---------- /flight: free flight tracker (live; linked from the Trip Planner only, not in the nav; indexed + in the sitemap like other pages) ----------
 FLIGHT_API = os.environ.get("FLIGHT_API", "https://yw-flight.yourworldapps.workers.dev").strip()   # our relay in _src/worker/flight-proxy.mjs; FLIGHT_API="" = relay-free mode
+# Gate the "Open on the radar in the app" button until a supporting build is on Production.
+FLIGHT_APP_OPEN = os.environ.get("FLIGHT_APP_OPEN", "").strip() in ("1", "true", "yes")
 def flight_ref(sec):
     return PLAY + "&referrer=" + enc(f"utm_source=flight_page&utm_medium=web&utm_campaign={sec}")
 def flight_cta(sec):
@@ -701,7 +703,7 @@ def flight_page():
 <label class="fl-f"><span>To <small>(airport code)</small></span><input id="f-to" type="text" placeholder="SJC" maxlength="4"></label>
 <p class="dim small fl-wide" id="f-tz"></p></div></details>
 <p class="err" id="ferr" role="alert"></p></form></div></section>'''
-    b = f'''<div id="fl" data-api="{E(FLIGHT_API)}">
+    b = f'''<div id="fl" data-api="{E(FLIGHT_API)}" data-app-open="{1 if FLIGHT_APP_OPEN else 0}">
 <div id="fl-out" hidden>
 <div class="fl-alerts" id="fl-alerts" aria-live="assertive"></div>
 <section class="card fl-status" id="fl-status" aria-live="polite"></section>
