@@ -11,6 +11,8 @@
   const tz = (() => { try { return new Intl.DateTimeFormat([], { timeZoneName: "short" }).formatToParts(new Date()).find(p => p.type === "timeZoneName").value; } catch (e) { return ""; } })();
   const tm = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const tmd = ms => { const d = new Date(ms), same = d.toDateString() === new Date().toDateString(); return (same ? "" : d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + ", ") + tm(ms); };
+  // Same minute string the AI headline clock uses — must match the time portion of tmd/tm for a given etaMs.
+  const clockOnly = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", wx: {}, routeWx: [], nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null, estKey: "", pulse: false };
 
   async function getJSON(url, opt) { const r = await fetch(url, opt); if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { status: r.status }); return r.json(); }
@@ -181,18 +183,25 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
   
   function aiCard(a, c) {
     const r = a.read || {}, late = r.lateMin, [lo, hi] = r.range || [0, 0];
+    // One shared ETA for headline clock + projected arrival (tick refreshes both from the same value).
+    const etaMs = r.etaMs || (c.progress && c.progress.etaMs) || null;
+    if (etaMs) S.etaMs = etaMs;
     const meter = `<div class="fl-meter" aria-label="Delay risk ${E(r.label || a.label)}"><i class="on"></i><i class="${a.level >= 1 ? "on" : ""}"></i><i class="${a.level >= 2 ? "on" : ""}"></i><span>${E(r.label || a.label)}</span></div>`;
     const spacing = r.rangeKind === "spacing" || r.faaAddMin;
     const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> possible spacing on top of live ETA · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>`
       : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
     const why = (r.why && r.why.length ? r.why : a.reasons.filter(x => x.lvl >= 1).map(x => x.text)).slice(0, 5);
-    const eta = r.etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(r.etaMs)}</b><small>live track + approach buffer</small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
+    const eta = etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(etaMs)}</b><small>live track + approach buffer · <span class="fl-cd" data-until-eta data-until="${etaMs}"></span></small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
+    const headRaw = r.headline || a.label + " delay risk";
+    const head = headRaw.includes("{ETA}") && etaMs
+      ? E(headRaw).replace("{ETA}", `<span data-live="eta-clock">${E(clockOnly(etaMs))}</span>`)
+      : E(headRaw);
     // Auto-reset pulse when the estimate fingerprint changes
-    const key = [a.level, late, lo, hi, (r.headline || "").slice(0, 40)].join("|");
+    const key = [a.level, late, lo, hi, headRaw.slice(0, 40), etaMs].join("|");
     if (S.estKey && S.estKey !== key) { S.pulse = true; setTimeout(() => { S.pulse = false; const el = $("fl-ai"); if (el) el.classList.remove("pulse"); }, 1800); }
     S.estKey = key;
     return `<div class="fl-risk fl-ai lv${a.level}${S.pulse ? " pulse" : ""}" id="fl-ai"><div class="fl-risk-h"><b>AI delay read</b><span>${E(r.disclaimer || "AI estimate, not the airline's official status")}</span></div>
-${meter}<p class="fl-headline">${E(r.headline || a.label + " delay risk")}</p>${range}${eta}
+${meter}<p class="fl-headline">${head}</p>${range}${eta}
 ${S.pulse ? `<span class="fl-updated">Updated</span>` : ""}
 <div class="fl-todo"><b>What to do</b>${a.todo.map(x => `<p>${E(x)}</p>`).join("")}</div>
 ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}</ul>` : ""}
@@ -297,8 +306,16 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
     const x = ac ? F.project(ac, now, 90) : null, lg = S.liveLeg;
     if (x && S.proj) { const pl = $("fl-pl"); if (pl) pl.style.transform = `translate(${S.proj.X(x.lon).toFixed(1)}px,${S.proj.Y(x.lat).toFixed(1)}px) rotate(${S.rot || 0}deg) scale(1.6)`; }
     if (x && x.moved && lg) { const to = F.distNm(x, lg.to), gs = ac.gs; const set = (k, v) => document.querySelectorAll(`[data-live="${k}"]`).forEach(el => el.textContent = v);
-      if (S.liveLeg === S.leg) { set("dist", mi(to).toLocaleString()); set("dist2", mi(to).toLocaleString()); set("eta", tmd(now + to / gs * 3600e3)); }
-      if (S.inbound && S.liveLeg === S.inbound) { set("idist", mi(to).toLocaleString()); set("ieta", tm(now + to / gs * 3600e3)); } }
+      // Shared ETA: same liveEtaMs (GC + approach buffer) for projected arrival, headline clock, and countdown.
+      const etaMs = F.liveEtaMs({ ...ac, lat: x.lat, lon: x.lon }, lg, now);
+      if (S.liveLeg === S.leg) {
+        set("dist", mi(to).toLocaleString()); set("dist2", mi(to).toLocaleString());
+        if (etaMs) {
+          S.etaMs = etaMs; set("eta", tmd(etaMs)); set("eta-clock", clockOnly(etaMs));
+          document.querySelectorAll("[data-until-eta]").forEach(el => { el.dataset.until = String(etaMs); });
+        }
+      }
+      if (S.inbound && S.liveLeg === S.inbound) { set("idist", mi(to).toLocaleString()); set("ieta", etaMs ? tm(etaMs) : tm(now + to / gs * 3600e3)); } }
     const fr = $("fl-fresh");
     if (fr) { if (!API) fr.innerHTML = `<i class="dot off"></i> Live position isn't connected on this preview.`;
       else if (!S.acAt) fr.innerHTML = `<i class="dot off"></i> Checking live tracking…`;
@@ -501,6 +518,7 @@ ${pick("ride", "🚕 Rides & getting around", "Uber, Lyft or taxi — check the 
     stuck.dataset.user = "1";
     syncWhatIf(); renderStuck();
   }, true);
+
 
   // ---------- boot from #link ----------
   async function boot() {

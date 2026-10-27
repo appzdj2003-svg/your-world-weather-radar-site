@@ -15,6 +15,7 @@
   // Regional airlines that fly under their own callsign for a mainline brand (helps explain "not found").
   const REGIONALS = { DL:["SKW","EDV","RPA"], UA:["SKW","RPA","GJS","ASH","UCA","AWI"], AA:["ENY","JIA","PDT","RPA","SKW","ASH","AWI"], AS:["QXE","SKW"], AC:["JZA"] };
 
+
   function parseFlight(s) {
     s = String(s || "").toUpperCase().replace(/[\s\-]/g, "");
     let m;
@@ -190,7 +191,13 @@
     return out;
   }
 
-  // Minutes late(+) / early(−). Airborne with a solid position ETA: live track is primary.
+  // One shared arrival ETA (ms): same formula the AI card, headline clock, and 1s tick must all use.
+  function liveEtaMs(ac, leg, now) {
+    if (!ac || !leg) return null;
+    const pr = progress(ac, leg, now);
+    return pr && pr.etaMs ? pr.etaMs : null;
+  }
+    // Minutes late(+) / early(−). Airborne with a solid position ETA: live track is primary.
   // FAA arrival programs then add a capped holding/spacing cushion on top — they do not replace the live ETA.
   // Before takeoff (or with no solid live ETA), the FAA program delay applies normally.
   function delayEstimate(c) {
@@ -326,7 +333,7 @@
     // Plain-English headline. Must never contradict the projected arrival (live ETA) on the same card.
     const top = R.filter(r => r.lvl >= 1).sort((a, b) => b.lvl - a.lvl)[0];
     const dest = ap(c.dest) || "arrival", origin = ap(c.origin) || "departure";
-    const etaClock = de.etaMs ? new Date(de.etaMs).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+    // {ETA} is filled by the UI from the same etaMs as Projected arrival / live tick — never bake a clock here.
     const destName = (c.dest && (c.dest.name || "").replace(/\b(International|Intl\.?|Regional|Municipal|Airport)\b.*/i, "").trim()) || dest;
     let headline;
     if (disagree) {
@@ -337,7 +344,7 @@
       if (de.faaMin || (top && /FAA|ground|delay|spacing/i.test(top.text))) wxBits.push("FAA spacing");
       if (!wxBits.length && top) wxBits.push("Weather");
       const who = wxBits.length ? wxBits.join(" and ") : "Conditions";
-      headline = `${track}${etaClock ? ` (${etaClock})` : ""}. ${who} at ${destName || dest} could add ${fmtMin(lo)} to ${fmtMin(hi)}.`;
+      headline = `${track}${de.etaMs ? " ({ETA})" : ""}. ${who} at ${destName || dest} could add ${fmtMin(lo)} to ${fmtMin(hi)}.`;
     } else if (top && /fog|LIFR|visibility/i.test(top.text)) {
       const vis = (c.wx && c.dest && c.wx[c.dest.icao] && c.wx[c.dest.icao].metar && c.wx[c.dest.icao].metar.vis);
       headline = `Fog at ${dest}${vis != null ? ` (visibility ${vis} mile${vis === 1 ? "" : "s"})` : ""}.`;
@@ -409,6 +416,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

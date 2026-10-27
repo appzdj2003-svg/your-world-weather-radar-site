@@ -107,10 +107,22 @@ t("DEN fog: airborne early live ETA is primary; FAA arrival delay only as capped
   assert(/Tracking about on time|early/i.test(a.read.headline), a.read.headline);
   assert(/Fog|FAA spacing/i.test(a.read.headline), a.read.headline);
   assert(!/Likely 42 min|1 h 44|Likely .* late/i.test(a.read.headline), "must not claim FAA-wide late when live is early: " + a.read.headline);
-  // Headline projected clock must match the same etaMs the card would show
-  const clock = new Date(etaMs).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  assert(a.read.headline.includes(clock), `headline should include ${clock}: ${a.read.headline}`);
+  // Headline uses {ETA} placeholder; UI fills it from the same etaMs as Projected arrival / live tick
+  assert(a.read.headline.includes("{ETA}"), `headline should use {ETA} placeholder: ${a.read.headline}`);
+  assert(!/\d{1,2}:\d{2}/.test(a.read.headline.replace("{ETA}", "")), "must not bake a clock into the headline");
 });
+t("liveEtaMs matches progress.etaMs (shared ETA for headline, projected, countdown)", () => {
+  const DEN = { iata: "DEN", icao: "KDEN", lat: 39.8561, lon: -104.6737 };
+  const RIW = { iata: "RIW", icao: "KRIW", lat: 43.0642, lon: -108.4597 };
+  const ac = { lat: 41.0, lon: -106.5, gs: 420, alt: 32000, track: 140 };
+  const leg = { from: RIW, to: DEN };
+  const pr = F.progress(ac, leg, NOW);
+  assert(pr && pr.etaMs);
+  assert.strictEqual(F.liveEtaMs(ac, leg, NOW), pr.etaMs);
+  assert.strictEqual(F.liveEtaMs(null, leg, NOW), null);
+});
+
+
 (async () => {
   const tok = await F.encode({ v: 1, fn: "DL681", from: "SFO", to: "ATL", dep: "2026-10-27T03:45:00.000Z" });
   assert(/^v1\./.test(tok)); const back = await F.decode(tok); assert.strictEqual(back.fn, "DL681"); assert.strictEqual(back.from, "SFO"); n++;
