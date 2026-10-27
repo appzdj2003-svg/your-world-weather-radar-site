@@ -675,6 +675,57 @@ def static_fire_page():
          b, h, "0.5", scripts=("static-fire/sf.js",), jsonld=ld, head_extra=f'<link rel="stylesheet" href="../assets/{V("static-fire/sf.css")}">')
 
 
+# ---------- /flight: free flight tracker (PREVIEW: not in nav, not in the sitemap, noindex) ----------
+FLIGHT_API = os.environ.get("FLIGHT_API", "").strip()   # our relay in _src/worker/flight-proxy.mjs (NOT deployed yet); empty = relay-free mode
+def flight_ref(sec):
+    return PLAY + "&referrer=" + enc(f"utm_source=flight_page&utm_medium=web&utm_campaign={sec}")
+def flight_cta(sec):
+    return (f'<div class="fl-cta"><div><b>Get storm alerts in the app</b><span>{APP} shows live planes on the radar map (tap any plane for its route), plus storms and weather alerts where you are.</span></div>'
+            f'<a class="btn primary glow" data-ev="play_store" data-prov="google_play" data-sec="{sec}" href="{E(flight_ref(sec))}" target="_blank" rel="noopener">{PLAY_SVG}Get it on Google Play</a></div>')
+def flight_page():
+    h = f'''<section class="hero fl-hero"><div class="wrap"><span class="kicker">✈️ Free flight tracker</span><h1>Track my flight</h1>
+<p class="lead">Where your plane is, the weather and FAA delays at both airports, storms on the route, and what to do if you're stuck.</p>
+<form id="fform" class="fl-form" novalidate autocomplete="off">
+<label class="fl-f fl-fn"><span>Flight number</span><input id="f-fn" type="text" inputmode="text" placeholder="DL1234" required autocapitalize="characters" spellcheck="false"></label>
+<button class="btn primary fl-go">Track</button>
+<details class="fl-more"><summary>Add your times (optional, for ETA and delay checks)</summary><div class="fl-grid">
+<label class="fl-f"><span>Date</span><input id="f-d" type="date"></label>
+<label class="fl-f"><span>Scheduled departure</span><input id="f-dep" type="datetime-local"></label>
+<label class="fl-f"><span>Scheduled arrival</span><input id="f-arr" type="datetime-local"></label>
+<label class="fl-f"><span>Updated departure <small>(if your airline changed it)</small></span><input id="f-ndep" type="datetime-local"></label>
+<label class="fl-f"><span>From <small>(airport code)</small></span><input id="f-from" type="text" placeholder="ATL" maxlength="4"></label>
+<label class="fl-f"><span>To <small>(airport code)</small></span><input id="f-to" type="text" placeholder="SJC" maxlength="4"></label>
+<p class="dim small fl-wide" id="f-tz"></p></div></details>
+<p class="err" id="ferr" role="alert"></p></form></div></section>'''
+    b = f'''<div id="fl" data-api="{E(FLIGHT_API)}">
+<div id="fl-out" hidden>
+<div class="fl-alerts" id="fl-alerts" aria-live="assertive"></div>
+<section class="card fl-status" id="fl-status" aria-live="polite"></section>
+<p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
+{flight_cta("after_estimate")}
+<section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>
+<section aria-label="Airports"><div id="fl-apts" class="fl-apts"></div></section>
+<section id="fl-haz" class="fl-haz"></section>
+<details class="card fl-stuck" id="fl-stuck" data-sec="stuck"><summary><b>Stuck with a delay?</b> <span>How much time you have, and what's nearby</span></summary>
+<div class="fl-set"><label>Boarding starts <select id="s-board"><option value="30">30</option><option value="35">35</option><option value="40" selected>40</option></select> min before departure</label>
+<label>Getting back through security <select id="s-sec"><option value="30">30</option><option value="45" selected>45</option><option value="60">60</option><option value="90">90</option></select> min</label></div>
+<div id="fl-stuck-b"></div></details>
+{flight_cta("bottom")}
+</div>
+<section class="fl-how"><h2>How it works</h2><ul>
+<li><b>Live position</b> comes from volunteer ADS-B receivers (adsb.lol). Planes outside receiver range won't show.</li>
+<li><b>Delay risk</b> is a simple set of rules: FAA ground stops and delay programs, storms, low visibility and strong winds at your airports, hazards on the route, and the plane's own progress. It's an estimate, not airline information.</li>
+<li><b>Smooth plane:</b> between live updates (every 20 seconds) we move the plane forward at its last reported speed and heading, for up to 90 seconds. The freshness line says how old the last real position is.</li>
+<li><b>Share my flight</b> makes a link that opens this flight with your times filled in, so family can watch it come in.</li></ul></section>
+<div class="fl-toast" id="fl-toast" role="status" aria-live="polite"></div>
+<p class="owo-attr">Live aircraft: <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> (<a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">ODbL</a>). Routes: adsb.lol / Virtual Radar Server standing data (CC0); routes are typical for the flight number and can differ on the day.
+Weather: <a href="https://aviationweather.gov" target="_blank" rel="noopener">aviationweather.gov</a> and the <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>. Airport status: <a href="https://nasstatus.faa.gov" target="_blank" rel="noopener">FAA NAS Status</a>.
+Places: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). Map imagery: NASA GIBS / Blue Marble. Not affiliated with any airline or the FAA.</p></div>'''
+    page("flight/index.html", "Track my flight · Free flight tracker",
+         "Free flight tracker: live position, weather and FAA delays at both airports, storms on the route and a plain-English delay estimate.",
+         b, h, "0.5", scripts=("codec-core.js", "flightcore.js", "flight.js"), sitemap=False,
+         head_extra=f'<meta name="robots" content="noindex"><link rel="stylesheet" href="../assets/{V("flight.css")}">')
+
 if __name__ == "__main__":
-    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); flight_page(); misc()
     print(f"Built {len(PAGES)} pages")
