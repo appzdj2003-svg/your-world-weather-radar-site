@@ -73,8 +73,11 @@
 .fl-pick .fl-links{margin-top:4px}.fl-pick.air{background:#F0F9FF;border-color:#7DD3FC}
 .fl-pick.food{background:#FFF7ED;border-color:#FDBA74}.fl-pick.todo{background:#F5F3FF;border-color:#C4B5FD}
 .fl-pick.hotel{background:#ECFDF5;border-color:#6EE7B7}.fl-pick.ride{background:#F8FAFC;border-color:#CBD5E1}
-.fl-set{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0;font-size:.92rem;align-items:center}.fl-set select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line)}
-.fl-set-lab{display:inline-flex;align-items:center;flex-wrap:nowrap;gap:6px;white-space:nowrap}.fl-set-lab span{white-space:nowrap}
+.fl-set{display:flex;flex-direction:column;flex-wrap:nowrap;gap:10px;margin:12px 0;font-size:.95rem;align-items:stretch}
+.fl-set select{box-sizing:border-box;width:auto;min-width:4.5em;max-width:none;flex:0 0 auto;font:inherit;font-size:1.1rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;padding:9px 12px;border-radius:10px;border:1.5px solid #94A3B8;background:#fff;color:#0F172A;appearance:auto;-webkit-appearance:menulist}
+.fl-set-lab{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;color:var(--slate);font-weight:600;min-width:0}
+.fl-set-lab span{white-space:nowrap;color:var(--slate)}
+.fl-set .fl-whatif{margin-top:2px}
 .fl-clock{background:var(--slate);color:#fff;border-radius:14px;padding:14px 16px}
 .fl-clock>span{display:block;color:#CBD5E1;font-weight:600}.fl-clock b{display:block;font-size:2.1rem;line-height:1.1}.fl-clock .fl-cd{font-size:1.2rem;color:#FBBF24;font-weight:800}
 .fl-clock small{display:block;margin-top:6px;color:#CBD5E1;font-size:.88rem}.fl-clock small b{display:inline;font-size:1em;color:#fff}
@@ -340,6 +343,12 @@ body.fl-embed .fl-how,
 body.fl-embed .fl-cta,
 body.fl-embed .owo-attr { display: none !important; }
 html.fl-embed .fl-hero h1::after { content: " · Live trip"; font-weight: 500; font-size: .7em; opacity: .7; }
+html.fl-embed .fl-col-side,
+body.fl-embed .fl-col-side,
+html.fl-embed .fl-track-mini,
+body.fl-embed .fl-track-mini { display: none !important; }
+html.fl-embed .fl-layout,
+body.fl-embed .fl-layout { display: flex; flex-direction: column; gap: 10px; }
 html.fl-embed .fl-mapw, body.fl-embed .fl-mapw { min-height: 220px; }
 html.fl-embed .fl-map, body.fl-embed .fl-map { min-height: 220px; height: 260px; }
 
