@@ -227,7 +227,7 @@ ${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl
 <div class="tp-live-countdown" id="tp-live-cd" hidden></div>
 <div id="tp-live-shift"></div>
 <div class="tp-live-frame-wrap"><iframe class="tp-live-frame" id="tp-live-frame" title="Live flight tracker" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-<p class="note">One live tracker — this page embeds Track my flight once (no duplicate polling here). Delay tips below are a rule-based estimate, not the airline.</p>
+<p class="note">Delay tips below are a rule-based estimate, not the airline.</p>
 <div id="tp-live-day1" class="tp-live-day1"></div></section>`;
   }
   function flightToken() {

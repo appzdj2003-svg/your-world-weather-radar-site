@@ -510,7 +510,7 @@ def trip_planner(path):
 <label class="tp-f"><span>Scheduled depart <small>(optional)</small></span><input id="f-fdep" type="datetime-local"></label>
 <label class="tp-f"><span>Scheduled arrive <small>(optional)</small></span><input id="f-farr" type="datetime-local"></label>
 </div>
-<p class="note">Same as Track my flight. With a flight number, your plan gets a Live trip view: plane on the radar, weather at both airports, countdown to landing, then day 1.</p>
+<p class="note">With a flight number, your plan gets a Live trip view: follow your plane on the radar with weather at both airports and along the route, a countdown to landing, and your first days adjusted if you're delayed.</p>
 </details>
 <p class="err tp-wide" id="terr" role="alert"></p>
 <button class="btn primary tp-go tp-wide">Plan my trip</button></form></details>
