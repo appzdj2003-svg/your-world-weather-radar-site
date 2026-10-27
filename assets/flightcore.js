@@ -693,6 +693,20 @@
     }
     return "cruising";
   }
+  // How often the page asks the relay for a live position. Airborne: every 20 s (relay shares a 30 s cache).
+  // Taxiing: 60 s. Parked at the gate / not found yet / landed: minutes, because nothing changes fast and
+  // the relay caches those answers for 3 min anyway. Errors (busy/down/budget) keep their own backoff in flight.js.
+  const POLL = { air: 20e3, taxi: 60e3, soon: 120e3, idle: 180e3, far: 300e3, landed: 300e3 };
+  function livePollMs(ac, pr, depMs, now) {
+    now = now || Date.now();
+    const depIn = isFinite(depMs) && depMs ? depMs - now : null;
+    if (!ac) return depIn != null && depIn > 60 * 60e3 ? POLL.far : depIn != null && depIn > -90 * 60e3 ? POLL.soon : POLL.idle;
+    const onGround = pr ? pr.onGround : (ac.alt === "ground" || (isFinite(ac.alt) && ac.alt < 300 && (ac.gs || 0) < 60));
+    if (!onGround) return POLL.air;
+    if ((ac.gs || 0) >= 5) return POLL.taxi;
+    if (pr && pr.at === "dest") return POLL.landed;
+    return depIn != null && depIn < 20 * 60e3 ? POLL.soon : POLL.idle;
+  }
   const phaseLabel = ph => PHASE_LABEL[ph] || (ph ? ph[0].toUpperCase() + ph.slice(1) : "");
   function progress(ac, leg, now) {
     if (!ac || !leg) return null; const p = { lat: ac.lat, lon: ac.lon }, toNm = distNm(p, leg.to), fromNm = distNm(p, leg.from);
@@ -981,6 +995,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, flightPhase, phaseLabel, PHASE_LABEL, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, flightPhase, phaseLabel, livePollMs, POLL, PHASE_LABEL, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

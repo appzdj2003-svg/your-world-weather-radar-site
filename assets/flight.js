@@ -163,6 +163,11 @@
     if (S.ac) { S.ac.seenAt = Date.now() - 125 * 1000; S.acStale = true; savePos(S.ac, S.t.fn); }
     S.acErr = "busy"; S.acAt = Date.now() - 5e3; S.retryAfterMs = 20e3;
   }
+  // State-aware poll interval: 20 s airborne, 1 min taxiing, 2-5 min parked / not found / landed.
+  function livePoll() {
+    const pr = S.ac && S.leg ? F.progress(S.ac, S.leg) : null, { depMs } = times();
+    return F.livePollMs(S.ac, pr, depMs, Date.now());
+  }
   function clearLiveTimer() { if (S.liveTimer) { clearTimeout(S.liveTimer); S.liveTimer = null; } }
   function scheduleLive() {
     clearLiveTimer();
@@ -172,7 +177,7 @@
       S.liveBackoff = wait;
     } else if (S.acErr === "budget") {
       wait = S.retryAfterMs > 0 ? Math.min(Math.max(S.retryAfterMs, 60e3), 3600e3) : 15 * 60e3;
-    } else { S.liveBackoff = 15e3; wait = 20e3; }
+    } else { S.liveBackoff = 15e3; wait = livePoll(); }
     S.nextLiveAt = Date.now() + wait;
     S.liveTimer = setTimeout(async () => {
       if (!S.t) return;
@@ -255,7 +260,7 @@
     S.onVis && document.removeEventListener("visibilitychange", S.onVis);
     S.onVis = async () => { if (document.hidden || !S.t) return; const now = Date.now();
       if (S.sim === "busy") { forceBusySim(); pickLeg(); }
-      else if (now - S.acAt > 20e3) {
+      else if (now - S.acAt > livePoll()) {
         await loadLive();
         const p2 = F.parseFlight(S.t.fn);
         if (p2 && p2.cs && (S.routeUnconfirmed || (S.ac && !F.liveLeg(S.legs, S.ac)))) await resolveRoute(p2.cs);
@@ -582,7 +587,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
         const heard = ac && ac.seenAt ? (now - ac.seenAt) / 1000 : null;
         const nextAt = S.nextLiveAt || (S.acAt + 20e3);
         const next = Math.max(0, Math.ceil((nextAt - now) / 1000));
-        const nextTxt = document.hidden ? "when you're back" : `in ${next} s`;
+        const nextTxt = document.hidden ? "when you're back" : next > 90 ? `in ${Math.ceil(next / 60)} min` : `in ${next} s`;
         if (hold && ac) {
           fr.innerHTML = `<i class="dot warn"></i> Last seen ${ago(heard || 0)} ago · next check ${nextTxt}`;
         } else if (S.acErr && !ac) {

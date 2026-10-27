@@ -184,7 +184,23 @@ t("canceled helpers: peers, rebook, nearby airports, Google Flights URL", () => 
   const tok = await F.encode({ v: 1, fn: "DL681", from: "SFO", to: "ATL", dep: "2026-10-27T03:45:00.000Z" });
   assert(/^v1\./.test(tok)); const back = await F.decode(tok); assert.strictEqual(back.fn, "DL681"); assert.strictEqual(back.from, "SFO"); n++;
   let bad = false; try { const r = await F.decode("v1.garbage"); bad = !r; } catch (e) { bad = true; } assert(bad);
-  console.log(`flightcore: ${n} tests passed`);
+  t("live polling: 20 s airborne, 1 min taxiing, minutes when parked / not found / landed", () => {
+  const now = Date.parse("2026-10-27T18:00:00Z"), leg = { from: { lat: 35.214, lon: -80.943 }, to: { lat: 40.64, lon: -73.78 } };
+  const air = { lat: 37, lon: -78, alt: 34000, gs: 450, vs: 0 }, finalAc = { lat: 40.6, lon: -73.9, alt: 350, gs: 140, vs: -700 };
+  const taxi = { lat: 35.214, lon: -80.943, alt: "ground", gs: 15 }, gate = { lat: 35.214, lon: -80.943, alt: "ground", gs: 0 }, landed = { lat: 40.64, lon: -73.78, alt: "ground", gs: 0 };
+  const P = ac => F.progress(ac, leg, now);
+  assert.strictEqual(F.livePollMs(air, P(air), null, now), 20e3);
+  assert.strictEqual(F.livePollMs(finalAc, P(finalAc), null, now), 20e3, "350 ft on final at 140 kt is still airborne");
+  assert.strictEqual(F.livePollMs(taxi, P(taxi), null, now), 60e3);
+  assert.strictEqual(F.livePollMs(gate, P(gate), null, now), 180e3);
+  assert.strictEqual(F.livePollMs(gate, P(gate), now + 10 * 60e3, now), 120e3, "pushback soon");
+  assert.strictEqual(F.livePollMs(landed, P(landed), null, now), 300e3);
+  assert.strictEqual(F.livePollMs(null, null, null, now), 180e3, "not found, no time given");
+  assert.strictEqual(F.livePollMs(null, null, now + 3 * 3600e3, now), 300e3, "departs in hours");
+  assert.strictEqual(F.livePollMs(null, null, now + 30 * 60e3, now), 120e3, "departs soon");
+  assert.strictEqual(F.livePollMs(air, null, null, now), 20e3, "no leg known");
+});
+console.log(`flightcore: ${n} tests passed`);
 })().catch(e => { console.error(e); process.exit(1); });
 
 t("polish2: FAA why uses place names + neat durations, All signals keep center codes", () => {
