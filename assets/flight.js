@@ -100,7 +100,9 @@
     S.timers.forEach(clearInterval); S.timers = []; Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null });
     const cpanel = $("fl-canceled");
     if (cpanel) { cpanel.open = false; }
-    const p = F.parseFlight(t.fn); $("fl-out").hidden = false; $("fl-status").innerHTML = `<p class="fl-big">Looking up ${E(t.fn)}…</p>`;
+    const p = F.parseFlight(t.fn); $("fl-out").hidden = false; document.body.classList.add("fl-tracking");
+    const mini = $("fl-track-mini"); if (mini) { mini.hidden = false; mini.querySelector("[data-fn]").textContent = t.fn; }
+    $("fl-status").innerHTML = `<p class="fl-big">Looking up ${E(t.fn)}…</p>`;
     if (p && p.unknownAirline) { $("fl-status").innerHTML = `<p class="fl-big">We don't know airline code ${E(p.iata)} yet.</p><p>Try the 3-letter airline code (for example DAL for Delta) followed by the number.</p>`; return; }
     // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
     if (S.sim) { pickLeg(); render(); }
@@ -131,18 +133,27 @@
     if (S.sim) c = applySim(c, S.sim);
     return c;
   }
-  // Preview-only simulated high-risk case (?sim=high). Clearly labelled in the UI.
+  // Preview-only sims (?sim=high|landed). Clearly labelled in the UI.
   function applySim(c, kind) {
-    if (kind !== "high") return c;
+    if (kind !== "high" && kind !== "landed") return c;
     const dest = c.dest || { iata: "DEN", icao: "KDEN", name: "Denver", countryiso2: "US", lat: 39.86, lon: -104.67 };
-    const origin = c.origin || { iata: "ANC", icao: "PANC", name: "Anchorage", countryiso2: "US", lat: 61.17, lon: -150.0 };
+    const origin = c.origin || { iata: "ATL", icao: "KATL", name: "Atlanta", countryiso2: "US", lat: 33.64, lon: -84.43 };
     const wx = { ...(c.wx || {}) };
-    wx[dest.icao] = { metar: { raw: "METAR KDEN SIM 00000KT 1/4SM FG VV001 03/03", vis: 0.25, fltCat: "LIFR", wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null, src: "sim" };
-    const nas = { updated: "sim", groundStops: [], groundDelays: [{ arpt: dest.iata || "DEN", reason: "WX: Fog", avg: "1 hour and 15 minutes", max: "2 hours" }], delays: [], closures: [] };
-    const arrMs = c.arrMs || (c.now + 45 * 60e3);
-    const progress = c.progress && !c.progress.onGround ? { ...c.progress, etaMs: arrMs + 55 * 60e3, bufferMin: 18 } :
-      { toNm: 80, fromNm: 400, totalNm: 480, onGround: false, phase: "cruising", bufferMin: 18, etaMs: arrMs + 55 * 60e3 };
-    return { ...c, origin, dest, wx, nas, progress, arrMs, routeWx: [{ icaoId: "KBJC", fltCat: "LIFR", visib: "1/4", wxString: "FG", clouds: [{ cover: "VV", base: 100 }] }] };
+    if (kind === "high") {
+      wx[dest.icao] = { metar: { raw: "METAR KDEN SIM 00000KT 1/4SM FG VV001 03/03", vis: 0.25, fltCat: "LIFR", wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null, src: "sim" };
+      const nas = { updated: "sim", groundStops: [], groundDelays: [{ arpt: dest.iata || "DEN", reason: "WX: Fog", avg: "1 hour and 15 minutes", max: "2 hours" }], delays: [], closures: [] };
+      const arrMs = c.arrMs || (c.now + 45 * 60e3);
+      const progress = c.progress && !c.progress.onGround ? { ...c.progress, etaMs: arrMs + 55 * 60e3, bufferMin: 18 } :
+        { toNm: 80, fromNm: 400, totalNm: 480, onGround: false, phase: "cruising", bufferMin: 18, etaMs: arrMs + 55 * 60e3 };
+      return { ...c, origin, dest, wx, nas, progress, arrMs, routeWx: [{ icaoId: "KBJC", fltCat: "LIFR", visib: "1/4", wxString: "FG", clouds: [{ cover: "VV", base: 100 }] }] };
+    }
+    // landed
+    wx[dest.icao] = { metar: { raw: "METAR KDEN SIM 14008KT 10SM FEW080 18/02", vis: 10, fltCat: "VFR", wxString: "", gust: 0, clouds: [{ cover: "FEW", base: 8000 }] }, taf: null, src: "sim" };
+    wx[origin.icao] = wx[origin.icao] || { metar: { raw: "METAR KATL SIM 09006KT 10SM CLR 22/10", vis: 10, fltCat: "VFR", wxString: "", gust: 0, clouds: [] }, taf: null, src: "sim" };
+    S.landedAt = S.landedAt || c.now - 4 * 60e3;
+    return { ...c, origin, dest, wx, nas: c.nas || { updated: "sim", groundStops: [], groundDelays: [], delays: [], closures: [] },
+      progress: { toNm: 0, fromNm: 480, totalNm: 480, onGround: true, at: "dest", phase: "landed", bufferMin: 0, etaMs: c.now - 4 * 60e3 },
+      arrMs: c.arrMs || (c.now - 10 * 60e3) };
   }
   function statusLine(c) {
     const pr = c.progress, ac = S.ac, code = a => a.iata || a.icao;
@@ -186,35 +197,78 @@
     }
     const pr = c.progress, ib = c.inbound;
     let eta = "";
-    if (pr && pr.etaMs) eta = `<div class="fl-eta"><div><span>Estimated arrival</span><b data-live="eta">${tmd(pr.etaMs)}</b><small>live track + approach buffer</small></div>${c.arrMs ? `<div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${pr.etaMs - c.arrMs > 5 * 60e3 ? fmtLate(pr.etaMs - c.arrMs) + " later" : c.arrMs - pr.etaMs > 5 * 60e3 ? fmtLate(c.arrMs - pr.etaMs) + " earlier" : "about on time"}</small></div>` : ""}</div>`;
-    else if (c.depMs || c.arrMs) eta = `<div class="fl-eta">${c.depMs ? `<div><span>${S.t.ndep ? "Updated departure" : "Scheduled departure"}</span><b>${tmd(c.depMs)}</b></div>` : ""}${c.arrMs ? `<div><span>Scheduled arrival</span><b>${tmd(c.arrMs)}</b></div>` : ""}</div>`;
+    if (pr && pr.etaMs) eta = `<div class="fl-eta"><div><span>ETA</span><b data-live="eta">${tmd(pr.etaMs)}</b><small>live + buffer</small></div>${c.arrMs ? `<div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${pr.etaMs - c.arrMs > 5 * 60e3 ? fmtLate(pr.etaMs - c.arrMs) + " later" : c.arrMs - pr.etaMs > 5 * 60e3 ? fmtLate(c.arrMs - pr.etaMs) + " earlier" : "on time"}</small></div>` : ""}</div>`;
+    else if (c.depMs || c.arrMs) eta = `<div class="fl-eta">${c.depMs ? `<div><span>${S.t.ndep ? "Updated depart" : "Depart"}</span><b>${tmd(c.depMs)}</b></div>` : ""}${c.arrMs ? `<div><span>Arrive</span><b>${tmd(c.arrMs)}</b></div>` : ""}</div>`;
     const legPick = !S.leg && S.legs.length > 1 ? `<div class="fl-legs">${S.legs.map(l => `<button type="button" class="btn" data-leg="${l.i}">${E(code(l.from))} → ${E(code(l.to))}</button>`).join("")}</div>` : "";
     const nonUS = S.leg && [S.leg.from, S.leg.to].some(x => x.countryiso2 !== "US");
     const live = (k, v) => `<span data-live="${k}">${v}</span>`;
     const big = E(st.big).replace("{DIST}", live("dist", pr ? mi(pr.toNm).toLocaleString() : "")), sub = E(st.sub || "").replace("{IDIST}", live("idist", ib ? mi(ib.toNm).toLocaleString() : "")).replace("{IETA}", live("ieta", ib && ib.etaMs ? tm(ib.etaMs) : ""));
-    // Boarding-pass style header with a live progress bar (share of the straight-line distance flown).
     const pct = pr && !pr.onGround ? Math.max(2, Math.min(98, 100 * pr.fromNm / Math.max(1, pr.fromNm + pr.toNm))) : pr && pr.at === "dest" ? 100 : 0;
     const pass = S.leg ? `<div class="fl-pass"><div class="fl-pa"><b>${E(code(S.leg.from))}</b><span>${E(city(S.leg.from))}</span></div>
 <div class="fl-track" aria-hidden="true"><i class="fl-bar" style="width:${pct}%"></i><i class="fl-dot" style="left:${pct}%">✈</i></div>
 <div class="fl-pa r"><b>${E(code(S.leg.to))}</b><span>${E(city(S.leg.to))}</span></div></div>` : "";
-    const landed = pr && pr.onGround && pr.at === "dest" ? `<div class="fl-landed${S.justLanded ? " pop" : ""}"><b>Landed!</b><span>${S.landedAt ? `Seen on the ground at ${E(code(S.leg.to))} at ${tm(S.landedAt)} (live tracking)` : `On the ground at ${E(code(S.leg.to))} (live tracking)`}. Gate and baggage info is in the airline app.</span></div>` : "";
-    $("fl-status").innerHTML = `<div class="fl-top"><p class="fl-head">${E(S.t.fn)}${S.ac && S.ac.type ? ` <span class="dim">· ${E(S.ac.type)}${S.ac.reg ? " " + E(S.ac.reg) : ""}</span>` : ""}</p>
-<div class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}">${S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me"}</button><button type="button" class="fl-chip" id="fl-share">↗ Share my flight</button></div></div>${appOpenBtn()}
+    const landed = pr && pr.onGround && pr.at === "dest" ? `<div class="fl-landed${S.justLanded ? " pop" : ""}"><b>Landed!</b><span>${S.landedAt ? `On the ground at ${E(code(S.leg.to))} at ${tm(S.landedAt)}` : `On the ground at ${E(code(S.leg.to))}`}. Gate and baggage in the airline app.</span></div>` : "";
+    const pill = statusPill(a, pr, st);
+    const phase = flightPhase(pr, c);
+    $("fl-status").innerHTML = `<div class="fl-top"><p class="fl-head">${E(S.t.fn)}${S.ac && S.ac.type ? ` <span class="dim">· ${E(S.ac.type)}</span>` : ""}</p><span class="fl-top-right">${pill}<span class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}" title="Alert me">${S.alertsOn ? "🔔" : "🔔"}</button><button type="button" class="fl-chip" id="fl-share" title="Share">↗</button></span></span></div>
 ${pass}${landed}<p class="fl-big">${big}</p>${sub ? `<p class="fl-sub">${sub}</p>` : ""}
-${pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : ""}
-${legPick}${eta}
-${aiCard(a, c)}${S.sim ? `<p class="fl-sim-tag">SIMULATED high-risk case — not a real delay</p>` : ""}
-${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazards need our relay, which isn't connected on this preview.</p>`}${nonUS ? `<p class="dim small">FAA delay programs cover US airports only.</p>` : ""}
+${eta}${legPick}
 <p class="fl-fresh" id="fl-fresh"></p>`;
+    const nums = pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : "";
+    const ov = $("fl-overview-extra");
+    if (ov) ov.innerHTML = `${nums}${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazards need our relay, which isn't connected on this preview.</p>`}${nonUS ? `<p class="dim small">FAA delay programs cover US airports only.</p>` : ""}`;
+    const aiHost = $("fl-ai-host");
+    if (aiHost) aiHost.innerHTML = `${aiCard(a, c)}${S.sim ? `<p class="fl-sim-tag">SIMULATED ${E(S.sim)} — preview only</p>` : ""}`;
+    const acts = $("fl-acts-bar");
+    if (acts) acts.innerHTML = appOpenBtn() || "";
     $("fl-status").querySelectorAll("[data-leg]").forEach(b => b.onclick = () => { const l = S.legs[+b.dataset.leg]; S.t.from = l.from.iata || l.from.icao; S.t.to = l.to.iata || l.to.icao; fillForm(S.t); pickLeg(); loadWx().then(render); loadPlaces().then(renderStuck); render(); });
     renderMap(c); renderAirports(c); renderHazards(c); renderStuck(a);
     const late = a.read && a.read.lateMin, likely = a.level >= 1 || (late != null && late >= 20) || !!S.whatIfMin;
     const stuck = $("fl-stuck");
-    stuck.classList.toggle("hot", !!(a.level >= 1 || (late != null && late >= 20) || S.whatIfMin));
-    if (!stuck.dataset.user) stuck.open = likely;
-    else if (likely && !stuck.dataset.userClosed) stuck.open = true;
+    if (stuck) {
+      stuck.classList.toggle("hot", !!(a.level >= 1 || (late != null && late >= 20) || S.whatIfMin));
+      if (!stuck.dataset.user) stuck.open = likely;
+      else if (likely && !stuck.dataset.userClosed) stuck.open = true;
+    }
+    preferSeg(phase, likely, !!landed);
     S.level = a.level; S.justLanded = false; tick();
     syncWhatIf();
+  }
+  function flightPhase(pr, c) {
+    if (pr && pr.onGround && pr.at === "dest") return "landed";
+    if (pr && !pr.onGround) return "air";
+    if (pr && pr.onGround && pr.at === "origin") return "pre";
+    if (c.depMs && c.now < c.depMs) return "pre";
+    return "pre";
+  }
+  function statusPill(a, pr, st) {
+    let label = "Tracking", cls = "neutral";
+    if (pr && pr.onGround && pr.at === "dest") { label = "Landed"; cls = "good"; }
+    else if (a && a.level >= 2) { label = "Delayed est."; cls = "bad"; }
+    else if (a && a.level >= 1) { label = "Watch"; cls = "warn"; }
+    else if (pr && !pr.onGround) { label = "On time"; cls = "good"; }
+    else if (st && /Not in the air|on the ground at/i.test(st.big || "")) { label = "Pre-departure"; cls = "neutral"; }
+    return `<span class="fl-pill-status ${cls}">${E(label)}</span>`;
+  }
+  function preferSeg(phase, likely, landed) {
+    if (S.segUser) return;
+    // Stay on Overview so status + map + AI fill the first screen; hint via pill / hot stuck.
+    let seg = "overview";
+    if (landed) seg = "nearby";
+    setSeg(seg, false);
+    // Soft badge on Plans when delay is likely
+    const plansBtn = document.querySelector('#fl-seg [data-seg="plans"]');
+    if (plansBtn) plansBtn.classList.toggle("fl-seg-hot", !!likely && !landed);
+  }
+  function setSeg(seg, user) {
+    if (user) S.segUser = true;
+    const tabs = document.querySelectorAll("#fl-seg [data-seg]");
+    const panels = document.querySelectorAll(".fl-panel");
+    tabs.forEach(b => {
+      const on = b.dataset.seg === seg;
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    panels.forEach(p => { p.hidden = p.id !== "fl-panel-" + seg; });
   }
   const city = a => String(a.name || "").replace(/\b(International|Intl\.?|Regional|Municipal)\b.*$/i, "").replace(/\bAirport\b.*$/i, "").trim() || a.name || "";
   const fmtLate = ms => F.fmtMin(ms / 60e3);
@@ -227,10 +281,9 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     if (etaMs) S.etaMs = etaMs;
     const meter = `<div class="fl-meter" aria-label="Delay risk ${E(r.label || a.label)}"><i class="on"></i><i class="${a.level >= 1 ? "on" : ""}"></i><i class="${a.level >= 2 ? "on" : ""}"></i><span>${E(r.label || a.label)}</span></div>`;
     const spacing = r.rangeKind === "spacing" || r.faaAddMin;
-    const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} to ${E(F.fmtMin(hi))}` : "—"}</b> possible spacing on top of live ETA · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>`
-      : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} to ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
+    const range = spacing ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))}–${E(F.fmtMin(hi))}` : "—"}</b> spacing on top of ETA</p>`
+      : (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))}–${E(F.fmtMin(hi))}` : "—"}</b> likely delay</p>` : `<p class="fl-range"><b>On time band</b></p>`;
     const why = (r.why && r.why.length ? r.why : a.reasons.filter(x => x.lvl >= 1).map(x => x.text)).slice(0, 5);
-    const eta = etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(etaMs)}</b><small>live track + approach buffer · <span class="fl-cd" data-until-eta data-until="${etaMs}"></span></small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
     const headRaw = r.headline || a.label + " delay risk";
     const head = headRaw.includes("{ETA}") && etaMs
       ? E(headRaw).replace("{ETA}", `<span data-live="eta-clock">${E(clockOnly(etaMs))}</span>`)
@@ -239,12 +292,15 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     const key = [a.level, late, lo, hi, headRaw.slice(0, 40), etaMs].join("|");
     if (S.estKey && S.estKey !== key) { S.pulse = true; setTimeout(() => { S.pulse = false; const el = $("fl-ai"); if (el) el.classList.remove("pulse"); }, 1800); }
     S.estKey = key;
-    return `<div class="fl-risk fl-ai lv${a.level}${S.pulse ? " pulse" : ""}" id="fl-ai"><div class="fl-risk-h"><b>AI delay read</b><span>${E(r.disclaimer || "AI estimate, not the airline's official status")}</span></div>
-${meter}<p class="fl-headline">${head}</p>${range}${eta}
+    // ETA lives in the status header; keep the AI summary compact for the first screen.
+    return `<div class="fl-risk fl-ai lv${a.level}${S.pulse ? " pulse" : ""}" id="fl-ai"><div class="fl-risk-h"><b>AI delay read</b><span>${E(r.disclaimer || "AI estimate · not airline status")}</span></div>
+${meter}<p class="fl-headline">${head}</p>${range}
 ${S.pulse ? `<span class="fl-updated">Updated</span>` : ""}
+<details class="fl-more-why"><summary>Details · what to do & signals</summary>
 <div class="fl-todo"><b>What to do</b>${a.todo.map(x => `<p>${E(x)}</p>`).join("")}</div>
 ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}</ul>` : ""}
-<details class="fl-more-why"><summary>All signals</summary><ul>${a.reasons.map(x => `<li class="r${x.lvl}">${E(x.text)}${x.src ? ` <small>${E(x.src)}</small>` : ""}</li>`).join("")}</ul></details></div>`;
+<ul>${a.reasons.map(x => `<li class="r${x.lvl}">${E(x.text)}${x.src ? ` <small>${E(x.src)}</small>` : ""}</li>`).join("")}</ul>
+</details></div>`;
   }
 
 // ---------- live watch: alerts when something changes (only while this page is open) ----------
@@ -336,7 +392,19 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
     if (window.gtag) gtag("event", "select_content", { content_type: "flight_open_app", item_id: S.t.fn });
     location.href = url;
   }
-  $("fl-status").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.id === "fl-share") share(); else if (b.id === "fl-alert") toggleAlerts(); else if (b.id === "fl-open-app") openInApp(); });
+  const onActClick = e => { const b = e.target.closest("button"); if (!b) return; if (b.id === "fl-share") share(); else if (b.id === "fl-alert") toggleAlerts(); else if (b.id === "fl-open-app") openInApp(); };
+  $("fl-status").addEventListener("click", onActClick);
+  const actsBar = $("fl-acts-bar"); if (actsBar) actsBar.addEventListener("click", onActClick);
+  const seg = $("fl-seg");
+  if (seg) seg.addEventListener("click", e => { const b = e.target.closest("[data-seg]"); if (b) setSeg(b.dataset.seg, true); });
+  const changeBtn = $("fl-change");
+  if (changeBtn) changeBtn.addEventListener("click", () => {
+    document.body.classList.remove("fl-tracking");
+    const mini = $("fl-track-mini"); if (mini) mini.hidden = true;
+    const hero = document.querySelector(".fl-hero"); if (hero) hero.scrollIntoView({ block: "start" });
+    const fn = $("f-fn"); if (fn) fn.focus();
+  });
+  document.addEventListener("click", e => { const j = e.target.closest("[data-jump-seg]"); if (j) { setSeg(j.dataset.jumpSeg, true); const st = $("fl-stuck"); if (st) { st.open = true; st.scrollIntoView({ block: "nearest" }); } } });
 
   // ---------- 1-second tick: smooth plane, live numbers, freshness, countdowns ----------
   const ago = s => s < 60 ? `${Math.round(s)} s` : s < 3600 ? `${Math.floor(s / 60)} min` : `${Math.floor(s / 3600)} h`;
@@ -558,13 +626,25 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
     box.innerHTML = html +
       `<details class="fl-how-est"><summary>How we estimate</summary><p>Travel times are approximate: straight-line distance × ${F.ROAD} at about ${mphCar} mph by car (plus ${F.MODES[1].waitMin} min to get a ride) or about ${mphWalk} mph on foot. Time on site is a planning allowance, not a measurement. “Fits” leaves at least 20 minutes spare. Places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), listed by distance (no ratings). Airport status: <a href="https://nasstatus.faa.gov" target="_blank" rel="noopener">FAA NAS Status</a>.</p></details>`;
     const sw = $("fl-swipe"); if (sw) sw.scrollLeft = sl; tick();
+    const nearBox = $("fl-nearby");
+    if (nearBox) {
+      const pickEl = box.querySelector(".fl-stuck-picks");
+      const swipeEl = box.querySelector(".fl-swipe");
+      const scrub = html => html.replace(/\bid="[^"]*"/g, "");
+      nearBox.innerHTML = (pickEl ? scrub(pickEl.outerHTML) : "") + (swipeEl ? `<h3 class="fl-swipe-h">More nearby</h3>` + scrub(swipeEl.outerHTML) : (pickEl ? "" : `<p class="dim">Open Delayed under If plans change for countdown and nearby options, or track a flight first.</p>`));
+      // Tab chips in the Nearby mirror jump to Delayed so filters stay single-source.
+      nearBox.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
+        S.tab = b.dataset.tab; S.stuckKey = ""; setSeg("plans", true); const st = $("fl-stuck"); if (st) st.open = true; renderStuck();
+      }));
+    }
   }
-  $("fl-stuck-b").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; S.tab = b.dataset.tab; S.stuckKey = ""; renderStuck(); const sw = $("fl-swipe"); if (sw) sw.scrollLeft = 0; });
-  ["s-board", "s-sec"].forEach(id => $(id).addEventListener("change", () => renderStuck()));
-  $("fl-stuck").addEventListener("toggle", () => {
-    $("fl-stuck").dataset.user = "1";
-    if (!$("fl-stuck").open) $("fl-stuck").dataset.userClosed = "1";
-    else delete $("fl-stuck").dataset.userClosed;
+  const stuckB = $("fl-stuck-b"); if (stuckB) stuckB.addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; S.tab = b.dataset.tab; S.stuckKey = ""; renderStuck(); const sw = $("fl-swipe"); if (sw) sw.scrollLeft = 0; });
+  ["s-board", "s-sec"].forEach(id => { const el = $(id); if (el) el.addEventListener("change", () => renderStuck()); });
+  const stuckEl = $("fl-stuck");
+  if (stuckEl) stuckEl.addEventListener("toggle", () => {
+    stuckEl.dataset.user = "1";
+    if (!stuckEl.open) stuckEl.dataset.userClosed = "1";
+    else delete stuckEl.dataset.userClosed;
   });
   function syncWhatIf() {
     document.querySelectorAll("[data-whatif]").forEach(b => {

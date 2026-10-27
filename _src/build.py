@@ -729,15 +729,46 @@ def flight_page():
 <label class="fl-f"><span>From <small>(airport code)</small></span><input id="f-from" type="text" placeholder="ATL" maxlength="4"></label>
 <label class="fl-f"><span>To <small>(airport code)</small></span><input id="f-to" type="text" placeholder="SJC" maxlength="4"></label>
 <p class="dim small fl-wide" id="f-tz"></p></div></details>
-<p class="err" id="ferr" role="alert"></p></form></div></section>'''
+<p class="err" id="ferr" role="alert"></p></form></div></section>
+<div class="fl-track-mini" id="fl-track-mini" hidden><span>Tracking <b data-fn></b></span><button type="button" class="fl-chip" id="fl-change">Change flight</button></div>'''
     b = f'''<div id="fl" data-api="{E(FLIGHT_API)}" data-app-open="{1 if FLIGHT_APP_OPEN else 0}">
 <div id="fl-out" hidden>
 <div class="fl-alerts" id="fl-alerts" aria-live="assertive"></div>
+<div class="fl-layout">
+<div class="fl-col-main">
 <section class="card fl-status" id="fl-status" aria-live="polite"></section>
-<details class="card fl-canceled" id="fl-canceled" data-sec="canceled">
-<summary class="fl-canceled-sum"><span class="fl-canceled-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm4.7 13.3a1 1 0 0 1-1.4 1.4L12 13.4l-3.3 3.3a1 1 0 0 1-1.4-1.4l3.3-3.3-3.3-3.3a1 1 0 0 1 1.4-1.4l3.3 3.3 3.3-3.3a1 1 0 0 1 1.4 1.4L13.4 12z"/></svg></span><span class="fl-canceled-txt"><b>Flight canceled?</b><em>Rebooking options, alternate flights and overnight plans</em></span></summary>
-<div class="fl-canceled-body" id="fl-canceled-b"><p class="dim">Track a flight to see rebooking options for this route.</p></div>
+<section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>
+<section class="card fl-ai-host" id="fl-ai-host" aria-label="AI delay read"></section>
+<div class="fl-acts-bar" id="fl-acts-bar"></div>
+</div>
+<div class="fl-col-side">
+<nav class="fl-seg" id="fl-seg" role="tablist" aria-label="Flight panels">
+<button type="button" role="tab" id="fl-seg-overview" aria-controls="fl-panel-overview" aria-selected="true" data-seg="overview">Overview</button>
+<button type="button" role="tab" id="fl-seg-weather" aria-controls="fl-panel-weather" aria-selected="false" data-seg="weather">Weather</button>
+<button type="button" role="tab" id="fl-seg-plans" aria-controls="fl-panel-plans" aria-selected="false" data-seg="plans">If plans change</button>
+<button type="button" role="tab" id="fl-seg-nearby" aria-controls="fl-panel-nearby" aria-selected="false" data-seg="nearby">Nearby</button>
+</nav>
+<div class="fl-panels">
+<div class="fl-panel" id="fl-panel-overview" role="tabpanel" aria-labelledby="fl-seg-overview">
+<div id="fl-overview-extra"></div>
+<details class="fl-alert-note-box"><summary>About Alert me</summary>
+<p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
 </details>
+{flight_cta("after_estimate")}
+<details class="fl-how card"><summary><b>How we estimate</b><em>Sources, smooth plane and share links</em></summary>
+<ul>
+<li><b>Live position</b> comes from volunteer ADS-B receivers (adsb.lol). Planes outside receiver range won't show.</li>
+<li><b>Delay risk</b> is a simple set of rules: FAA ground stops and delay programs, storms, low visibility and strong winds at your airports, hazards on the route, and the plane's own progress. It's an estimate, not airline information.</li>
+<li><b>Smooth plane:</b> between live updates (every 20 seconds) we move the plane forward at its last reported speed and heading, for up to 90 seconds. The freshness line says how old the last real position is.</li>
+<li><b>Share my flight</b> makes a link that opens this flight with your times filled in, so family can watch it come in.</li>
+</ul></details>
+</div>
+<div class="fl-panel" id="fl-panel-weather" role="tabpanel" aria-labelledby="fl-seg-weather" hidden>
+<section aria-label="Airports"><div id="fl-apts" class="fl-apts"></div></section>
+<section id="fl-haz" class="fl-haz"></section>
+</div>
+<div class="fl-panel" id="fl-panel-plans" role="tabpanel" aria-labelledby="fl-seg-plans" hidden>
+<div class="fl-plans-grid">
 <details class="card fl-stuck" id="fl-stuck" data-sec="stuck"><summary class="fl-stuck-sum">
 <span class="fl-stuck-sum-hot"><b>Delayed</b><em>Countdown, nearby options and overnight stays</em></span>
 <span class="fl-stuck-sum-idle"><b>Expecting a delay?</b><em>Options near the airport, or try a what-if delay</em>
@@ -749,18 +780,21 @@ def flight_page():
 <span class="fl-whatif fl-whatif-in" role="group" aria-label="What if delay"><span class="dim">What if</span><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button><button type="button" data-whatif="0" class="fl-whatif-clear">Clear</button></span>
 </div>
 <div id="fl-stuck-b"></div></div></details>
-<p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
-{flight_cta("after_estimate")}
-<section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>
-<section aria-label="Airports"><div id="fl-apts" class="fl-apts"></div></section>
-<section id="fl-haz" class="fl-haz"></section>
+<details class="card fl-canceled" id="fl-canceled" data-sec="canceled">
+<summary class="fl-canceled-sum"><span class="fl-canceled-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm4.7 13.3a1 1 0 0 1-1.4 1.4L12 13.4l-3.3 3.3a1 1 0 0 1-1.4-1.4l3.3-3.3-3.3-3.3a1 1 0 0 1 1.4-1.4l3.3 3.3 3.3-3.3a1 1 0 0 1 1.4 1.4L13.4 12z"/></svg></span><span class="fl-canceled-txt"><b>Flight canceled?</b><em>Rebooking options, alternate flights and overnight plans</em></span></summary>
+<div class="fl-canceled-body" id="fl-canceled-b"><p class="dim">Track a flight to see rebooking options for this route.</p></div>
+</details>
+</div>
+</div>
+<div class="fl-panel" id="fl-panel-nearby" role="tabpanel" aria-labelledby="fl-seg-nearby" hidden>
+<p class="dim small fl-nearby-hint">Food, rides and things to do near the airport — same picks as under <button type="button" class="fl-linkish" data-jump-seg="plans">If plans change → Delayed</button>.</p>
+<div id="fl-nearby" class="fl-nearby"></div>
 {flight_cta("bottom")}
 </div>
-<section class="fl-how"><h2>How it works</h2><ul>
-<li><b>Live position</b> comes from volunteer ADS-B receivers (adsb.lol). Planes outside receiver range won't show.</li>
-<li><b>Delay risk</b> is a simple set of rules: FAA ground stops and delay programs, storms, low visibility and strong winds at your airports, hazards on the route, and the plane's own progress. It's an estimate, not airline information.</li>
-<li><b>Smooth plane:</b> between live updates (every 20 seconds) we move the plane forward at its last reported speed and heading, for up to 90 seconds. The freshness line says how old the last real position is.</li>
-<li><b>Share my flight</b> makes a link that opens this flight with your times filled in, so family can watch it come in.</li></ul></section>
+</div>
+</div>
+</div>
+</div>
 <div class="fl-toast" id="fl-toast" role="status" aria-live="polite"></div>
 <p class="owo-attr">Live aircraft: <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a> (<a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">ODbL</a>). Routes: adsb.lol / Virtual Radar Server standing data (CC0); routes are typical for the flight number and can differ on the day.
 Weather: <a href="https://aviationweather.gov" target="_blank" rel="noopener">aviationweather.gov</a> and the <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>. Airport status: <a href="https://nasstatus.faa.gov" target="_blank" rel="noopener">FAA NAS Status</a>.
