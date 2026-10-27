@@ -1,6 +1,6 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": [
    {
     "id": "ep222026",
@@ -37,15 +37,15 @@
   ]
  },
  "metar": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1793073060,
-    "temp": 16.7,
-    "dewp": 7.2,
-    "wdir": 280,
-    "wspd": 6,
+    "obsTime": 1793083860,
+    "temp": 14.4,
+    "dewp": 7.8,
+    "wdir": 10,
+    "wspd": 7,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
@@ -55,187 +55,108 @@
       "base": 25000
      }
     ],
-    "rawOb": "METAR KJFK 270351Z 28006KT 10SM FEW250 17/07 A3017 RMK AO2 SLP216 T01670072",
+    "rawOb": "METAR KJFK 270651Z 01007KT 10SM FEW250 14/08 A3022 RMK AO2 SLP232 T01440078",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1793073000,
-    "temp": 16,
+    "obsTime": 1793083800,
+    "temp": 15,
     "dewp": 14,
-    "wdir": 210,
-    "wspd": 15,
-    "wgst": 30,
-    "wxString": null,
-    "cover": "OVC",
+    "wdir": 230,
+    "wspd": 14,
+    "wgst": null,
+    "wxString": "-RA -DZ",
+    "cover": "BKN",
     "clouds": [
      {
-      "cover": "OVC",
-      "base": 1400
+      "cover": "SCT",
+      "base": 1200
+     },
+     {
+      "cover": "SCT",
+      "base": 2200
+     },
+     {
+      "cover": "BKN",
+      "base": 3900
      }
     ],
-    "rawOb": "METAR EGLL 270350Z AUTO 21015G30KT 9999 OVC014/// 16/14 Q1004",
+    "rawOb": "METAR EGLL 270650Z AUTO 23014KT 9999 -RADZ SCT012/// SCT022/// BKN039/// //////TCU 15/14 Q1005",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1793073600,
-    "temp": 14,
-    "dewp": 13,
-    "wdir": 190,
-    "wspd": 10,
-    "wgst": null,
-    "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "SCT",
-      "base": 1300
-     },
-     {
-      "cover": "BKN",
-      "base": 2100
-     }
-    ],
-    "rawOb": "METAR LFPG 270400Z 19010KT 9999 SCT013 BKN021 14/13 Q1015 NOSIG",
-    "lat": 49.015,
-    "lon": 2.534,
-    "city": "Paris"
-   },
-   {
-    "icaoId": "OMDB",
-    "obsTime": 1793073600,
-    "temp": 29,
-    "dewp": 24,
-    "wdir": 120,
-    "wspd": 4,
-    "wgst": null,
-    "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR OMDB 270400Z 12004KT 090V150 6000 NSC 29/24 Q1015 NOSIG",
-    "lat": 25.254,
-    "lon": 55.366,
-    "city": "Dubai"
-   },
-   {
-    "icaoId": "VABB",
-    "obsTime": 1793073600,
-    "temp": 32,
-    "dewp": 14,
-    "wdir": 100,
-    "wspd": 7,
-    "wgst": null,
-    "wxString": "FU",
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR VABB 270400Z 10007KT 2500 FU NSC 32/14 Q1014 NOSIG",
-    "lat": 19.1,
-    "lon": 72.859,
-    "city": "Mumbai"
-   },
-   {
-    "icaoId": "RJTT",
-    "obsTime": 1793073600,
-    "temp": 20,
-    "dewp": 17,
-    "wdir": 90,
-    "wspd": 4,
-    "wgst": null,
-    "wxString": null,
-    "cover": "BKN",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 1000
-     },
-     {
-      "cover": "BKN",
-      "base": 3800
-     }
-    ],
-    "rawOb": "METAR RJTT 270400Z 09004KT 9999 FEW010 BKN038 20/17 Q1004 NOSIG",
-    "lat": 35.553,
-    "lon": 139.781,
-    "city": "Tokyo"
-   },
-   {
-    "icaoId": "YSSY",
-    "obsTime": 1793073600,
-    "temp": 22,
+    "obsTime": 1793084400,
+    "temp": 13,
     "dewp": 12,
-    "wdir": 70,
-    "wspd": 15,
-    "wgst": null,
-    "wxString": null,
-    "cover": "SCT",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 4000
-     },
-     {
-      "cover": "SCT",
-      "base": 4700
-     }
-    ],
-    "rawOb": "METAR YSSY 270400Z 07015KT 9999 FEW040 SCT047 22/12 Q1016",
-    "lat": -33.946,
-    "lon": 151.173,
-    "city": "Sydney"
-   },
-   {
-    "icaoId": "FACT",
-    "obsTime": 1793073600,
-    "temp": 14,
-    "dewp": 12,
-    "wdir": 270,
-    "wspd": 4,
+    "wdir": 180,
+    "wspd": 9,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 1000
+      "base": 500
      }
     ],
-    "rawOb": "METAR FACT 270400Z 27004KT 9999 FEW010 14/12 Q1020 NOSIG",
-    "lat": -33.965,
-    "lon": 18.602,
-    "city": "Cape Town"
+    "rawOb": "METAR LFPG 270700Z 18009KT 9999 FEW005 13/12 Q1014 TEMPO BKN006",
+    "lat": 49.015,
+    "lon": 2.534,
+    "city": "Paris"
    },
    {
-    "icaoId": "SBGR",
-    "obsTime": 1793073600,
-    "temp": 12,
-    "dewp": 11,
-    "wdir": 100,
-    "wspd": 2,
+    "icaoId": "OMDB",
+    "obsTime": 1793084400,
+    "temp": 33,
+    "dewp": 21,
+    "wdir": "VRB",
+    "wspd": 4,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR SBGR 270400Z 10002KT CAVOK 12/11 Q1021",
-    "lat": -23.432,
-    "lon": -46.469,
-    "city": "São Paulo"
+    "rawOb": "METAR OMDB 270700Z VRB04KT CAVOK 33/21 Q1015 NOSIG",
+    "lat": 25.254,
+    "lon": 55.366,
+    "city": "Dubai"
    },
    {
-    "icaoId": "MMMX",
-    "obsTime": 1793072700,
-    "temp": 17,
-    "dewp": 9,
-    "wdir": 340,
-    "wspd": 8,
+    "icaoId": "VABB",
+    "obsTime": 1793084400,
+    "temp": 36,
+    "dewp": 12,
+    "wdir": 80,
+    "wspd": 10,
+    "wgst": null,
+    "wxString": "FU",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR VABB 270700Z 08010KT 3000 FU NSC 36/12 Q1012 NOSIG",
+    "lat": 19.1,
+    "lon": 72.859,
+    "city": "Mumbai"
+   },
+   {
+    "icaoId": "RJTT",
+    "obsTime": 1793084400,
+    "temp": 20,
+    "dewp": 18,
+    "wdir": 120,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "BKN",
     "clouds": [
+     {
+      "cover": "FEW",
+      "base": 1500
+     },
      {
       "cover": "SCT",
       "base": 2000
@@ -245,7 +166,94 @@
       "base": 8000
      }
     ],
-    "rawOb": "METAR MMMX 270345Z 34008KT 7SM SCT020 BKN080 17/09 A3038 NOSIG RMK 8/570 HZY CI",
+    "rawOb": "METAR RJTT 270700Z 12006KT 9999 FEW015 SCT020 BKN080 20/18 Q1004 NOSIG",
+    "lat": 35.553,
+    "lon": 139.781,
+    "city": "Tokyo"
+   },
+   {
+    "icaoId": "YSSY",
+    "obsTime": 1793084400,
+    "temp": 20,
+    "dewp": 12,
+    "wdir": 50,
+    "wspd": 13,
+    "wgst": null,
+    "wxString": null,
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 3200
+     }
+    ],
+    "rawOb": "METAR YSSY 270700Z AUTO 05013KT 9999 // FEW032 20/12 Q1016",
+    "lat": -33.946,
+    "lon": 151.173,
+    "city": "Sydney"
+   },
+   {
+    "icaoId": "FACT",
+    "obsTime": 1793084400,
+    "temp": 19,
+    "dewp": 14,
+    "wdir": "VRB",
+    "wspd": 3,
+    "wgst": null,
+    "wxString": null,
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR FACT 270700Z VRB03KT CAVOK 19/14 Q1022 NOSIG",
+    "lat": -33.965,
+    "lon": 18.602,
+    "city": "Cape Town"
+   },
+   {
+    "icaoId": "SBGR",
+    "obsTime": 1793084400,
+    "temp": 13,
+    "dewp": 12,
+    "wdir": 140,
+    "wspd": 2,
+    "wgst": null,
+    "wxString": null,
+    "cover": "SCT",
+    "clouds": [
+     {
+      "cover": "BKN",
+      "base": 600
+     },
+     {
+      "cover": "SCT",
+      "base": 1000
+     }
+    ],
+    "rawOb": "METAR SBGR 270700Z 14002KT 9999 BKN006 SCT010 13/12 Q1020",
+    "lat": -23.432,
+    "lon": -46.469,
+    "city": "São Paulo"
+   },
+   {
+    "icaoId": "MMMX",
+    "obsTime": 1793083200,
+    "temp": 15,
+    "dewp": 9,
+    "wdir": 40,
+    "wspd": 3,
+    "wgst": null,
+    "wxString": null,
+    "cover": "OVC",
+    "clouds": [
+     {
+      "cover": "BKN",
+      "base": 2000
+     },
+     {
+      "cover": "OVC",
+      "base": 8000
+     }
+    ],
+    "rawOb": "METAR MMMX 270640Z 04003KT 6SM BKN020 OVC080 15/09 A3037 NOSIG RMK 8/57/ HZY",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -253,7 +261,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": [
    {
     "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
@@ -833,7 +841,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": [
    {
     "pid": "io0226",
@@ -849,12 +857,12 @@
    },
    {
     "pid": "ep2226",
-    "tcw": "WTPN52 PHNC 262200    \nWARNING    ATCG MIL 22E NEP 261027031202\n2026102618 22E VANCE      023  02 280 06 SATL 030\nT000 154N 1059W 055 R050 050 NE QD 030 SE QD 000 SW QD 040 NW QD R034 100 NE QD 070 SE QD 050 SW QD 100 NW QD \nT012 156N 1069W 050 R050 040 NE QD 000 SE QD 000 SW QD 000 NW QD R034 080 NE QD 050 SE QD 030 SW QD 070 NW QD \nT024 167N 1079W 045 R034 060 NE QD 050 SE QD 030 SW QD 050 NW QD \nT036 181N 1084W 040 R034 060 NE QD 050 SE QD 000 SW QD 050 NW QD \nT048 198N 1086W 040 R034 060 NE QD 040 SE QD 000 SW QD 040 NW QD \nT060 213N 1084W 035 R034 050 NE QD 040 SE QD 000 SW QD 030 NW QD \nT072 226N 1082W 030 \nAMP\n    072HR POST-TROP/EXTRATROP\nSUBJ:  TROPICAL STORM 22E (VANCE) WARNING NR 023    \n1. TROPICAL STORM 22E (VANCE) WARNING NR 023    \n   02 ACTIVE TROPICAL CYCLONES IN EASTPAC\n   MAX SUSTAINED WINDS BASED ON ONE-MINUTE AVERAGE\n   WIND RADII VALID OVER OPEN WATER ONLY\n    ---\n   WARNING POSITION:\n   261800Z --- NEAR 15.4N 105.9W\n     MOVEMENT PAST SIX HOURS - 280 DEGREES AT 06 KTS\n     POSITION ACCURATE TO WITHIN 030 NM\n     POSITION BASED ON CENTER LOCATED BY SATELLITE\n   PRESENT WIND DISTRIBUTION:\n   MAX SUSTAINED WINDS - 055 KT, GUSTS 070 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 050 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 100 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            100 NM NORTHWEST QUADRANT\n   REPEAT POSIT: 15.4N 105.9W\n    ---\n   FORECASTS:\n   12 HRS, VALID AT:\n   270600Z --- 15.6N 106.9W\n   MAX SUSTAINED WINDS - 050 KT, GUSTS 065 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 050 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            000 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            000 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 080 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   VECTOR TO 24 HR POSIT: 320 DEG/ 07 KTS\n    ---\n   24 HRS, VALID AT:\n   271800Z --- 16.7N 107.9W\n   MAX SUSTAINED WINDS - 045 KT, GUSTS 055 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   VECTOR TO 36 HR POSIT: 340 DEG/ 07 KTS\n    ---\n   36 HRS, VALID AT:\n   280600Z --- 18.1N 108.4W\n   MAX SUSTAINED WINDS - 040 KT, GUSTS 050 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   VECTOR TO 48 HR POSIT: 355 DEG/ 09 KTS\n    ---\n   EXTENDED OUTLOOK:\n   48 HRS, VALID AT:\n   281800Z --- 19.8N 108.6W\n   MAX SUSTAINED WINDS - 040 KT, GUSTS 050 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   VECTOR TO 60 HR POSIT: 005 DEG/ 08 KTS\n    ---\n   60 HRS, VALID AT:\n   290600Z --- 21.3N 108.4W\n   MAX SUSTAINED WINDS - 035 KT, GUSTS 045 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            030 NM NORTHWEST QUADRANT\n   VECTOR TO 72 HR POSIT: 010 DEG/ 07 KTS\n    ---\n   72 HRS, VALID AT:\n   291800Z --- 22.6N 108.2W\n   MAX SUSTAINED WINDS - 030 KT, GUSTS 040 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   POST-TROP/EXTRATROP\n    ---\nREMARKS:\n262200Z POSITION NEAR 15.5N 106.2W.\n26OCT26. TROPICAL STORM 22E (VANCE), LOCATED APPROXIMATELY 1204\nNM SOUTH-SOUTHEAST OF SAN DIEGO, HAS TRACKED WESTWARD AT 06 KNOTS\nOVER THE PAST SIX HOURS.\nMINIMUM CENTRAL PRESSURE AT 261800Z IS 997 MB. MAXIMUM\nSIGNIFICANT WAVE HEIGHT AT 261800Z IS 19 FEET. NEXT WARNINGS AT\n270400Z, 271000Z, 271600Z AND 272200Z.\nFOR SIX-HOURLY UPDATES.\n//\n2226101818 106N 892W  15\n2226101900 107N 903W  15\n2226101906 107N 912W  15\n2226101912 107N 921W  15\n2226101918 106N 930W  20\n2226102000 103N 940W  20\n2226102006 100N 948W  25\n2226102012 100N 956W  25\n2226102018  98N 962W  25\n2226102100  97N 969W  25\n2226102106  96N 978W  25\n2226102112  95N 987W  30\n2226102118  94N 995W  35\n2226102200  95N1000W  35\n2226102206  96N1005W  40\n2226102212  97N1009W  45\n2226102218  98N1013W  55\n2226102218  98N1013W  55\n2226102300 104N1016W  60\n2226102300 104N1016W  60\n2226102306 106N1019W  70\n2226102306 106N1019W  70\n2226102306 106N1019W  70\n2226102312 106N1021W  75\n2226102312 106N1021W  75\n2226102312 106N1021W  75\n2226102318 110N1022W  90\n2226102318 110N1022W  90\n2226102318 110N1022W  90\n2226102400 116N1026W 100\n2226102400 116N1026W 100\n2226102400 116N1026W 100\n2226102406 120N1029W  95\n2226102406 120N1029W  95\n2226102406 120N1029W  95\n2226102412 125N1031W  90\n2226102412 125N1031W  90\n2226102412 125N1031W  90\n2226102418 130N1032W  85\n2226102418 130N1032W  85\n2226102418 130N1032W  85\n2226102500 135N1033W  80\n2226102500 135N1033W  80\n2226102500 135N1033W  80\n2226102506 137N1035W  75\n2226102506 137N1035W  75\n2226102506 137N1035W  75\n2226102512 139N1036W  65\n2226102512 139N1036W  65\n2226102512 139N1036W  65\n2226102518 146N1040W  60\n2226102518 146N1040W  60\n2226102600 149N1045W  55\n2226102600 149N1045W  55\n2226102606 152N1049W  55\n2226102606 152N1049W  55\n2226102612 153N1053W  55\n2226102612 153N1053W  55\n2226102618 154N1059W  55\n2226102618 154N1059W  55\nNNNN\n"
+    "tcw": "WTPN52 PHNC 270400 COR\nWARNING    ATCG MIL 22E NEP 261027055149\n2026102700 22E VANCE      023A 02 270 02 SATL 030\nT000 153N 1061W 045 R034 090 NE QD 060 SE QD 040 SW QD 090 NW QD \nT012 159N 1071W 045 R034 070 NE QD 040 SE QD 030 SW QD 060 NW QD \nT024 172N 1079W 040 R034 050 NE QD 040 SE QD 000 SW QD 040 NW QD \nT036 188N 1083W 040 R034 050 NE QD 030 SE QD 000 SW QD 040 NW QD \nT048 205N 1083W 040 R034 050 NE QD 030 SE QD 000 SW QD 040 NW QD \nT060 220N 1081W 035 R034 040 NE QD 030 SE QD 000 SW QD 020 NW QD \nT072 235N 1076W 030 \nAMP\n    072HR POST-TROP/REMNT LOW\nSUBJ:  TROPICAL STORM 22E (VANCE) WARNING NR 023A CORRECTED\n1. TROPICAL STORM 22E (VANCE) WARNING NR 023A CORRECTED\n   02 ACTIVE TROPICAL CYCLONES IN EASTPAC\n   MAX SUSTAINED WINDS BASED ON ONE-MINUTE AVERAGE\n   WIND RADII VALID OVER OPEN WATER ONLY\n    ---\n   WARNING POSITION:\n   270000Z --- NEAR 15.3N 106.1W\n     MOVEMENT PAST SIX HOURS - 270 DEGREES AT 02 KTS\n     POSITION ACCURATE TO WITHIN 030 NM\n     POSITION BASED ON CENTER LOCATED BY SATELLITE\n   PRESENT WIND DISTRIBUTION:\n   MAX SUSTAINED WINDS - 045 KT, GUSTS 055 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 090 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            090 NM NORTHWEST QUADRANT\n   REPEAT POSIT: 15.3N 106.1W\n    ---\n   FORECASTS:\n   12 HRS, VALID AT:\n   271200Z --- 15.9N 107.1W\n   MAX SUSTAINED WINDS - 045 KT, GUSTS 055 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   VECTOR TO 24 HR POSIT: 330 DEG/ 08 KTS\n    ---\n   24 HRS, VALID AT:\n   280000Z --- 17.2N 107.9W\n   MAX SUSTAINED WINDS - 040 KT, GUSTS 050 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   VECTOR TO 36 HR POSIT: 345 DEG/ 08 KTS\n    ---\n   36 HRS, VALID AT:\n   281200Z --- 18.8N 108.3W\n   MAX SUSTAINED WINDS - 040 KT, GUSTS 050 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   VECTOR TO 48 HR POSIT: 360 DEG/ 09 KTS\n    ---\n   EXTENDED OUTLOOK:\n   48 HRS, VALID AT:\n   290000Z --- 20.5N 108.3W\n   MAX SUSTAINED WINDS - 040 KT, GUSTS 050 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   VECTOR TO 60 HR POSIT: 005 DEG/ 08 KTS\n    ---\n   60 HRS, VALID AT:\n   291200Z --- 22.0N 108.1W\n   MAX SUSTAINED WINDS - 035 KT, GUSTS 045 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 034 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            000 NM SOUTHWEST QUADRANT\n                            020 NM NORTHWEST QUADRANT\n   VECTOR TO 72 HR POSIT: 015 DEG/ 08 KTS\n    ---\n   72 HRS, VALID AT:\n   300000Z --- 23.5N 107.6W\n   MAX SUSTAINED WINDS - 030 KT, GUSTS 040 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   POST-TROP/REMNT LOW\n    ---\nREMARKS:\n270400Z POSITION NEAR 15.5N 106.4W.\n27OCT26. TROPICAL STORM 22E (VANCE), LOCATED APPROXIMATELY 1204\nNM SOUTH-SOUTHEAST OF SAN DIEGO, HAS TRACKED WESTWARD AT 02 KNOTS\nOVER THE PAST SIX HOURS.\nMINIMUM CENTRAL PRESSURE AT 270000Z IS 999 MB. MAXIMUM\nSIGNIFICANT WAVE HEIGHT AT 270000Z IS 19 FEET. NEXT WARNINGS AT\n271000Z, 271600Z, 272200Z AND 280400Z.\nFOR SIX-HOURLY UPDATES.\n//\n2226101818 106N 892W  15\n2226101900 107N 903W  15\n2226101906 107N 912W  15\n2226101912 107N 921W  15\n2226101918 106N 930W  20\n2226102000 103N 940W  20\n2226102006 100N 948W  25\n2226102012 100N 956W  25\n2226102018  98N 962W  25\n2226102100  97N 969W  25\n2226102106  96N 978W  25\n2226102112  95N 987W  30\n2226102118  94N 995W  35\n2226102200  95N1000W  35\n2226102206  96N1005W  40\n2226102212  97N1009W  45\n2226102218  98N1013W  55\n2226102218  98N1013W  55\n2226102300 104N1016W  60\n2226102300 104N1016W  60\n2226102306 106N1019W  70\n2226102306 106N1019W  70\n2226102306 106N1019W  70\n2226102312 106N1021W  75\n2226102312 106N1021W  75\n2226102312 106N1021W  75\n2226102318 110N1022W  90\n2226102318 110N1022W  90\n2226102318 110N1022W  90\n2226102400 116N1026W 100\n2226102400 116N1026W 100\n2226102400 116N1026W 100\n2226102406 120N1029W  95\n2226102406 120N1029W  95\n2226102406 120N1029W  95\n2226102412 125N1031W  90\n2226102412 125N1031W  90\n2226102412 125N1031W  90\n2226102418 130N1032W  85\n2226102418 130N1032W  85\n2226102418 130N1032W  85\n2226102500 135N1033W  80\n2226102500 135N1033W  80\n2226102500 135N1033W  80\n2226102506 137N1035W  75\n2226102506 137N1035W  75\n2226102506 137N1035W  75\n2226102512 139N1036W  65\n2226102512 139N1036W  65\n2226102512 139N1036W  65\n2226102518 146N1040W  60\n2226102518 146N1040W  60\n2226102600 149N1045W  55\n2226102600 149N1045W  55\n2226102606 152N1049W  55\n2226102606 152N1049W  55\n2226102612 153N1053W  55\n2226102612 153N1053W  55\n2226102618 153N1059W  55\n2226102618 153N1059W  55\n2226102700 153N1061W  45\nNNNN\n"
    }
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -886,8 +894,8 @@
    },
    "kp": {
     "now": 0.67,
-    "nowAt": "2026-10-27T03:00:00+00:00",
-    "max24h": 2.0,
+    "nowAt": "2026-10-27T06:00:00+00:00",
+    "max24h": 2.67,
     "next24h": 2.33,
     "byDate": {
      "2026-10-27": 2.33,
@@ -897,15 +905,15 @@
     }
    },
    "wind": {
-    "speed": 381.0,
-    "bz": 6.0,
-    "bt": 8.0,
-    "at": "2026-10-27T04:15:00Z"
+    "speed": 372.0,
+    "bz": 3.0,
+    "bt": 7.0,
+    "at": "2026-10-27T07:08:00Z"
    },
    "flare": {
-    "current": "B2.8",
-    "max": "C1.1",
-    "maxAt": "2026-10-27T02:48:00Z"
+    "current": "B3.2",
+    "max": "B3.9",
+    "maxAt": "2026-10-27T05:18:00Z"
    },
    "image": {
     "at": "2026-10-27T04:14:06+00:00",
@@ -914,21 +922,21 @@
   }
  },
  "pads": {
-  "fetchedAt": "2026-10-27T04:23:40+00:00",
+  "fetchedAt": "2026-10-27T07:18:08+00:00",
   "items": [
    {
     "icaoId": "KXMR",
-    "obsTime": 1793073300,
+    "obsTime": 1793084100,
     "temp": 24.6,
-    "dewp": 17.8,
+    "dewp": 18,
     "wdir": 50,
-    "wspd": 13,
+    "wspd": 12,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KXMR 270355Z AUTO 05013KT 10SM CLR 25/18 A3002 RMK AO2 SLP169 T02460178",
+    "rawOb": "METAR KXMR 270655Z AUTO 05012KT 10SM CLR 25/18 A2998 RMK AO2 LTG DSNT SE SLP155 T02460180",
     "lat": 28.4674,
     "lon": -80.5589,
     "pad": "cape",
@@ -941,22 +949,22 @@
    },
    {
     "icaoId": "KVBG",
-    "obsTime": 1793073300,
-    "temp": 15.8,
-    "dewp": 14.7,
-    "wdir": 330,
-    "wspd": 6,
+    "obsTime": 1793084100,
+    "temp": 16.3,
+    "dewp": 14.6,
+    "wdir": 40,
+    "wspd": 4,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "FEW",
+    "cover": "SCT",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 1600
+      "cover": "SCT",
+      "base": 1500
      }
     ],
-    "rawOb": "METAR KVBG 270355Z 33006KT 10SM FEW016 16/15 A3005 RMK AO2A SLP178 T01580147",
+    "rawOb": "METAR KVBG 270655Z 04004KT 10SM SCT015 16/15 A3005 RMK AO2A SCT V FEW SLP178 T01630146",
     "lat": 34.733,
     "lon": -120.583,
     "pad": "vandenberg",
@@ -968,9 +976,9 @@
    },
    {
     "icaoId": "KBRO",
-    "obsTime": 1793073180,
-    "temp": 23.9,
-    "dewp": 21.1,
+    "obsTime": 1793080380,
+    "temp": 22.2,
+    "dewp": 20,
     "wdir": 0,
     "wspd": 0,
     "wgst": null,
@@ -983,7 +991,7 @@
       "base": 3000
      }
     ],
-    "rawOb": "METAR KBRO 270353Z 00000KT 10SM SCT030 24/21 A3008 RMK AO2 SLP183 T02390211 $",
+    "rawOb": "METAR KBRO 270553Z AUTO 00000KT 10SM SCT030 22/20 A3009 RMK AO2 SLP187 T02220200 10261 20222 52003 PWINO $",
     "lat": 25.9146,
     "lon": -97.4231,
     "pad": "starbase",
@@ -996,17 +1004,17 @@
    },
    {
     "icaoId": "KWAL",
-    "obsTime": 1793073240,
+    "obsTime": 1793084040,
     "temp": 12.8,
-    "dewp": 10.6,
-    "wdir": 270,
+    "dewp": 11.1,
+    "wdir": 280,
     "wspd": 6,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KWAL 270354Z AUTO 27006KT 10SM CLR 13/11 A3024 RMK AO2 SLP237 T01280106",
+    "rawOb": "METAR KWAL 270654Z AUTO 28006KT 10SM CLR 13/11 A3023 RMK AO2 SLP233 T01280111 $",
     "lat": 37.9372,
     "lon": -75.4662,
     "pad": "wallops",
