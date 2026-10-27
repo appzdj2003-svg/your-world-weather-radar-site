@@ -1,4 +1,4 @@
-/* Flight tracker core (pure logic, no DOM): /flight#v1.<data> link codec, flight-number parsing, route legs, geometry,
+/* Flight tracker core (pure logic, no DOM): /flight/open#v1.<data> (app) + /flight# (web page) link codec, flight-number parsing, route legs, geometry,
    METAR/TAF reading, SIGMETs on the route, the rules-based delay estimate, the "how much time do I have" math and the
    transport modes. Node-testable: node _src/tests/flightcore.test.js
    Link data: {v:1, fn:"DL809", d?:"YYYY-MM-DD", dep?, arr?, ndep?: ISO-8601 UTC, from?, to?: IATA/ICAO} */
@@ -249,7 +249,12 @@
     return { backBy, gateMin, outMin, items };
   }
 
-  const api = Object.assign(core.make("flight", validate), { validate, parseFlight, IATA_ICAO, REGIONALS, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
+  const base = core.make("flight", validate);
+  const OPEN = "flight/open";
+  const api = Object.assign(base, {
+    WEB: base.WEB.replace(/flight$/, OPEN),
+    webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
+    validate, parseFlight, IATA_ICAO, REGIONALS, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
     wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

@@ -187,7 +187,9 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
   // ---------- share ----------
   async function share() {
     let tok = ""; try { tok = await F.encode(S.t); } catch (e) { tok = encodeURIComponent(S.t.fn); }
-    const url = `${location.origin}${location.pathname}?utm_source=share_flight&utm_medium=social&utm_campaign=flight#${tok}`;
+    // /flight/open is the App Link path (bare /flight stays in the browser).
+    // Without the app, /flight/open redirects to /flight#.
+    const url = `${location.origin}/flight/open?utm_source=share_flight&utm_medium=social&utm_campaign=flight#${tok}`;
     const code = x => x.iata || x.icao, text = S.leg ? `Follow ${S.t.fn} ${code(S.leg.from)} → ${code(S.leg.to)} live: where it is, weather at both airports and delay risk.` : `Follow ${S.t.fn} live.`;
     let method = "copy";
     try { if (navigator.share) { await navigator.share({ title: `${S.t.fn} live`, text, url }); method = "native"; } else { await navigator.clipboard.writeText(url); toast("Link copied. Send it to family so they can watch it come in."); } }
@@ -221,7 +223,8 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     if (ac.alt === "ground") payload.alt = 0;
     else if (isFinite(ac.alt)) payload.alt = +ac.alt;
     const tok = await F.encode(payload);
-    const url = F.intentUrl(tok);
+    // Prefer the verified https App Link (/flight/open); intent:// still available as F.intentUrl.
+    const url = F.webUrl(tok);
     if (window.gtag) gtag("event", "select_content", { content_type: "flight_open_app", item_id: S.t.fn });
     location.href = url;
   }

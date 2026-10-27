@@ -679,7 +679,8 @@ def static_fire_page():
          b, h, "0.5", scripts=("static-fire/sf.js",), jsonld=ld, head_extra=f'<link rel="stylesheet" href="../assets/{V("static-fire/sf.css")}">')
 
 
-# ---------- /flight: free flight tracker (live; linked from the Trip Planner only, not in the nav; indexed + in the sitemap like other pages) ----------
+# ---------- /flight: free flight tracker (live; linked from the Trip Planner only, not in the nav; indexed + in the sitemap like other pages).
+# App Links claim /flight/open only (same idea as /plan vs /alert-planner/); bare /flight stays in the browser. ----------
 FLIGHT_API = os.environ.get("FLIGHT_API", "https://yw-flight.yourworldapps.workers.dev").strip()   # our relay in _src/worker/flight-proxy.mjs; FLIGHT_API="" = relay-free mode
 # Gate the "Open on the radar in the app" button until a supporting build is on Production.
 FLIGHT_APP_OPEN = os.environ.get("FLIGHT_APP_OPEN", "").strip() in ("1", "true", "yes")
@@ -732,6 +733,25 @@ Places: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel
          b, h, "0.5", scripts=("codec-core.js", "flightcore.js", "flight.js"),
          head_extra=f'<link rel="stylesheet" href="../assets/{V("flight.css")}">')
 
+# App Links claim exactly /flight/open (and /flight/open/), not bare /flight — so Track my flight
+# stays in the browser. Shared / open-in-app links use /flight/open#v1.…; this tiny page keeps
+# those links working when the app is not installed (redirect to /flight/ + hash).
+def flight_open_redirect():
+    d = ROOT / "flight" / "open"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "index.html").write_text(
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+        f"<title>Open flight | {APP}</title>"
+        f"<link rel=\"canonical\" href=\"{SITE}flight/\">"
+        "<meta name=\"robots\" content=\"noindex\">"
+        "<script>location.replace(\"/flight/\" + location.search + location.hash);</script></head>"
+        f"<body style=\"font-family:system-ui;padding:24px\"><p>Opening your flight: "
+        f"<a href=\"/flight/\">{SITE}flight/</a></p></body></html>"
+    )
+
+
+
 if __name__ == "__main__":
-    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); flight_page(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); flight_page(); flight_open_redirect(); misc()
     print(f"Built {len(PAGES)} pages")
