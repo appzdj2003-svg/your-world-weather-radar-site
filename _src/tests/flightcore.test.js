@@ -32,7 +32,7 @@ t("SIGMETs: only ones crossing the leg and still valid", () => {
   assert.strictEqual(hit.length, 1); assert.strictEqual(hit[0].words, "thunderstorms");
   assert.strictEqual(F.sigmetsOnLeg([{ type: "SIGMET", hazard: "TURB", to: NOW / 1000 - 60, coords: box }], L[0], NOW, null).length, 0);
   assert.strictEqual(F.sigmetsOnLeg([{ type: "SIGMET", hazard: "TURB", to: NOW / 1000 + 60, coords: [[50, 10], [51, 10], [51, 11], [50, 10]] }], L[0], NOW, null).length, 0);
-  assert.strictEqual(F.sigmetsOnLeg([{ type: "AIRMET", hazard: "TURB", coords: box }], L[0], NOW, null).length, 0);
+  assert.strictEqual(F.sigmetsOnLeg([{ type: "AIRMET", hazard: "TURB", coords: box }], L[0], NOW, null).length, 1);
 });
 t("estimate: Low with nothing found, High with a big FAA program, every reason has a source", () => {
   const a0 = F.assess({ now: NOW, origin: ATL, dest: SFO, nas: { groundStops: [], groundDelays: [], delays: [], closures: [] }, wx: {}, sigmets: [] });
@@ -61,6 +61,22 @@ t("smooth plane: dead reckoning at reported speed, capped at 90 s, never on the 
   const b = F.project(ac, 1e12 + 600e3); assert(Math.abs(F.distNm(ac, b) - 12) < 0.05, "capped at 90 s");
   assert(!F.project({ ...ac, alt: "ground" }, 1e12 + 60e3).moved); assert(!F.project({ ...ac, gs: 20 }, 1e12 + 60e3).moved);
   const d = F.destPt({ lat: 0, lon: 0 }, 0, 60); assert(Math.abs(d.lat - 1) < 0.01 && Math.abs(d.lon) < 1e-9);
+});
+t("position ETA: approach buffer + delayEstimate takes larger of live vs FAA; AI read has Low/Medium/High", () => {
+  const mid = { lat: 35.5, lon: -100, gs: 450, alt: 34000, vs: 0 };
+  const pr = F.progress(mid, L[0], NOW);
+  assert(pr.etaMs && pr.bufferMin >= 12);
+  const lateish = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { ...pr, etaMs: NOW + 3600e3 + 50 * 60e3 }, origin: ATL, dest: SFO, nas: { groundStops: [], groundDelays: [], delays: [], closures: [] } });
+  assert.strictEqual(lateish.liveMin, 50); assert.strictEqual(lateish.source, "live track");
+  const faaWins = F.delayEstimate({ now: NOW, arrMs: NOW + 3600e3, progress: { etaMs: NOW + 3600e3 + 10 * 60e3 }, origin: ATL, dest: SFO, nas });
+  assert.strictEqual(faaWins.source, "FAA"); assert(faaWins.lateMin >= 60);
+  const fog = F.assess({ now: NOW, origin: ATL, dest: SFO, arrMs: NOW + 3600e3,
+    progress: { etaMs: NOW + 3600e3 + 40 * 60e3, bufferMin: 18, onGround: false },
+    wx: { KSFO: { metar: { fltCat: "LIFR", vis: 0.25, wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null } },
+    nas: { groundStops: [], groundDelays: [], delays: [], closures: [] }, sigmets: [] });
+  assert.strictEqual(fog.label, "High"); assert(fog.read); assert(/Fog|LIFR|visibility/i.test(fog.read.headline));
+  assert.strictEqual(fog.read.disclaimer, "AI estimate, not the airline's official status");
+  assert.deepStrictEqual(F.LV, ["Low", "Medium", "High"]);
 });
 (async () => {
   const tok = await F.encode({ v: 1, fn: "DL681", from: "SFO", to: "ATL", dep: "2026-10-27T03:45:00.000Z" });

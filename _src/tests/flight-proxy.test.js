@@ -53,5 +53,18 @@ const assert = require("assert"), path = require("path");
     await k.put(day, JSON.stringify({ n: W.ADSB_DAILY_CAP }));
     const r = await W.handle(req("/flight?cs=JBU34"), e2, up, T0); assert.strictEqual(r.status, 503); assert.strictEqual(calls.length, 1, "no upstream call past the cap");
   });
+
+  await t("route-wx: bbox METAR + G-AIRMET, trimmed and origin-locked", async () => {
+    calls = [];
+    reply = () => {
+      const u = calls[calls.length - 1] && calls[calls.length - 1].u || "";
+      if (/metar\?bbox/.test(u)) return new Response(JSON.stringify([{ icaoId: "KDEN", fltCat: "LIFR", visib: "1/4", wxString: "FG", clouds: [{ cover: "VV", base: 100 }], rawOb: "x", extra: "drop" }]), { status: 200 });
+      return new Response(JSON.stringify([{ hazard: "IFR", product: "SIERRA", validTimeFrom: T0/1000, validTimeTo: T0/1000+3600, coords: [{ lat: 39, lon: -105 }, { lat: 40, lon: -104 }, { lat: 39, lon: -104 }] }]), { status: 200 });
+    };
+    const r = await W.handle(req("/route-wx?olat=61.17&olon=-150&dlat=39.86&dlon=-104.67"), env, up, T0);
+    assert.strictEqual(r.status, 200); const j = await r.json();
+    assert.strictEqual(j.metar[0].icaoId, "KDEN"); assert(!("extra" in j.metar[0])); assert(j.gairmet.length >= 1);
+    assert(calls[0].u.includes("metar?bbox=")); assert.strictEqual((await W.handle(req("/route-wx?olat=61.17&olon=-150&dlat=39.86&dlon=-104.67", "https://evil.example"), env, up, T0)).status, 403);
+  });
   console.log(`flight-proxy: ${n} tests passed`);
 })().catch(e => { console.error(e); process.exit(1); });

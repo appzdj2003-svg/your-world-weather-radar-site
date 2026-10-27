@@ -11,7 +11,7 @@
   const tz = (() => { try { return new Intl.DateTimeFormat([], { timeZoneName: "short" }).formatToParts(new Date()).find(p => p.type === "timeZoneName").value; } catch (e) { return ""; } })();
   const tm = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const tmd = ms => { const d = new Date(ms), same = d.toDateString() === new Date().toDateString(); return (same ? "" : d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + ", ") + tm(ms); };
-  const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", wx: {}, nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null };
+  const S = { t: null, route: null, legs: [], leg: null, ac: null, acAt: 0, acErr: "", wx: {}, routeWx: [], nas: null, sig: null, places: null, timers: [], fetched: {}, open: {}, tab: "dinner", alertsOn: false, prev: null, rot: null, estKey: "", pulse: false };
 
   async function getJSON(url, opt) { const r = await fetch(url, opt); if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { status: r.status }); return r.json(); }
   const api = p => getJSON(API + p);
@@ -54,6 +54,15 @@
   }
   async function loadNas() { if (!API) return; try { S.nas = await api("/nas"); S.fetched.nas = Date.now(); } catch (e) { S.nas = S.nas || null; } }
   async function loadSig() { if (!API) return; try { S.sig = (await api("/sigmet")).sigmets || []; } catch (e) {} }
+  // Weather along the route (METAR samples). Needs Worker /route-wx; silent no-op if not deployed yet.
+  async function loadRouteWx() {
+    if (!API || !S.leg) { S.routeWx = []; return; }
+    const a = S.leg.from, b = S.leg.to;
+    try {
+      const j = await api(`/route-wx?olat=${a.lat}&olon=${a.lon}&dlat=${b.lat}&dlon=${b.lon}`);
+      S.routeWx = j.metar || []; S.fetched.routeWx = Date.now();
+    } catch (e) { S.routeWx = S.routeWx || []; }
+  }
   async function loadPlaces() { const o = S.leg && S.leg.from; if (!API || !o || S.places) return;
     try { S.places = (await api(`/places?lat=${o.lat}&lon=${o.lon}`)).places || []; } catch (e) { S.places = null; S.placesErr = true; } }
   const airports = () => S.leg ? [S.leg.from, S.leg.to] : [];
@@ -69,20 +78,22 @@
   }
 
   async function start(t) {
-    S.timers.forEach(clearInterval); S.timers = []; Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, nas: null, sig: null, places: null, placesErr: false, acErr: "", prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {} });
+    S.timers.forEach(clearInterval); S.timers = []; Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false });
     const p = F.parseFlight(t.fn); $("fl-out").hidden = false; $("fl-status").innerHTML = `<p class="fl-big">Looking up ${E(t.fn)}…</p>`;
     if (p && p.unknownAirline) { $("fl-status").innerHTML = `<p class="fl-big">We don't know airline code ${E(p.iata)} yet.</p><p>Try the 3-letter airline code (for example DAL for Delta) followed by the number.</p>`; return; }
+    // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
+    if (S.sim) { pickLeg(); render(); }
     S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); pickLeg();
-    await Promise.all([loadWx(), loadNas(), loadSig()]); render(); loadPlaces().then(renderStuck);
+    await Promise.all([loadWx(), loadNas(), loadSig(), loadRouteWx()]); render(); loadPlaces().then(renderStuck);
     const every = (ms, fn) => S.timers.push(setInterval(() => { if (!document.hidden) fn(); }, ms));
     every(20e3, async () => { await loadLive(); pickLeg(); render(); });
-    every(5 * 60e3, async () => { await loadWx(); await loadSig(); render(); });
+    every(5 * 60e3, async () => { await loadWx(); await loadSig(); await loadRouteWx(); render(); });
     every(2 * 60e3, async () => { await loadNas(); render(); });
     every(30e3, renderStuck);
     S.onVis && document.removeEventListener("visibilitychange", S.onVis);
     S.onVis = async () => { if (document.hidden || !S.t) return; const now = Date.now();
       if (now - S.acAt > 20e3) { await loadLive(); pickLeg(); }
-      if (now - (S.fetched.wx || 0) > 5 * 60e3) await Promise.all([loadWx(), loadSig()]);
+      if (now - (S.fetched.wx || 0) > 5 * 60e3) await Promise.all([loadWx(), loadSig(), loadRouteWx()]);
       if (now - (S.fetched.nas || 0) > 2 * 60e3) await loadNas(); render(); };
     document.addEventListener("visibilitychange", S.onVis);
   }
@@ -93,8 +104,23 @@
     const now = Date.now(), { depMs, arrMs } = times(), onLeg = S.ac && S.leg && S.liveLeg === S.leg;
     const pr = onLeg ? F.progress(S.ac, S.leg, now) : null, inb = S.inbound ? F.progress(S.ac, S.inbound, now) : null;
     const wx = {}; for (const a of airports()) if (S.wx[a.icao]) wx[a.icao] = S.wx[a.icao];
-    const sig = S.sig ? F.sigmetsOnLeg(S.sig, S.leg, now, onLeg && !pr.onGround ? S.ac : null) : [];
-    return { now, depMs, arrMs, origin: S.leg && S.leg.from, dest: S.leg && S.leg.to, nas: S.nas, wx, sigmets: sig, progress: pr, inbound: inb };
+    const sig = S.sig ? F.sigmetsOnLeg(S.sig, S.leg, now, onLeg && !(pr && pr.onGround) ? S.ac : null) : [];
+    let c = { now, depMs, arrMs, origin: S.leg && S.leg.from, dest: S.leg && S.leg.to, nas: S.nas, wx, routeWx: S.routeWx || [], sigmets: sig, progress: pr, inbound: inb };
+    if (S.sim) c = applySim(c, S.sim);
+    return c;
+  }
+  // Preview-only simulated high-risk case (?sim=high). Clearly labelled in the UI.
+  function applySim(c, kind) {
+    if (kind !== "high") return c;
+    const dest = c.dest || { iata: "DEN", icao: "KDEN", name: "Denver", countryiso2: "US", lat: 39.86, lon: -104.67 };
+    const origin = c.origin || { iata: "ANC", icao: "PANC", name: "Anchorage", countryiso2: "US", lat: 61.17, lon: -150.0 };
+    const wx = { ...(c.wx || {}) };
+    wx[dest.icao] = { metar: { raw: "METAR KDEN SIM 00000KT 1/4SM FG VV001 03/03", vis: 0.25, fltCat: "LIFR", wxString: "FG", gust: 0, clouds: [{ cover: "VV", base: 100 }] }, taf: null, src: "sim" };
+    const nas = { updated: "sim", groundStops: [], groundDelays: [{ arpt: dest.iata || "DEN", reason: "WX: Fog", avg: "1 hour and 15 minutes", max: "2 hours" }], delays: [], closures: [] };
+    const arrMs = c.arrMs || (c.now + 45 * 60e3);
+    const progress = c.progress && !c.progress.onGround ? { ...c.progress, etaMs: arrMs + 55 * 60e3, bufferMin: 18 } :
+      { toNm: 80, fromNm: 400, totalNm: 480, onGround: false, phase: "cruising", bufferMin: 18, etaMs: arrMs + 55 * 60e3 };
+    return { ...c, origin, dest, wx, nas, progress, arrMs, routeWx: [{ icaoId: "KBJC", fltCat: "LIFR", visib: "1/4", wxString: "FG", clouds: [{ cover: "VV", base: 100 }] }] };
   }
   function statusLine(c) {
     const pr = c.progress, ac = S.ac, code = a => a.iata || a.icao;
@@ -106,9 +132,10 @@
       return { big: ib.onGround ? `Your plane is on the ground at ${code(S.inbound.from)}` : `Your plane is on its way in to ${code(S.leg.from)}`,
         sub: ib.etaMs ? `{IDIST} mi out · lands about {IETA} at its current speed (straight line)` : "It flies the leg before yours." }; }
     if (pr) {
-      if (pr.onGround) return { big: pr.at === "dest" ? `Landed at ${code(S.leg.to)}` : pr.at === "origin" ? `On the ground at ${code(S.leg.from)}` : "On the ground", sub: ac.gs > 5 ? "Taxiing" : "" };
-      const alt = isFinite(ac.alt) ? `${Math.round(ac.alt / 100) * 100 >= 18000 ? "FL" + Math.round(ac.alt / 100) : ac.alt.toLocaleString() + " ft"}` : "";
-      return { big: `In the air · {DIST} mi to ${code(S.leg.to)}`, sub: [pr.phase[0].toUpperCase() + pr.phase.slice(1), alt, ac.gs ? `${Math.round(ac.gs * 1.15078)} mph` : ""].filter(Boolean).join(" · ") };
+      if (pr.onGround) return { big: pr.at === "dest" ? `Landed at ${code(S.leg.to)}` : pr.at === "origin" ? `On the ground at ${code(S.leg.from)}` : "On the ground", sub: ac && ac.gs > 5 ? "Taxiing" : "" };
+      const alt = ac && isFinite(ac.alt) ? `${Math.round(ac.alt / 100) * 100 >= 18000 ? "FL" + Math.round(ac.alt / 100) : ac.alt.toLocaleString() + " ft"}` : "";
+      const dest = S.leg ? code(S.leg.to) : (c.dest ? code(c.dest) : "");
+      return { big: dest ? `In the air · {DIST} mi to ${dest}` : "In the air", sub: [pr.phase[0].toUpperCase() + pr.phase.slice(1), alt, ac && ac.gs ? `${Math.round(ac.gs * 1.15078)} mph` : ""].filter(Boolean).join(" · ") };
     }
     if (ac && !S.leg) return { big: "In the air", sub: "We couldn't match it to a route." };
     return { big: "Not in the air right now", sub: "We don't see this flight on live tracking. It may not have left yet, may have landed, or may be outside receiver coverage." };
@@ -118,7 +145,7 @@
     watch(c, a);
     const pr = c.progress, ib = c.inbound;
     let eta = "";
-    if (pr && pr.etaMs) eta = `<div class="fl-eta"><div><span>Estimated arrival</span><b data-live="eta">${tmd(pr.etaMs)}</b><small>straight line at current speed</small></div>${c.arrMs ? `<div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${pr.etaMs - c.arrMs > 5 * 60e3 ? fmtLate(pr.etaMs - c.arrMs) + " later" : c.arrMs - pr.etaMs > 5 * 60e3 ? fmtLate(c.arrMs - pr.etaMs) + " earlier" : "about on time"}</small></div>` : ""}</div>`;
+    if (pr && pr.etaMs) eta = `<div class="fl-eta"><div><span>Estimated arrival</span><b data-live="eta">${tmd(pr.etaMs)}</b><small>live track + approach buffer</small></div>${c.arrMs ? `<div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${pr.etaMs - c.arrMs > 5 * 60e3 ? fmtLate(pr.etaMs - c.arrMs) + " later" : c.arrMs - pr.etaMs > 5 * 60e3 ? fmtLate(c.arrMs - pr.etaMs) + " earlier" : "about on time"}</small></div>` : ""}</div>`;
     else if (c.depMs || c.arrMs) eta = `<div class="fl-eta">${c.depMs ? `<div><span>${S.t.ndep ? "Updated departure" : "Scheduled departure"}</span><b>${tmd(c.depMs)}</b></div>` : ""}${c.arrMs ? `<div><span>Scheduled arrival</span><b>${tmd(c.arrMs)}</b></div>` : ""}</div>`;
     const legPick = !S.leg && S.legs.length > 1 ? `<div class="fl-legs">${S.legs.map(l => `<button type="button" class="btn" data-leg="${l.i}">${E(code(l.from))} → ${E(code(l.to))}</button>`).join("")}</div>` : "";
     const nonUS = S.leg && [S.leg.from, S.leg.to].some(x => x.countryiso2 !== "US");
@@ -135,10 +162,8 @@
 ${pass}${landed}<p class="fl-big">${big}</p>${sub ? `<p class="fl-sub">${sub}</p>` : ""}
 ${pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : ""}
 ${legPick}${eta}
-<div class="fl-risk lv${a.level}"><div class="fl-risk-h"><b>${a.label} delay risk</b><span>Estimate, not airline info. Check with your airline.</span></div>
-<div class="fl-todo"><b>What to do</b>${a.todo.map(x => `<p>${E(x)}</p>`).join("")}</div>
-<ul>${a.reasons.map(r => `<li class="r${r.lvl}">${E(r.text)}${r.src ? ` <small>${E(r.src)}</small>` : ""}</li>`).join("")}</ul>
-${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazards need our relay, which isn't connected on this preview.</p>`}${nonUS ? `<p class="dim small">FAA delay programs cover US airports only.</p>` : ""}</div>
+${aiCard(a, c)}${S.sim ? `<p class="fl-sim-tag">SIMULATED high-risk case — not a real delay</p>` : ""}
+${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazards need our relay, which isn't connected on this preview.</p>`}${nonUS ? `<p class="dim small">FAA delay programs cover US airports only.</p>` : ""}
 <p class="fl-fresh" id="fl-fresh"></p>`;
     $("fl-status").querySelectorAll("[data-leg]").forEach(b => b.onclick = () => { const l = S.legs[+b.dataset.leg]; S.t.from = l.from.iata || l.from.icao; S.t.to = l.to.iata || l.to.icao; fillForm(S.t); pickLeg(); loadWx().then(render); loadPlaces().then(renderStuck); render(); });
     renderMap(c); renderAirports(c); renderHazards(c); renderStuck(a);
@@ -148,7 +173,26 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
   const city = a => String(a.name || "").replace(/\b(International|Intl\.?|Regional|Municipal)\b.*$/i, "").replace(/\bAirport\b.*$/i, "").trim() || a.name || "";
   const fmtLate = ms => F.fmtMin(ms / 60e3);
 
-  // ---------- live watch: alerts when something changes (only while this page is open) ----------
+  
+  function aiCard(a, c) {
+    const r = a.read || {}, late = r.lateMin, [lo, hi] = r.range || [0, 0];
+    const meter = `<div class="fl-meter" aria-label="Delay risk ${E(r.label || a.label)}"><i class="on"></i><i class="${a.level >= 1 ? "on" : ""}"></i><i class="${a.level >= 2 ? "on" : ""}"></i><span>${E(r.label || a.label)}</span></div>`;
+    const range = (late != null && late > 5) || a.level >= 1 ? `<p class="fl-range"><b>${lo && hi ? `${E(F.fmtMin(lo))} – ${E(F.fmtMin(hi))}` : "—"}</b> likely delay · source: ${E(r.source || "rules")}${r.basis ? ` · ${E(r.basis)}` : ""}</p>` : `<p class="fl-range"><b>On time band</b> · no delay signal above the noise</p>`;
+    const why = (r.why && r.why.length ? r.why : a.reasons.filter(x => x.lvl >= 1).map(x => x.text)).slice(0, 5);
+    const eta = r.etaMs && c.arrMs ? `<div class="fl-eta"><div><span>Projected arrival</span><b data-live="eta">${tmd(r.etaMs)}</b><small>live track + approach buffer</small></div><div><span>Scheduled</span><b>${tmd(c.arrMs)}</b><small>${late > 5 ? E(F.fmtMin(late)) + " later" : late < -5 ? E(F.fmtMin(-late)) + " earlier" : "about on time"}</small></div></div>` : "";
+    // Auto-reset pulse when the estimate fingerprint changes
+    const key = [a.level, late, lo, hi, (r.headline || "").slice(0, 40)].join("|");
+    if (S.estKey && S.estKey !== key) { S.pulse = true; setTimeout(() => { S.pulse = false; const el = $("fl-ai"); if (el) el.classList.remove("pulse"); }, 1800); }
+    S.estKey = key;
+    return `<div class="fl-risk fl-ai lv${a.level}${S.pulse ? " pulse" : ""}" id="fl-ai"><div class="fl-risk-h"><b>AI delay read</b><span>${E(r.disclaimer || "AI estimate, not the airline's official status")}</span></div>
+${meter}<p class="fl-headline">${E(r.headline || a.label + " delay risk")}</p>${range}${eta}
+${S.pulse ? `<span class="fl-updated">Updated</span>` : ""}
+<div class="fl-todo"><b>What to do</b>${a.todo.map(x => `<p>${E(x)}</p>`).join("")}</div>
+${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}</ul>` : ""}
+<details class="fl-more-why"><summary>All signals</summary><ul>${a.reasons.map(x => `<li class="r${x.lvl}">${E(x.text)}${x.src ? ` <small>${E(x.src)}</small>` : ""}</li>`).join("")}</ul></details></div>`;
+  }
+
+// ---------- live watch: alerts when something changes (only while this page is open) ----------
   const chime = () => { if (!S.alertsOn) return; try { const A = window.AudioContext || window.webkitAudioContext; S.ac0 = S.ac0 || new A(); const x = S.ac0, o = x.createOscillator(), g = x.createGain();
     o.type = "sine"; o.frequency.setValueAtTime(880, x.currentTime); o.frequency.setValueAtTime(1320, x.currentTime + 0.12); g.gain.setValueAtTime(0.0001, x.currentTime);
     g.gain.exponentialRampToValueAtTime(0.15, x.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, x.currentTime + 0.5); o.connect(g).connect(x.destination); o.start(); o.stop(x.currentTime + 0.55); } catch (e) {} };
@@ -361,13 +405,17 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     const o = S.leg.from, code = o.iata || o.icao, now = Date.now(), c = context();
     let dep = c.depMs, basis = S.t.ndep ? "your updated departure" : "the scheduled departure";
     if (c.inbound && c.inbound.etaMs && dep) { const ready = c.inbound.etaMs + F.TURN_MIN * 60e3; if (ready > dep) { dep = ready; basis = `your inbound plane landing about ${tm(c.inbound.etaMs)} plus a ${F.TURN_MIN}-min turnaround (assumption)`; } }
+    // Auto-reset countdown from the AI delay read (take the later of schedule vs estimated)
+    const a0 = F.assess(c), dLate = a0.delay && a0.delay.lateMin;
+    if (dep && dLate != null && dLate > 0 && a0.delay.source !== "live track") { /* FAA holds push departure */ dep = Math.max(dep, c.now + dLate * 60e3); basis = `AI delay read (${a0.delay.source || "estimate"}): about ${F.fmtMin(dLate)} late`; }
+    else if (dep && dLate != null && dLate > 0) { dep = dep + dLate * 60e3; basis = `AI delay read from ${a0.delay.basis || "live track"}`; }
     const boardMin = +$("s-board").value || 35, secMin = +$("s-sec").value || 45;
     const near = (S.places || []).map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).filter(p => p.c !== "station");
     const station = (S.places || []).filter(p => p.c === "station").map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).sort((x, y) => x.km - y.km)[0];
     let clock = "";
     if (dep && dep > now) {
       const P = F.plan({ now, depMs: dep, boardMin, secMin, places: near, apt: o }); S.plan = P;
-      clock = `<div class="fl-clock"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}">${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : "now"}</span>
+      clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}">${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : "now"}</span>
 <small>From ${E(basis)} (${tm(dep)}), minus ${boardMin} min for boarding.${P.gateMin > 0 ? ` Leaving the airport? Allow ${secMin} min to get back through security, which leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : ""}</small></div>`;
     } else clock = `<p class="fl-clock-miss">${dep ? "The departure time has passed. Check your airline app for the new time and add it above as the updated departure." : "Add your departure time above to see how much time you have."}</p>`;
     const warn = `<p class="fl-warn">⚠️ Delays can shrink fast. Watch your airline app; this is an estimate.</p>`;
@@ -415,5 +463,6 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
   }
   try { const from = sessionStorage.getItem("yw-flight-from"); if (from) { sessionStorage.removeItem("yw-flight-from");   // the Trip Planner's "Track my flight" card
     if (window.gtag && /^[a-z_]{1,30}$/.test(from)) gtag("event", "flight_page_click", { section: from }); } } catch (e) {}
+  try { const sim = new URLSearchParams(location.search).get("sim"); if (sim) S.sim = sim; } catch (e) {}
   boot(); window.addEventListener("hashchange", boot);
 })();

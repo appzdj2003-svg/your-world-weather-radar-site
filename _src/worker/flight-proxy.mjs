@@ -6,6 +6,7 @@
             /wx?ids=KATL,KSJC    METAR + TAF, up to 4 airports (aviationweather.gov, public domain)      cache 5 min
             /nas                 FAA NAS airport status XML -> JSON (public domain)                       cache 60 s
             /sigmet              US + international SIGMETs incl. convective (aviationweather.gov)        cache 5 min
+            /route-wx?olat=&olon=&dlat=&dlon=  METAR samples along GC route + ends (AWC, public domain)  cache 5 min
             /places?lat=&lon=    named places near an airport from OpenStreetMap via Nominatim (ODbL)     cache 7 days
                                  (one request per category, 1.1 s apart, per Nominatim's 1 req/s policy)
    Config (wrangler [vars]): UA (required), ORIGINS (comma list). KV binding FLIGHT_KV (adsb.lol cache + daily budget, places). */
@@ -82,6 +83,18 @@ export function route(url) {
     return { key: `p:${la},${lo}`, ttl: 7 * 864e5, up: PLACE_CATS.map(([c, n]) => `${NOMI}?amenity=${c}&viewbox=${vb}&bounded=1&format=jsonv2&limit=${n}`), kind: "places", serial: 1100 }; }
   if (p === "/nas") return { key: "nas", ttl: 60e3, up: [NAS], kind: "nas" };
   if (p === "/sigmet") return { key: "sig", ttl: 5 * 60e3, up: [`${AWC}airsigmet?format=json`, `${AWC}isigmet?format=json`], kind: "sigmet" };
+  if (p === "/route-wx") {
+    // Sample METARs along the great-circle route (origin, ~3 midpoints, dest). AWC bbox query — free, no key.
+    const olat = Number(u.searchParams.get("olat")), olon = Number(u.searchParams.get("olon"));
+    const dlat = Number(u.searchParams.get("dlat")), dlon = Number(u.searchParams.get("dlon"));
+    if (![olat, olon, dlat, dlon].every(isFinite) || Math.abs(olat) > 90 || Math.abs(dlat) > 90) return null;
+    const pad = 1.5; // degrees around the corridor
+    const minLat = Math.min(olat, dlat) - pad, maxLat = Math.max(olat, dlat) + pad;
+    const minLon = Math.min(olon, dlon) - pad, maxLon = Math.max(olon, dlon) + pad;
+    const bbox = [minLat, minLon, maxLat, maxLon].map(v => Math.round(v * 100) / 100).join(",");
+    // Also pull G-AIRMET (free AWC) for icing/IFR/turb along the corridor when available
+    return { key: "rwx:" + bbox, ttl: 5 * 60e3,
+      up: [`${AWC}metar?bbox=${bbox}&format=json`, `${AWC}gairmet?format=json`], kind: "route-wx", bbox }; }
   return null;
 }
 async function build(r, texts) {
@@ -89,6 +102,21 @@ async function build(r, texts) {
   if (r.kind === "wx") return trimWx(JSON.parse(texts[0] || "[]"), JSON.parse(texts[1] || "[]"));
   if (r.kind === "places") return { places: trimPlaces(texts) };
   if (r.kind === "nas") return parseNas(texts[0]);
+  if (r.kind === "route-wx") {
+    const metar = JSON.parse(texts[0] || "[]");
+    // Cap samples so the page stays light; prefer LIFR/IFR and stormy first, then nearest to corridor mid.
+    const trim = trimWx(metar, []).metar;
+    const score = m => (m.fltCat === "LIFR" ? 4 : m.fltCat === "IFR" ? 3 : /TS|FG|FZ|SN/.test(m.wxString || "") ? 2 : 1);
+    trim.sort((a, b) => score(b) - score(a));
+    let gair = [];
+    try { gair = JSON.parse(texts[1] || "[]"); } catch (e) { gair = []; }
+    const gairmet = (Array.isArray(gair) ? gair : []).slice(0, 40).map(g => ({
+      product: g.product || g.hazard || "", hazard: g.hazard || "", dueTo: g.dueTo || "",
+      from: num(g.validTimeFrom), to: num(g.validTimeTo),
+      coords: Array.isArray(g.coords) ? g.coords.slice(0, 24).map(c => [Math.round(+c.lat * 1000) / 1000, Math.round(+c.lon * 1000) / 1000]) : []
+    })).filter(g => g.coords.length > 2);
+    return { metar: trim.slice(0, 12), gairmet, bbox: r.bbox };
+  }
   return { sigmets: [...trimSigmets(JSON.parse(texts[0] || "[]"), "us"), ...trimSigmets(JSON.parse(texts[1] || "[]"), "intl")] };
 }
 

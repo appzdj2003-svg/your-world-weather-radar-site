@@ -141,7 +141,7 @@
   function sigmetsOnLeg(list, leg, now, ac) {
     if (!leg || !Array.isArray(list)) return []; const pts = gcPoints(leg.from, leg.to, Math.max(20, Math.round(distNm(leg.from, leg.to) / 15)));
     const out = [];
-    for (const s of list) { if (s.type && s.type !== "SIGMET") continue; if (s.to && s.to * 1000 < now) continue;
+    for (const s of list) { if (s.type && !/SIGMET|AIRMET/i.test(s.type)) continue; if (s.to && s.to * 1000 < now) continue;
       const poly = s.coords; let hitAt = -1; for (let i = 0; i < pts.length; i++) if (inPoly(pts[i], poly)) { hitAt = i; break; }
       if (hitAt < 0) continue;
       let ahead = null; if (ac) { const done = distNm(leg.from, ac), at = distNm(leg.from, pts[hitAt]); ahead = at >= done - 20; }
@@ -165,25 +165,96 @@
   }
 
   // ---------- live position vs schedule ----------
+  const TURN_MIN = 35;   // planning assumption for a narrow-body turnaround; shown to the user as an assumption
+  // Descent/approach buffer (minutes): great-circle cruise time alone understates arrival. Not airline ETA.
+  function approachBufferMin(toNm, phase) {
+    if (toNm < 12) return phase === "descending" ? 6 : 10;
+    if (toNm < 40) return 12;
+    if (toNm < 100) return 18;
+    return 25;
+  }
   function progress(ac, leg, now) {
     if (!ac || !leg) return null; const p = { lat: ac.lat, lon: ac.lon }, toNm = distNm(p, leg.to), fromNm = distNm(p, leg.from);
     const onGround = ac.alt === "ground" || (isFinite(ac.alt) && ac.alt < 300 && (ac.gs || 0) < 60);
     const out = { toNm, fromNm, totalNm: distNm(leg.from, leg.to), onGround };
     if (onGround) out.at = toNm < 5 ? "dest" : fromNm < 5 ? "origin" : null;
-    else if ((ac.gs || 0) >= 100) out.etaMs = now + toNm / ac.gs * 3600e3;   // straight line at the current ground speed
-    out.phase = onGround ? "ground" : isFinite(ac.vs) && ac.vs < -500 ? "descending" : isFinite(ac.vs) && ac.vs > 500 ? "climbing" : "cruising";
+    else {
+      out.phase = isFinite(ac.vs) && ac.vs < -500 ? "descending" : isFinite(ac.vs) && ac.vs > 500 ? "climbing" : "cruising";
+      if ((ac.gs || 0) >= 80) {
+        const buf = approachBufferMin(toNm, out.phase);
+        out.bufferMin = buf;
+        out.etaMs = now + toNm / ac.gs * 3600e3 + buf * 60e3;   // GC at current GS + descent/approach buffer
+      }
+    }
+    if (!out.phase) out.phase = onGround ? "ground" : "cruising";
     return out;
   }
 
-  // ---------- the estimate (rules only, no AI, no made-up odds) ----------
-  const LV = ["Low", "Some", "High"];
+  // Minutes late(+) / early(−) from live track vs schedule, FAA programs, and pre-departure hold. Takes the larger delay.
+  function delayEstimate(c) {
+    const now = c.now, out = { liveMin: null, faaMin: null, lateMin: null, etaMs: null, source: "", basis: "" };
+    const pr = c.progress, code = a => a && (a.iata || a.icao) || "";
+    // Position-based (airborne)
+    if (pr && pr.etaMs && c.arrMs) {
+      out.liveMin = Math.round((pr.etaMs - c.arrMs) / 60e3);
+      out.etaMs = pr.etaMs;
+      out.basis = `live track + ${pr.bufferMin || 0}-min approach buffer`;
+    }
+    // Pre-departure: past scheduled dep, still on ground / not seen
+    if (c.depMs && now > c.depMs) {
+      const stillHeld = !pr || (pr.onGround && pr.at === "origin") || (!pr && !c.inbound);
+      if (stillHeld) {
+        const hold = Math.round((now - c.depMs) / 60e3);
+        if (out.liveMin == null || hold > out.liveMin) { out.liveMin = hold; out.basis = "past scheduled departure, still on the ground"; }
+      }
+    }
+    // Inbound aircraft still arriving for this departure
+    if (c.inbound && c.inbound.etaMs && c.depMs) {
+      const ready = c.inbound.etaMs + TURN_MIN * 60e3, late = Math.round((ready - c.depMs) / 60e3);
+      if (late > 0 && (out.liveMin == null || late > out.liveMin)) { out.liveMin = late; out.basis = `inbound landing + ${TURN_MIN}-min turnaround`; }
+    }
+    // FAA: take the largest published program minutes at origin/dest
+    let faa = 0, faaTxt = "";
+    for (const apt of [c.origin, c.dest]) {
+      for (const n of nasFor(c.nas, apt)) {
+        let m = 0;
+        if (n.kind === "stop" || n.kind === "closure") m = 90;
+        else if (n.kind === "gdp") { const g = (c.nas.groundDelays || []).find(x => x.arpt === faaCode(apt)); m = toMin(g && g.avg) || 45; }
+        else if (n.kind === "delay") { const d = (c.nas.delays || []).find(x => x.arpt === faaCode(apt)); m = toMin(d && d.max) || toMin(d && d.min) || 30; }
+        if (m > faa) { faa = m; faaTxt = n.text; }
+      }
+    }
+    out.faaMin = faa || null;
+    const live = out.liveMin, useFaa = faa && (live == null || faa > Math.max(0, live));
+    if (useFaa) { out.lateMin = faa; out.source = "FAA"; out.basis = faaTxt || "FAA program"; }
+    else if (live != null) { out.lateMin = live; out.source = live >= 0 && faa && faa >= live ? "live+FAA" : "live track"; }
+    else if (faa) { out.lateMin = faa; out.source = "FAA"; }
+    return out;
+  }
+
+  // ---------- the estimate (deterministic weighted rules; plain-English "AI delay read") ----------
+  const LV = ["Low", "Medium", "High"];
+  function routeWxFlags(list) {
+    // METARs sampled along the GC route (from /route-wx). Flag fog/LIFR, low ceilings, TS, gusts, snow/ice.
+    const out = []; if (!Array.isArray(list)) return out;
+    for (const m of list) {
+      const cat = m.fltCat || fltCat(visNum(m.visib), ceiling(m.clouds));
+      const words = wxWords(m.wxString), gust = m.wgst || 0, id = m.icaoId || m.name || "en route";
+      if (cat === "LIFR" || /fog/.test(words.join(" "))) out.push({ lvl: 2, text: `Fog or very low cloud near ${id} along the route (${cat}${m.visib != null ? `, visibility ${m.visib} mi` : ""}).`, kind: "fog" });
+      else if (cat === "IFR") out.push({ lvl: 1, text: `Low cloud or poor visibility near ${id} along the route (${cat}).`, kind: "ifr" });
+      if (words.some(w => /thunder/.test(w))) out.push({ lvl: 2, text: `Thunderstorms reported near ${id} along the route.`, kind: "ts" });
+      if (words.some(w => /freezing|snow|ice/.test(w))) out.push({ lvl: 1, text: `${words.filter(w => /freezing|snow|ice/.test(w)).join(", ")} near ${id} along the route.`, kind: "ice" });
+      if (gust >= 35) out.push({ lvl: 1, text: `Wind gusts to ${gust} kt near ${id} along the route.`, kind: "wind" });
+    }
+    return out;
+  }
   function assess(c) {
-    const R = [], todo = [], now = c.now, add = (lvl, text, src) => R.push({ lvl, text, src });
-    const ap = (x, rule) => x && (x.iata || x.icao);
+    const R = [], todo = [], why = [], now = c.now, add = (lvl, text, src, kind) => { R.push({ lvl, text, src, kind: kind || "" }); if (lvl >= 1) why.push(text); };
+    const ap = x => x && (x.iata || x.icao);
     for (const [apt, role] of [[c.origin, "dep"], [c.dest, "arr"]]) {
       if (!apt) continue;
       for (const n of nasFor(c.nas, apt)) { if (n.kind === "delay" && n.dir && n.dir !== "general" && ((role === "dep") !== (n.dir === "departure"))) n.lvl = Math.min(n.lvl, 1);
-        add(n.lvl, n.text, "FAA");
+        add(n.lvl, n.text, "FAA", n.kind);
         if (n.kind === "stop") todo.push(c.progress && !c.progress.onGround && role === "arr" ? `Ground stop at ${ap(apt)}. Planes already in the air may hold or divert. Follow your airline app.` : `Ground stop at ${ap(apt)}. Check your airline app for a new departure time or rebooking.`);
         else if (n.kind === "gdp") todo.push(`Flights into ${ap(apt)} are being held by the FAA. Check your airline app before heading to the gate.`);
         else if (n.kind === "closure") todo.push(`${ap(apt)} is listed as closed. Contact your airline about rebooking.`); }
@@ -191,30 +262,62 @@
       const tWin = role === "dep" ? c.depMs : c.arrMs, win = tafWindow(w.taf, (tWin || now) - 3600e3, (tWin || now) + 3600e3), cur = w.metar;
       const words = new Set([...(cur ? wxWords(cur.wxString) : []), ...(win ? win.words : [])]);
       const when = tWin ? (role === "dep" ? "around departure" : "around arrival") : "now or in the next hours";
-      if ([...words].some(x => /thunder/.test(x))) { add(1, `Thunderstorms ${cur && /TS/.test(cur.wxString || "") ? "reported" : "forecast" + (win && win.possible ? " (possible)" : "")} at ${ap(apt)} ${when}.`, "NWS/AWC");
+      if ([...words].some(x => /thunder/.test(x))) { add(1, `Thunderstorms ${cur && /TS/.test(cur.wxString || "") ? "reported" : "forecast" + (win && win.possible ? " (possible)" : "")} at ${ap(apt)} ${when}.`, "NWS/AWC", "ts");
         todo.push(`Storms at ${ap(apt)} can pause ramp work and cause holding. Keep an eye on your airline app.`); }
-      if ([...words].some(x => /freezing|snow|ice pellets/.test(x))) add(1, `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${ap(apt)} ${when}: de-icing and slower operations are common.`, "NWS/AWC");
+      if ([...words].some(x => /freezing|snow|ice pellets/.test(x))) add(1, `${[...words].filter(x => /freezing|snow|ice/.test(x)).join(", ")} at ${ap(apt)} ${when}: de-icing and slower operations are common.`, "NWS/AWC", "ice");
       const cat = [cur && cur.fltCat, win && win.fltCat].filter(Boolean).sort((a, b) => ["VFR", "MVFR", "IFR", "LIFR"].indexOf(b) - ["VFR", "MVFR", "IFR", "LIFR"].indexOf(a))[0];
-      if (cat === "LIFR" || (cat === "IFR" && role === "arr")) add(1, `${CAT_WORDS[cat]} at ${ap(apt)} ${when} (${cat}). Airports often space flights out in these conditions.`, "NWS/AWC");
-      const g = Math.max(cur && cur.gust || 0, win && win.gust || 0); if (g >= 35) add(1, `Wind gusts to ${g} kt at ${ap(apt)} ${when}.`, "NWS/AWC");
+      if (cat === "LIFR" || (cat === "IFR" && role === "arr")) add(cat === "LIFR" ? 2 : 1, `${CAT_WORDS[cat]} at ${ap(apt)} ${when} (${cat}${cur && cur.vis != null ? `, visibility ${cur.vis} mi` : ""}). Airports often space flights out in these conditions.`, "NWS/AWC", cat === "LIFR" ? "fog" : "ifr");
+      const g = Math.max(cur && cur.gust || 0, win && win.gust || 0); if (g >= 35) add(1, `Wind gusts to ${g} kt at ${ap(apt)} ${when}.`, "NWS/AWC", "wind");
     }
-    for (const s of c.sigmets || []) { if (s.ahead === false) continue; const strong = /volcanic|tropical/.test(s.words);
-      add(strong ? 2 : 1, `SIGMET for ${s.words} along the route, about ${Math.round(s.alongNm * 1.15078)} mi from ${ap(c.origin) || "the origin"}${s.ahead ? ", ahead of the plane" : ""}. Flights may reroute or hold.`, "AWC"); }
-    const pr = c.progress;
-    if (pr && pr.etaMs && c.arrMs) { const late = Math.round((pr.etaMs - c.arrMs) / 60e3);
-      if (late > 45) add(2, `At its current speed it's about ${fmtMin(late)} behind the scheduled arrival (straight-line estimate).`, "adsb.lol");
-      else if (late > 15) add(1, `At its current speed it's about ${fmtMin(late)} behind the scheduled arrival (straight-line estimate).`, "adsb.lol");
-      else add(0, late < -10 ? `On its current track and speed it looks set to arrive ahead of schedule.` : `On its current track and speed it looks close to the scheduled arrival.`, "adsb.lol"); }
+    for (const f of routeWxFlags(c.routeWx)) add(f.lvl, f.text, "AWC route sample", f.kind);
+    for (const s of c.sigmets || []) { if (s.ahead === false) continue; const strong = /volcanic|tropical|thunder/.test(s.words);
+      add(strong ? 2 : 1, `${s.type === "AIRMET" || s.type === "G-AIRMET" ? "AIRMET" : "SIGMET"} for ${s.words} along the route, about ${Math.round(s.alongNm * 1.15078)} mi from ${ap(c.origin) || "the origin"}${s.ahead ? ", ahead of the plane" : ""}. Flights may reroute or hold.`, "AWC", /thunder/.test(s.words) ? "ts" : "sig"); }
+    const de = delayEstimate(c), pr = c.progress;
+    if (de.liveMin != null && de.source !== "FAA") {
+      const late = de.liveMin;
+      if (late > 45) add(2, `At its current speed, with an approach buffer, it's about ${fmtMin(late)} behind the scheduled arrival (${de.basis}).`, "adsb.lol", "live");
+      else if (late > 15) add(1, `At its current speed, with an approach buffer, it's about ${fmtMin(late)} behind the scheduled arrival (${de.basis}).`, "adsb.lol", "live");
+      else if (late < -10) add(0, `On its current track and speed it looks set to arrive ahead of schedule.`, "adsb.lol", "live");
+      else add(0, `On its current track and speed it looks close to the scheduled arrival.`, "adsb.lol", "live");
+    }
     if (c.inbound && c.inbound.etaMs && c.depMs) { const ready = c.inbound.etaMs + TURN_MIN * 60e3, late = Math.round((ready - c.depMs) / 60e3);
-      if (late > 0) { add(late > 30 ? 2 : 1, `Your plane is still on its way in. Landing plus a typical ${TURN_MIN}-minute turnaround puts it about ${fmtMin(late)} past the scheduled departure.`, "adsb.lol");
+      if (late > 0) { add(late > 30 ? 2 : 1, `Your plane is still on its way in. Landing plus a typical ${TURN_MIN}-minute turnaround puts it about ${fmtMin(late)} past the scheduled departure.`, "adsb.lol", "inbound");
         todo.push("Your plane is running late on its way in. Your airline app will show the official new time."); } }
-    if (pr && pr.onGround && pr.at === "origin" && c.depMs && now - c.depMs > 20 * 60e3) add(1, `Scheduled to leave ${fmtMin(Math.round((now - c.depMs) / 60e3))} ago and it's still on the ground at ${ap(c.origin)}.`, "adsb.lol");
-    const level = R.reduce((m, r) => Math.max(m, r.lvl), 0);
+    if (pr && pr.onGround && pr.at === "origin" && c.depMs && now - c.depMs > 20 * 60e3) add(1, `Scheduled to leave ${fmtMin(Math.round((now - c.depMs) / 60e3))} ago and it's still on the ground at ${ap(c.origin)}.`, "adsb.lol", "hold");
+    // Weighted level: weather/FAA reasons + magnitude of combined delay
+    let level = R.reduce((m, r) => Math.max(m, r.lvl), 0);
+    const late = de.lateMin;
+    if (late != null && late > 60) level = Math.max(level, 2);
+    else if (late != null && late > 25) level = Math.max(level, 1);
     if (!R.length) R.push({ lvl: 0, text: "No FAA programs, storms, low visibility or SIGMETs found for this flight right now.", src: "" });
     if (!todo.length) todo.push(level ? "Keep your airline app handy; it has the official times and gate." : "Nothing to do for now. Your airline app has the official times and gate.");
-    return { level, label: LV[level], reasons: R.sort((a, b) => b.lvl - a.lvl), todo: [...new Set(todo)] };
+    // Likely-delay range (minutes): widen around the point estimate; weather adds cushion
+    let lo = 0, hi = 0;
+    if (late != null && late > 0) { lo = Math.max(5, Math.round(late * 0.7)); hi = Math.round(late * 1.4 + (level >= 2 ? 20 : 10)); }
+    else if (level >= 2) { lo = 30; hi = 90; }
+    else if (level === 1) { lo = 15; hi = 45; }
+    // Plain-English headline from the top signal
+    const top = R.filter(r => r.lvl >= 1).sort((a, b) => b.lvl - a.lvl)[0];
+    const dest = ap(c.dest) || "arrival", origin = ap(c.origin) || "departure";
+    let headline;
+    if (top && /fog|LIFR|visibility/i.test(top.text)) {
+      const vis = (c.wx && c.dest && c.wx[c.dest.icao] && c.wx[c.dest.icao].metar && c.wx[c.dest.icao].metar.vis);
+      headline = `Fog at ${dest}${vis != null ? ` (visibility ${vis} mile${vis === 1 ? "" : "s"})` : ""}.`;
+    } else if (top && /thunder|SIGMET for thunderstorms/i.test(top.text)) headline = `Thunderstorms near ${/origin|dep/i.test(top.text) ? origin : dest}.`;
+    else if (top && /FAA|ground (stop|delay)|closed/i.test(top.text)) headline = top.text.replace(/\.$/, "") + ".";
+    else if (late != null && late > 15) headline = `Running about ${fmtMin(late)} behind on the live track.`;
+    else if (top) headline = top.text.replace(/\.$/, "") + ".";
+    else headline = "No major delay signals right now.";
+    if (late != null && late > 10) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} late.`;
+    else if (level >= 1) headline += ` Likely ${fmtMin(lo)} to ${fmtMin(hi)} of delay risk.`;
+    else headline += " Looking close to on time.";
+    if (level >= 2) headline += " Rising risk.";
+    else if (level === 1) headline += " Watch closely.";
+    const read = { headline, level, label: LV[level], lateMin: late, range: [lo, hi], why: why.slice(0, 5),
+      source: de.source || (level ? "weather/rules" : "clear"), basis: de.basis, etaMs: de.etaMs, faaMin: de.faaMin, liveMin: de.liveMin,
+      disclaimer: "AI estimate, not the airline's official status" };
+    return { level, label: LV[level], reasons: R.sort((a, b) => b.lvl - a.lvl), todo: [...new Set(todo)], delay: de, read };
   }
-  const TURN_MIN = 35;   // planning assumption for a narrow-body turnaround; shown to the user as an assumption
   function fmtMin(m) { m = Math.abs(Math.round(m)); const h = Math.floor(m / 60), r = m % 60; return h ? `${h} h${r ? ` ${r} min` : ""}` : `${r} min`; }
 
   // ---------- "How much time do I have?" ----------
@@ -255,6 +358,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

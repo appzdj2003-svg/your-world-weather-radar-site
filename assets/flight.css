@@ -133,3 +133,19 @@
 @media(max-width:420px){.fl-status .fl-big{font-size:1.4rem}}
 #fl-out,#fl-out>*,#fl-stuck,#fl-stuck-b{min-width:0;max-width:100%}.fl-swipe{width:100%;box-sizing:border-box}
 @media(max-width:520px){.fl-pop{font-size:.82rem;padding:8px 34px 8px 10px;bottom:40px;left:8px;right:auto;max-width:78%}.fl-pop span{font-size:.82rem}}
+
+/* AI delay read card */
+.fl-ai{position:relative}
+.fl-ai .fl-headline{font-size:1.15rem;font-weight:700;margin:10px 0 6px;line-height:1.35}
+.fl-meter{display:flex;align-items:center;gap:6px;margin-top:10px}
+.fl-meter i{display:inline-block;width:28px;height:10px;border-radius:999px;background:#E2E8F0}
+.fl-meter i.on{background:currentColor}
+.fl-ai.lv0 .fl-meter{color:#16A34A}.fl-ai.lv1 .fl-meter{color:#D97706}.fl-ai.lv2 .fl-meter{color:#DC2626}
+.fl-meter span{font-weight:800;font-size:.85rem;margin-left:4px;letter-spacing:.04em;text-transform:uppercase}
+.fl-range{margin:6px 0 0;font-size:.95rem;color:var(--slate-3)}.fl-range b{color:var(--slate);font-size:1.05rem}
+.fl-why{margin:10px 0 0;padding-left:20px}.fl-why li{margin:.25em 0}
+.fl-more-why{margin-top:8px;font-size:.9rem}.fl-more-why summary{cursor:pointer;color:var(--mute);font-weight:600}
+.fl-updated{position:absolute;top:12px;right:14px;background:#0EA5E9;color:#fff;font:800 .7rem/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border-radius:999px;animation:flPulse 1.6s ease}
+.fl-ai.pulse,.fl-clock.pulse{animation:flPulse 1.6s ease}
+@keyframes flPulse{0%{box-shadow:0 0 0 0 rgba(14,165,233,.55)}70%{box-shadow:0 0 0 12px rgba(14,165,233,0)}100%{box-shadow:0 0 0 0 rgba(14,165,233,0)}}
+.fl-sim-tag{margin:10px 0 0;padding:8px 12px;border-radius:10px;background:#7C3AED;color:#fff;font-weight:800;font-size:.9rem;letter-spacing:.02em}
