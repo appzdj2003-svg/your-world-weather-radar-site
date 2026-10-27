@@ -444,9 +444,27 @@
     if (ac.alt === "ground" || !isFinite(ac.gs) || ac.gs < 40 || !isFinite(ac.track) || !sec) return { lat: ac.lat, lon: ac.lon, sec, moved: false };
     return { ...destPt(ac, ac.track, ac.gs * sec / 3600), sec, moved: true }; }
 
+  // Official display names when open datasets still use a retired name (IATA / ICAO).
+  // Only entries verified against the airport authority / FAA / state DOT.
+  const APT_NAME = {
+    LAS: "Harry Reid International Airport", KLAS: "Harry Reid International Airport",
+    CMH: "John Glenn Columbus International Airport", KCMH: "John Glenn Columbus International Airport",
+    SDF: "Louisville Muhammad Ali International Airport", KSDF: "Louisville Muhammad Ali International Airport",
+    HNL: "Daniel K. Inouye International Airport", PHNL: "Daniel K. Inouye International Airport",
+    ICT: "Wichita Dwight D. Eisenhower National Airport", KICT: "Wichita Dwight D. Eisenhower National Airport",
+    LIT: "Bill and Hillary Clinton National Airport", KLIT: "Bill and Hillary Clinton National Airport",
+    ATW: "Appleton International Airport", KATW: "Appleton International Airport",
+    BZN: "Bozeman Yellowstone International Airport", KBZN: "Bozeman Yellowstone International Airport"
+  };
+  function applyAptName(apt) {
+    if (!apt) return apt;
+    const n = APT_NAME[apt.iata] || APT_NAME[apt.icao];
+    return n && apt.name !== n ? { ...apt, name: n } : apt;
+  }
+
   // ---------- route legs (adsb.lol / VRS standing data, CC0) ----------
   function legs(routeJson) {
-    const a = (routeJson && routeJson._airports || []).filter(x => isFinite(x.lat) && isFinite(x.lon));
+    const a = (routeJson && routeJson._airports || []).filter(x => isFinite(x.lat) && isFinite(x.lon)).map(applyAptName);
     const out = []; for (let i = 0; i + 1 < a.length; i++) out.push({ from: a[i], to: a[i + 1], i }); return out;
   }
   const aptMatch = (apt, code) => !!code && !!apt && (apt.iata === code || apt.icao === code);
@@ -865,6 +883,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

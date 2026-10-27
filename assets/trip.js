@@ -223,7 +223,7 @@ ${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl
   function liveBlock() {
     if (!st.fn) return "";
     return `<section class="tp-sec tp-live" id="tp-live"><h2>✈️ Live trip</h2>
-<p class="dim">Your plane on the radar (same Track my flight module), weather at both airports and along the route, countdown to landing, then your first days. Open <b>Flight canceled?</b> inside the tracker for rebook, alternates, private/semi-private and drive options.</p>
+<p class="dim">Follow your plane on the radar with weather at both airports and along the route, a countdown to landing, and your first days adjusted if you're delayed. <b>Flight canceled?</b> opens rebooking and backup options.</p>
 <div class="tp-live-countdown" id="tp-live-cd" hidden></div>
 <div id="tp-live-shift"></div>
 <div class="tp-live-frame-wrap"><iframe class="tp-live-frame" id="tp-live-frame" title="Live flight tracker" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
