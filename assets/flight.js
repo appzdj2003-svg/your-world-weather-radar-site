@@ -242,7 +242,8 @@
   }
 
   async function start(t) {
-    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null, routeSrc: "", routeUnconfirmed: false });
+    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, whatIfMin: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null, routeSrc: "", routeUnconfirmed: false });
+    syncWhatIf();
     const cpanel = $("fl-canceled");
     if (cpanel) { cpanel.open = false; }
     const p = F.parseFlight(t.fn); $("fl-out").hidden = false; document.body.classList.add("fl-tracking");
@@ -710,8 +711,26 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
   document.querySelectorAll('a[href*="play.google.com"]:not([data-ev])').forEach(a => { a.dataset.ev = "play_store"; a.dataset.prov = "google_play";
     if (!a.closest("[data-sec]")) a.dataset.sec = a.closest("footer") ? "footer" : a.closest("header,nav") ? "nav" : a.closest('[class*="playbar"]') ? "playbar" : "other"; });
   const CATN = { restaurant: "Restaurant", cafe: "Café", fast_food: "Quick bite", museum: "Museum", attraction: "Attraction", park: "Park", cinema: "Cinema" };
+  // Route not known yet (no live plane, several standing legs): the countdown still only needs your departure time.
+  function clockNoLeg() {
+    const now = Date.now(), { depMs } = times(), boardMin = +$("s-board").value || 35, secMin = +$("s-sec").value || 45;
+    const removeWhatIf = `<button type="button" class="fl-wi-x" data-whatif="0">Remove what-if</button>`;
+    const note = `<p class="dim small">Nearby places appear once we know your departure airport: pick your leg, or add it under Change flight → From.</p>`;
+    if (!depMs) return `<p class="fl-clock-miss">Enter your departure time in the box at the top of this panel to see how much time you have left. It works whether or not your flight is delayed.${S.whatIfMin ? ` The ${F.fmtMin(S.whatIfMin)} what-if will be added once you enter a time. ${removeWhatIf}` : ""}</p>` + note;
+    let dep = depMs, wi = null;
+    const baseWord = S.t.ndep ? `your updated ${tm(depMs)} departure` : `the scheduled ${tm(depMs)} departure`;
+    if (S.whatIfMin) { dep = Math.max(depMs, now) + S.whatIfMin * 60e3; wi = { min: S.whatIfMin, baseWord: depMs < now ? `the current time (${tm(now)})` : baseWord, at: dep }; }
+    if (dep <= now) return `<p class="fl-clock-miss">Departure time has passed. Check your airline app for the new time and enter it under “New time if delayed” at the top of this panel.</p>` + note;
+    const P = F.plan({ now, depMs: dep, boardMin, secMin, places: [], apt: null });
+    const basisLine = wi ? `Based on ${wi.baseWord} plus a ${F.fmtMin(wi.min)} what-if (${tm(wi.at)}), minus ${boardMin} min for boarding and ${secMin} min for security. This is a what-if, not a real delay. ${removeWhatIf}`
+      : `Based on ${baseWord}, minus ${boardMin} min for boarding and ${secMin} min for security.`;
+    const outBit = P.gateMin > 0 ? ` Leaving the airport? That leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : "";
+    return `<div class="fl-clock${wi ? " fl-clock-wi" : ""}">${wi ? `<em class="fl-wi-tag">What-if: +${F.fmtMin(wi.min)} delay</em>` : ""}<span>${wi ? "If it were delayed, be back at the gate by" : "Be back at the gate by"}</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}"${wi ? ' data-est="1"' : ""}>${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : wi ? "Confirm boarding in your airline app" : "Time's up: head to the gate"}</span>
+<small>${basisLine}${outBit}</small></div>` + note;
+  }
   function renderStuck(a) {
-    const box = $("fl-stuck-b"); if (!S.t || !S.leg) { box.innerHTML = `<p class="dim">Track a flight to see options near the airport.</p>`; return; }
+    const box = $("fl-stuck-b"); if (!S.t) { box.innerHTML = `<p class="dim">Track a flight to see options near the airport.</p>`; return; }
+    if (!S.leg) { box.innerHTML = clockNoLeg(); S.stuckKey = ""; return; }
     const o = S.leg.from, code = o.iata || o.icao, now = Date.now(), c = context();
     let dep = c.depMs, basis = S.t.ndep ? "your updated departure" : "the scheduled departure";
     if (c.inbound && c.inbound.etaMs && dep) { const ready = c.inbound.etaMs + F.TURN_MIN * 60e3; if (ready > dep) { dep = ready; basis = `your inbound plane landing about ${tm(c.inbound.etaMs)} plus a ${F.TURN_MIN}-min turnaround (assumption)`; } }
@@ -719,7 +738,14 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     const a0 = F.assess(c), dLate = a0.delay && a0.delay.lateMin;
     if (dep && dLate != null && dLate > 0 && a0.delay.source !== "live track" && !(a0.delay.airborne && dLate <= 10)) { /* FAA holds push departure (pre-takeoff) */ dep = Math.max(dep, c.now + dLate * 60e3); basis = `AI delay read (${a0.delay.source || "estimate"}): about ${F.fmtMin(dLate)} late`; }
     else if (dep && dLate != null && dLate > 0) { dep = dep + dLate * 60e3; basis = `AI delay read from ${a0.delay.basis || "live track"}`; }
-    if (S.whatIfMin && dep) { dep = Math.max(dep, c.now) + S.whatIfMin * 60e3; basis = `what-if ${F.fmtMin(S.whatIfMin)} delay (not a real delay)`; }
+    // What-if chip: say plainly what it is added to, so "+3 h" on top of a typed 8:25 PM never looks like a wrong time.
+    let whatIf = null;
+    if (S.whatIfMin && dep) {
+      const base = dep, baseNow = base < c.now, baseWord = baseNow ? `the current time (${tm(c.now)})` : basis === "the scheduled departure" ? `the scheduled ${tm(base)} departure` : basis === "your updated departure" ? `your updated ${tm(base)} departure` : `the estimated ${tm(base)} departure`;
+      dep = Math.max(base, c.now) + S.whatIfMin * 60e3; basis = `what-if ${F.fmtMin(S.whatIfMin)} delay (not a real delay)`;
+      whatIf = { min: S.whatIfMin, baseWord, at: dep };
+    }
+    const removeWhatIf = `<button type="button" class="fl-wi-x" data-whatif="0">Remove what-if</button>`;
     const boardMin = +$("s-board").value || 35, secMin = +$("s-sec").value || 45;
     const near = (S.places || []).map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).filter(p => p.c !== "station");
     const station = (S.places || []).filter(p => p.c === "station").map(p => ({ ...p, km: F.distNm(o, p) * 1.852 })).sort((x, y) => x.km - y.km)[0];
@@ -728,18 +754,20 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     const estimated = !!(dLate != null && dLate > 0) || !!S.whatIfMin || !!(c.inbound && c.inbound.etaMs);
     if (dep && dep > now) {
       const P = F.plan({ now, depMs: dep, boardMin, secMin, places: near, apt: o }); S.plan = P;
-      const basisLine = estimated
+      const basisLine = whatIf
+        ? `Based on ${whatIf.baseWord} plus a ${F.fmtMin(whatIf.min)} what-if (${tm(whatIf.at)}), minus ${boardMin} min for boarding and ${secMin} min for security. This is a what-if, not a real delay. ${removeWhatIf}`
+        : estimated
         ? `Based on an estimated departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`
         : S.t.ndep
           ? `Based on your updated departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`
           : `Based on the scheduled departure of ${tm(dep)}, minus ${boardMin} min for boarding and ${secMin} min for security.`;
       const outBit = P.gateMin > 0 ? ` Leaving the airport? That leaves about <b>${F.fmtMin(Math.max(0, P.outMin))}</b> out and back.` : "";
       const upMsg = estimated ? "Confirm boarding in your airline app" : "Time's up: head to the gate";
-      clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}"${estimated ? ' data-est="1"' : ""}>${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : upMsg}</span>
+      clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}${whatIf ? " fl-clock-wi" : ""}">${whatIf ? `<em class="fl-wi-tag">What-if: +${F.fmtMin(whatIf.min)} delay</em>` : ""}<span>${whatIf ? "If it were delayed, be back at the gate by" : "Be back at the gate by"}</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}"${estimated ? ' data-est="1"' : ""}>${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : upMsg}</span>
 <small>${basisLine}${outBit}</small></div>`;
     } else if (dep && estimated) {
       clock = `<p class="fl-clock-miss">Estimated departure window may have started. Confirm the time and gate in your airline app, and enter it under “New time if delayed” at the top of this panel.</p>`;
-    } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it under “New time if delayed” at the top of this panel." : "Enter your departure time in the box at the top of this panel to see how much time you have left. It works whether or not your flight is delayed."}</p>`;
+    } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it under “New time if delayed” at the top of this panel." : "Enter your departure time in the box at the top of this panel to see how much time you have left. It works whether or not your flight is delayed."}${S.whatIfMin && !dep ? ` The ${F.fmtMin(S.whatIfMin)} what-if will be added once you enter a time. ${removeWhatIf}` : ""}</p>`;
     const warn = `<p class="fl-warn">Delays can change quickly. Confirm times in your airline app — this is an estimate.</p>`;
     const P = S.plan && dep && dep > now ? S.plan : null, short = !P || P.outMin < 60;
     const airside = `<div class="fl-opt fl-air"><b>Stay inside the airport</b><span>Food, shops and lounges past security — no re-screening. ${short ? "Best when time is short." : ""}</span>
