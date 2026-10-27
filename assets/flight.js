@@ -131,7 +131,7 @@
 <div class="fl-pa r"><b>${E(code(S.leg.to))}</b><span>${E(city(S.leg.to))}</span></div></div>` : "";
     const landed = pr && pr.onGround && pr.at === "dest" ? `<div class="fl-landed${S.justLanded ? " pop" : ""}"><b>Landed!</b><span>${S.landedAt ? `Seen on the ground at ${E(code(S.leg.to))} at ${tm(S.landedAt)} (live tracking)` : `On the ground at ${E(code(S.leg.to))} (live tracking)`}. Gate and baggage info is in the airline app.</span></div>` : "";
     $("fl-status").innerHTML = `<div class="fl-top"><p class="fl-head">${E(S.t.fn)}${S.ac && S.ac.type ? ` <span class="dim">· ${E(S.ac.type)}${S.ac.reg ? " " + E(S.ac.reg) : ""}</span>` : ""}</p>
-<div class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}">${S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me"}</button><button type="button" class="fl-chip" id="fl-share">↗ Share my flight</button>${appOpenBtn()}</div></div>
+<div class="fl-acts"><button type="button" class="fl-chip" id="fl-alert" aria-pressed="${S.alertsOn ? "true" : "false"}">${S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me"}</button><button type="button" class="fl-chip" id="fl-share">↗ Share my flight</button></div></div>${appOpenBtn()}
 ${pass}${landed}<p class="fl-big">${big}</p>${sub ? `<p class="fl-sub">${sub}</p>` : ""}
 ${pr && !pr.onGround && S.ac ? `<div class="fl-nums"><div><span>Altitude</span><b>${isFinite(S.ac.alt) ? Math.round(S.ac.alt).toLocaleString() + " ft" : "–"}</b></div><div><span>Speed</span><b>${S.ac.gs ? Math.round(S.ac.gs * 1.15078) + " mph" : "–"}</b></div><div><span>To go</span><b>${live("dist2", mi(pr.toNm).toLocaleString())} mi</b></div></div>` : ""}
 ${legPick}${eta}
@@ -187,12 +187,12 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
   // ---------- share ----------
   async function share() {
     let tok = ""; try { tok = await F.encode(S.t); } catch (e) { tok = encodeURIComponent(S.t.fn); }
-    // /flight/open is the App Link path (bare /flight stays in the browser).
-    // Without the app, /flight/open redirects to /flight#.
-    const url = `${location.origin}/flight/open?utm_source=share_flight&utm_medium=social&utm_campaign=flight#${tok}`;
-    const code = x => x.iata || x.icao, text = S.leg ? `Follow ${S.t.fn} ${code(S.leg.from)} → ${code(S.leg.to)} live: where it is, weather at both airports and delay risk.` : `Follow ${S.t.fn} live.`;
+    // Share the plain website link so recipients stay in the browser and follow along.
+    // /flight/open is only for the gated "Follow in the app" button (App Links).
+    const url = `${location.origin}/flight/?utm_source=share_flight&utm_medium=social&utm_campaign=flight#${tok}`;
+    const code = x => x.iata || x.icao, text = S.leg ? `Follow my flight live — ${S.t.fn} ${code(S.leg.from)} → ${code(S.leg.to)}` : `Follow my flight live — ${S.t.fn}`;
     let method = "copy";
-    try { if (navigator.share) { await navigator.share({ title: `${S.t.fn} live`, text, url }); method = "native"; } else { await navigator.clipboard.writeText(url); toast("Link copied. Send it to family so they can watch it come in."); } }
+    try { if (navigator.share) { await navigator.share({ title: "Follow my flight live", text, url }); method = "native"; } else { await navigator.clipboard.writeText(url); toast("Link copied. Send it to family so they can follow along on the website."); } }
     catch (e) { if (e && e.name === "AbortError") return; try { await navigator.clipboard.writeText(url); toast("Link copied."); } catch (x) { prompt("Copy this link:", url); method = "prompt"; } }
     if (window.gtag) gtag("event", "share", { method, content_type: "flight", item_id: S.t.fn });
   }
@@ -206,11 +206,20 @@ ${API ? "" : `<p class="dim small">FAA status, airport forecasts and route hazar
     if (window.gtag) gtag("event", "flight_alerts_on", { notif: n }); render();
   }
 
-  // Gated "Open on the radar in the app" — only when build.py FLIGHT_APP_OPEN is on (Production-ready app).
-  function appOpenEnabled() { return ($("fl") || {}).dataset?.appOpen === "1"; }
+  // Gated "Follow in the app" — FLIGHT_APP_OPEN=1 when Production-ready, or tester override ?app=1 / localStorage yw_app_beta=1.
+  function appOpenEnabled() {
+    try {
+      if (new URLSearchParams(location.search).get("app") === "1") {
+        localStorage.setItem("yw_app_beta", "1");
+        return true;
+      }
+    } catch (e) {}
+    try { if (localStorage.getItem("yw_app_beta") === "1") return true; } catch (e) {}
+    return ($("fl") || {}).dataset?.appOpen === "1";
+  }
   function appOpenBtn() {
     if (!appOpenEnabled()) return "";
-    return `<button type="button" class="fl-chip fl-open-app" id="fl-open-app">Open on the radar in the app</button>`;
+    return `<div class="fl-app-cta"><button type="button" class="fl-chip fl-open-app" id="fl-open-app">Follow in the app</button><span class="fl-app-sub">Opens your plane on the Weather Radar map</span></div>`;
   }
   async function openInApp() {
     if (!S || !S.t) return;
