@@ -317,7 +317,7 @@
       if (pr.onGround) return { big: pr.at === "dest" ? `Landed at ${code(S.leg.to)}` : pr.at === "origin" ? `On the ground at ${code(S.leg.from)}` : "On the ground", sub: ac && ac.gs > 5 ? "Taxiing" : "" };
       const alt = ac && isFinite(ac.alt) ? `${Math.round(ac.alt / 100) * 100 >= 18000 ? "FL" + Math.round(ac.alt / 100) : ac.alt.toLocaleString() + " ft"}` : "";
       const dest = S.leg ? code(S.leg.to) : (c.dest ? code(c.dest) : "");
-      return { big: dest ? `In the air · {DIST} mi to ${dest}` : "In the air", sub: [pr.phase[0].toUpperCase() + pr.phase.slice(1), alt, ac && ac.gs ? `${Math.round(ac.gs * 1.15078)} mph` : ""].filter(Boolean).join(" · ") };
+      return { big: dest ? `In the air · {DIST} mi to ${dest}` : "In the air", sub: [F.phaseLabel(pr.phase), alt, ac && ac.gs ? `${Math.round(ac.gs * 1.15078)} mph` : ""].filter(Boolean).join(" · ") };
     }
     if (ac && !S.leg) return { big: "In the air", sub: "We couldn't confirm this flight's route." };
     return { big: "Not in the air right now", sub: "We don't see this flight on live tracking. It may not have left yet, may have landed, or may be outside receiver coverage." };
@@ -481,7 +481,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
     if (st.storms > p.storms) alertMe("bad", "Storm near your route or airport", a.reasons.find(r => /Thunderstorm|SIGMET/.test(r.text)).text);
     if (st.phase !== p.phase && st.phase) {
       if (p.phase === "ground:origin" && !/^ground/.test(st.phase)) alertMe("info", "Took off", `${S.t.fn} is in the air from ${code(c.origin)} (live tracking).`);
-      if (st.phase === "descending" && p.phase === "cruising") alertMe("info", "Starting descent", `${S.t.fn} is descending toward ${code(c.dest)}. Landing is usually 20 to 40 minutes away.`);
+      if (/^(descending|approach|final)$/.test(st.phase) && /^(cruising|climbing)$/.test(p.phase || "")) alertMe("info", "Starting descent", `${S.t.fn} is descending toward ${code(c.dest)}. Landing is usually 20 to 40 minutes away.`);
       if (st.phase === "ground:dest" && !/^ground/.test(p.phase || "ground")) { S.landedAt = now; S.justLanded = true; alertMe("good", "Landed!", `${S.t.fn} is on the ground at ${code(c.dest)} (live tracking).`); confetti(); }
     }
     if (st.inb === "ground" && p.inb === "air") alertMe("good", "Your plane has landed", `Your inbound plane is on the ground at ${code(c.origin)}. Turnaround usually takes 30 to 60 minutes.`);

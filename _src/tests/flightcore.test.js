@@ -247,6 +247,30 @@ t("fog only when visibility supports it (AAL893 / CLT 10 SM regression)", () => 
   assert(rf.some(f => f.kind === "fog" && /^Fog near Alpha/.test(f.text)), JSON.stringify(rf));
 });
 
+t("flight phase uses altitude, vertical rate and distance (AAL893 'Cruising' at 350 ft regression)", () => {
+  const NAS = { lat: 25.039, lon: -77.4662 }, CLT = { lat: 35.214, lon: -80.9431 }, leg = { from: NAS, to: CLT };
+  const nm = n => ({ lat: CLT.lat - n / 60, lon: CLT.lon });       // n nm south of CLT on the NAS side
+  const ph = ac => F.progress(ac, leg, NOW);
+  // Real case: 350 ft, ~1 mi out, 148 kt, no/small vertical rate → On final, never Cruising.
+  for (const vs of [undefined, null, 0, -300, -700]) {
+    const p = ph({ ...nm(1), alt: 350, gs: 148, vs });
+    assert.strictEqual(p.phase, "final", "vs=" + vs); assert.strictEqual(F.phaseLabel(p.phase), "On final");
+    assert.strictEqual(p.onGround, false);
+  }
+  assert.strictEqual(ph({ ...nm(25), alt: 8000, gs: 230, vs: -100 }).phase, "approach");
+  assert.strictEqual(F.phaseLabel("approach"), "Landing soon");
+  assert.strictEqual(ph({ lat: 30, lon: -79, alt: 35000, gs: 450, vs: 0 }).phase, "cruising");
+  assert.strictEqual(ph({ lat: 30, lon: -79, alt: 35000, gs: 450 }).phase, "cruising");
+  assert.strictEqual(ph({ lat: 31, lon: -79.5, alt: 30000, gs: 450, vs: -1800 }).phase, "descending");
+  assert.strictEqual(ph({ ...nm(120), alt: 14000, gs: 300 }).phase, "descending", "low + near dest, rate missing");
+  assert.strictEqual(ph({ lat: 25.3, lon: -77.5, alt: 8000, gs: 280 }).phase, "climbing", "low near origin, rate missing");
+  assert.strictEqual(ph({ lat: 27, lon: -78, alt: 20000, gs: 400, vs: 2000 }).phase, "climbing");
+  assert.strictEqual(ph({ ...nm(3), alt: 1500, gs: 160, vs: 1500 }).phase, "climbing", "go-around climbs, not final");
+  const g = ph({ ...nm(0.5), alt: "ground", gs: 12 }); assert(g.onGround && g.at === "dest" && g.phase === "ground");
+  // Final/approach use the shorter descending buffer.
+  assert.strictEqual(F.approachBufferMin(5, "final"), F.approachBufferMin(5, "descending"));
+});
+
 t("canceled_private: both-ends BOS-HYA / BUR-LAS; LAX-JFK no scheduled; drive/Amtrak", () => {
   const BOS = { iata: "BOS", icao: "KBOS", lat: 42.364, lon: -71.005, name: "Boston" };
   const HYA = { iata: "HYA", icao: "KHYA", lat: 41.669, lon: -70.280, name: "Hyannis" };

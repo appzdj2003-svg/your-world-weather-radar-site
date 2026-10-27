@@ -669,18 +669,38 @@
   const TURN_MIN = 35;   // planning assumption for a narrow-body turnaround; shown to the user as an assumption
   // Descent/approach buffer (minutes): great-circle cruise time alone understates arrival. Not airline ETA.
   function approachBufferMin(toNm, phase) {
-    if (toNm < 12) return phase === "descending" ? 6 : 10;
+    if (toNm < 12) return phase === "descending" || phase === "approach" || phase === "final" ? 6 : 10;
     if (toNm < 40) return 12;
     if (toNm < 100) return 18;
     return 25;
   }
+  // Airborne phase from real altitude, vertical rate and distance — never "cruising" just because the rate is missing/small.
+  // final: ≤12 nm to dest below 4,000 ft · approach: ≤40 nm to dest below 12,000 ft (not climbing) ·
+  // climbing/descending: |vs| > 500 ft/min, or (rate missing/level) low near the origin / heading down near the dest.
+  const PHASE_LABEL = { climbing: "Climbing", cruising: "Cruising", descending: "Descending", approach: "Landing soon", final: "On final", ground: "On the ground", landed: "Landed" };
+  function flightPhase(ac, toNm, fromNm) {
+    const alt = isFinite(ac.alt) ? ac.alt : null, vs = isFinite(ac.vs) ? ac.vs : null;
+    const nearerDest = !isFinite(fromNm) || toNm <= fromNm;
+    if (alt != null && nearerDest && !(vs != null && vs > 500)) {
+      if (toNm <= 12 && alt < 4000) return "final";
+      if (toNm <= 40 && alt < 12000) return "approach";
+    }
+    if (vs != null && vs < -500) return "descending";
+    if (vs != null && vs > 500) return "climbing";
+    if (alt != null && alt < 18000) {
+      if (!nearerDest && fromNm <= 80) return "climbing";
+      if (nearerDest && toNm <= 150) return "descending";
+    }
+    return "cruising";
+  }
+  const phaseLabel = ph => PHASE_LABEL[ph] || (ph ? ph[0].toUpperCase() + ph.slice(1) : "");
   function progress(ac, leg, now) {
     if (!ac || !leg) return null; const p = { lat: ac.lat, lon: ac.lon }, toNm = distNm(p, leg.to), fromNm = distNm(p, leg.from);
     const onGround = ac.alt === "ground" || (isFinite(ac.alt) && ac.alt < 300 && (ac.gs || 0) < 60);
     const out = { toNm, fromNm, totalNm: distNm(leg.from, leg.to), onGround };
     if (onGround) out.at = toNm < 5 ? "dest" : fromNm < 5 ? "origin" : null;
     else {
-      out.phase = isFinite(ac.vs) && ac.vs < -500 ? "descending" : isFinite(ac.vs) && ac.vs > 500 ? "climbing" : "cruising";
+      out.phase = flightPhase(ac, toNm, fromNm);
       if ((ac.gs || 0) >= 80) {
         const buf = approachBufferMin(toNm, out.phase);
         out.bufferMin = buf;
@@ -961,6 +981,6 @@
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
     validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
-    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
+    wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, flightPhase, phaseLabel, PHASE_LABEL, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);
