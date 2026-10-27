@@ -729,6 +729,11 @@ def flight_page():
 <span class="fl-whatif fl-whatif-in" role="group" aria-label="What if delay"><span class="dim">What if</span><button type="button" data-whatif="60">1 h</button><button type="button" data-whatif="120">2 h</button><button type="button" data-whatif="180">3 h</button><button type="button" data-whatif="0" class="fl-whatif-clear">Clear</button></span>
 </div>
 <div id="fl-stuck-b"></div></div></details>
+<p class="fl-cancel-wrap"><button type="button" class="fl-cancel-btn" id="fl-cancel-btn">My flight got canceled</button></p>
+<details class="card fl-canceled" id="fl-canceled" data-sec="canceled" hidden>
+<summary class="fl-canceled-sum"><b>Canceled? Here's your plan</b><em>Other flights on this route, rebook with your airline, search fares, and overnight options</em></summary>
+<div class="fl-canceled-body" id="fl-canceled-b"><p class="dim">Track a flight first — then we can look up this route.</p></div>
+</details>
 <p class="dim small fl-alert-note">🔔 <b>Alert me</b> chimes and shows a banner when the delay risk changes, the FAA posts a ground stop, storms show up near your route or airports, or the plane takes off, starts its descent or lands. It only works while this page is open in your browser. For alerts when the page is closed, use your airline's app.</p>
 {flight_cta("after_estimate")}
 <section class="fl-mapw" aria-label="Map"><div id="fl-map" class="fl-map"></div></section>

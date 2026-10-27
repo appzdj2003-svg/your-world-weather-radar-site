@@ -122,6 +122,32 @@ t("liveEtaMs matches progress.etaMs (shared ETA for headline, projected, countdo
   assert.strictEqual(F.liveEtaMs(null, leg, NOW), null);
 });
 
+t("canceled helpers: peers, rebook, nearby airports, Google Flights URL", () => {
+  const idx = { "KFSD-KDEN": ["SKW5701", "FFT1629"], "KDEN-KFSD": ["SKW5229"] };
+  const peers = F.peersForPair(idx, "KFSD", "KDEN");
+  assert.strictEqual(peers.length, 3);
+  assert(peers.some(p => p.cs === "SKW5701"));
+  const live = F.matchLivePeers(peers, [{ flight: "SKW5701 ", alt: 22000, gs: 400, lat: 42, lon: -100 }, { flight: "FFT1629", alt: "ground", gs: 0 }]);
+  assert.strictEqual(live.find(p => p.cs === "SKW5701").live.airborne, true);
+  assert.strictEqual(live.find(p => p.cs === "FFT1629").live.airborne, false);
+  assert.strictEqual(live.find(p => p.cs === "SKW5229").live, null);
+  const rb = F.rebookFor({ iata: "UA", icao: "UAL" });
+  assert.strictEqual(rb.iata, "UA"); assert(/united\.com/i.test(rb.url));
+  const skw = F.rebookFor({ icao: "SKW", iata: "OO" });
+  assert(skw && skw.iata === "UA", "SkyWest maps to a mainline rebook page");
+  assert(/transportation\.gov.*refund/i.test(F.DOT_REFUNDS));
+  const DEN = { iata: "DEN", icao: "KDEN", lat: 39.856, lon: -104.674 };
+  const near = F.nearbyAirports(DEN, [
+    { iata: "COS", icao: "KCOS", lat: 38.806, lon: -104.7, name: "Colorado Springs" },
+    { iata: "CYS", icao: "KCYS", lat: 41.155, lon: -104.81, name: "Cheyenne" },
+    { iata: "LAX", icao: "KLAX", lat: 33.94, lon: -118.41, name: "Los Angeles" },
+    { iata: "DEN", icao: "KDEN", lat: 39.856, lon: -104.674, name: "Denver" }
+  ], 100);
+  assert(near.some(a => a.iata === "COS"));
+  assert(!near.some(a => a.iata === "LAX" || a.iata === "DEN"));
+  const url = F.googleFlightsUrl("FSD", "DEN", "2026-10-27");
+  assert(/google\.com\/travel\/flights/.test(url) && /FSD/.test(decodeURIComponent(url)) && /DEN/.test(decodeURIComponent(url)));
+});
 
 (async () => {
   const tok = await F.encode({ v: 1, fn: "DL681", from: "SFO", to: "ATL", dep: "2026-10-27T03:45:00.000Z" });

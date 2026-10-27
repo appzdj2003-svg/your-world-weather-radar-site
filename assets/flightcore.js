@@ -14,6 +14,82 @@
     CA:"CCA", MU:"CES", CZ:"CSN", QF:"QFA", NZ:"ANZ", VA:"VOZ", PR:"PAL", TG:"THA", MH:"MAS", GA:"GIA", FX:"FDX", "5X":"UPS" };
   // Regional airlines that fly under their own callsign for a mainline brand (helps explain "not found").
   const REGIONALS = { DL:["SKW","EDV","RPA"], UA:["SKW","RPA","GJS","ASH","UCA","AWI"], AA:["ENY","JIA","PDT","RPA","SKW","ASH","AWI"], AS:["QXE","SKW"], AC:["JZA"] };
+  // Mainline brand for a regional ICAO (canceled → rebook with the marketing carrier).
+  const ICAO_MAINLINE = { SKW:["UA","DL","AS"], EDV:["DL"], RPA:["UA","AA","DL"], GJS:["UA"], ASH:["UA","AA"], UCA:["UA"], AWI:["UA","AA"],
+    ENY:["AA"], JIA:["AA"], PDT:["AA"], QXE:["AS"], JZA:["AC"], ROU:["AC"] };
+  const AIRLINE_NAME = { UA:"United", AA:"American", DL:"Delta", WN:"Southwest", AS:"Alaska", B6:"JetBlue", NK:"Spirit", F9:"Frontier",
+    HA:"Hawaiian", SY:"Sun Country", G4:"Allegiant", AC:"Air Canada", OO:"SkyWest", MQ:"Envoy", YX:"Republic", QX:"Horizon" };
+  // Airline manage-trip / rebooking pages (public URLs; passenger still signs in on the airline site).
+  const AIRLINE_REBOOK = {
+    UA: { name: "United", url: "https://www.united.com/en/us/fly/travel/manage-trips.html" },
+    AA: { name: "American", url: "https://www.aa.com/reservation/view/findBookingAccess.do" },
+    DL: { name: "Delta", url: "https://www.delta.com/mytrips/findPnr" },
+    WN: { name: "Southwest", url: "https://www.southwest.com/air/manage-reservation/" },
+    AS: { name: "Alaska", url: "https://www.alaskaair.com/booking/reservation-lookup" },
+    B6: { name: "JetBlue", url: "https://www.jetblue.com/manage" },
+    NK: { name: "Spirit", url: "https://www.spirit.com/en-us/manage" },
+    F9: { name: "Frontier", url: "https://www.flyfrontier.com/manage-travel/" },
+    HA: { name: "Hawaiian", url: "https://www.hawaiianairlines.com/manage" },
+    AC: { name: "Air Canada", url: "https://www.aircanada.com/us/en/aco/home/book/manage-bookings.html" }
+  };
+  const DOT_REFUNDS = "https://www.transportation.gov/individuals/aviation-consumer-protection/refunds";
+
+  function mainlineIata(p) {
+    if (!p) return "";
+    if (p.iata && AIRLINE_REBOOK[p.iata]) return p.iata;
+    const icao = p.icao || "";
+    if (ICAO_MAINLINE[icao]) return ICAO_MAINLINE[icao][0];
+    const fromIcao = Object.keys(IATA_ICAO).find(k => IATA_ICAO[k] === icao);
+    return fromIcao && AIRLINE_REBOOK[fromIcao] ? fromIcao : (p.iata || "");
+  }
+  function rebookFor(p) {
+    const iata = mainlineIata(p);
+    return iata && AIRLINE_REBOOK[iata] ? { iata, ...AIRLINE_REBOOK[iata] } : null;
+  }
+  function peersForPair(index, fromIcao, toIcao) {
+    if (!index || !fromIcao || !toIcao) return [];
+    const a = String(fromIcao).toUpperCase(), b = String(toIcao).toUpperCase();
+    const fwd = index[a + "-" + b] || [], rev = index[b + "-" + a] || [];
+    const seen = new Set(), out = [];
+    for (const cs of fwd.concat(rev)) {
+      const c = String(cs || "").toUpperCase();
+      if (!c || seen.has(c)) continue; seen.add(c);
+      const airline = c.slice(0, 3);
+      out.push({ cs: c, airline, name: AIRLINE_NAME[Object.keys(IATA_ICAO).find(k => IATA_ICAO[k] === airline) || ""] || airline });
+    }
+    return out;
+  }
+  function matchLivePeers(peers, liveList) {
+    const by = new Map();
+    for (const a of liveList || []) {
+      const cs = String(a.flight || a.cs || "").toUpperCase().replace(/\s+/g, "");
+      if (!cs) continue;
+      by.set(cs, a);
+    }
+    return (peers || []).map(p => {
+      const live = by.get(p.cs);
+      if (!live) return { ...p, live: null };
+      const alt = live.alt;
+      const airborne = alt != null && alt !== "ground" && (+alt > 0);
+      return { ...p, live: { airborne, alt, gs: live.gs, lat: live.lat, lon: live.lon } };
+    });
+  }
+  function nearbyAirports(origin, list, maxNm) {
+    if (!origin || !isFinite(origin.lat) || !list) return [];
+    const lim = maxNm == null ? 100 : maxNm;
+    const oi = (origin.icao || "").toUpperCase(), oa = (origin.iata || "").toUpperCase();
+    return list.map(a => {
+      const nm = distNm(origin, a);
+      return { ...a, nm };
+    }).filter(a => a.nm > 5 && a.nm <= lim && (a.icao || "").toUpperCase() !== oi && (a.iata || "").toUpperCase() !== oa)
+      .sort((x, y) => x.nm - y.nm).slice(0, 6);
+  }
+  function googleFlightsUrl(fromIata, toIata, dateYmd) {
+    const fr = String(fromIata || "").toUpperCase(), to = String(toIata || "").toUpperCase();
+    const d = dateYmd || new Date().toISOString().slice(0, 10);
+    const q = encodeURIComponent(`Flights from ${fr} to ${to} on ${d} oneway`);
+    return `https://www.google.com/travel/flights?q=${q}`;
+  }
 
 
   function parseFlight(s) {
@@ -415,7 +491,7 @@
   const api = Object.assign(base, {
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
-    validate, parseFlight, IATA_ICAO, REGIONALS, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
+    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch,
     wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, sigmetsOnLeg, nasFor, faaCode, toMin, progress, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

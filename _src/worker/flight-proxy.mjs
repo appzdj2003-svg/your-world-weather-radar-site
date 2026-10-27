@@ -7,12 +7,13 @@
             /nas                 FAA NAS airport status XML -> JSON (public domain)                       cache 60 s
             /sigmet              US + international SIGMETs incl. convective (aviationweather.gov)        cache 5 min
             /route-wx?olat=&olon=&dlat=&dlon=  METAR samples along GC route + ends (AWC, public domain)  cache 5 min
+            /nearby?lat=&lon=&nm=   aircraft near a point (adsb.lol /v2/point, ODbL)                  cache 45 s, daily cap
             /places?lat=&lon=    named places near an airport from OpenStreetMap via Nominatim (ODbL)     cache 7 days
                                  (one request per category, 1.1 s apart, per Nominatim's 1 req/s policy)
    Config (wrangler [vars]): UA (required), ORIGINS (comma list). KV binding FLIGHT_KV (adsb.lol cache + daily budget, places). */
 const NOMI = "https://nominatim.openstreetmap.org/search";
 export const PLACE_CATS = [["restaurant", 15], ["cafe", 6], ["fast_food", 6], ["museum", 6], ["attraction", 6], ["park", 6], ["cinema", 4], ["station", 8]];
-const ADSB = "https://api.adsb.lol/v2/callsign/", AWC = "https://aviationweather.gov/api/data/", NAS = "https://nasstatus.faa.gov/api/airport-status-information";
+const ADSB = "https://api.adsb.lol/v2/callsign/", ADSB_POINT = "https://api.adsb.lol/v2/point/", AWC = "https://aviationweather.gov/api/data/", NAS = "https://nasstatus.faa.gov/api/airport-status-information";
 const allowed = (env, origin) => (env.ORIGINS || "https://weather.yourworldapps.si").split(",").map(s => s.trim()).filter(Boolean).includes(origin);
 const mem = new Map();
 // Memory (per isolate) first; KV only for the adsb.lol cache + daily budget and the 7-day places cache, so KV writes stay
@@ -83,6 +84,14 @@ export function route(url) {
     return { key: `p:${la},${lo}`, ttl: 7 * 864e5, up: PLACE_CATS.map(([c, n]) => `${NOMI}?amenity=${c}&viewbox=${vb}&bounded=1&format=jsonv2&limit=${n}`), kind: "places", serial: 1100 }; }
   if (p === "/nas") return { key: "nas", ttl: 60e3, up: [NAS], kind: "nas" };
   if (p === "/sigmet") return { key: "sig", ttl: 5 * 60e3, up: [`${AWC}airsigmet?format=json`, `${AWC}isigmet?format=json`], kind: "sigmet" };
+  if (p === "/nearby") {
+    const lat = Number(u.searchParams.get("lat")), lon = Number(u.searchParams.get("lon"));
+    let nm = Number(u.searchParams.get("nm")); if (!isFinite(nm) || nm <= 0) nm = 80;
+    nm = Math.min(150, Math.max(20, Math.round(nm)));
+    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 85 || Math.abs(lon) > 180) return null;
+    const la = Math.round(lat * 1000) / 1000, lo = Math.round(lon * 1000) / 1000;
+    return { key: `nb:${la},${lo},${nm}`, ttl: 45e3, up: [`${ADSB_POINT}${la}/${lo}/${nm}`], kind: "nearby", adsb: true };
+  }
   if (p === "/route-wx") {
     // Sample METARs along the great-circle route (origin, ~3 midpoints, dest). AWC bbox query — free, no key.
     const olat = Number(u.searchParams.get("olat")), olon = Number(u.searchParams.get("olon"));
@@ -99,6 +108,22 @@ export function route(url) {
 }
 async function build(r, texts) {
   if (r.kind === "flight") return trimAircraft(JSON.parse(texts[0]));
+  if (r.kind === "nearby") {
+    const j = JSON.parse(texts[0] || "{}");
+    const ac = (j && Array.isArray(j.ac) ? j.ac : []).filter(a => typeof a.lat === "number" && typeof a.lon === "number");
+    // Keep callsign flights only (skip empty / pure GA hex with no flight id), cap for the canceled panel.
+    const out = [];
+    for (const a of ac) {
+      const flight = String(a.flight || "").trim().toUpperCase();
+      if (!flight || flight.length < 3) continue;
+      out.push({ flight, lat: a.lat, lon: a.lon,
+        alt: a.alt_baro === "ground" ? "ground" : (typeof a.alt_baro === "number" ? a.alt_baro : null),
+        gs: typeof a.gs === "number" ? a.gs : null, track: typeof a.track === "number" ? a.track : null,
+        seen: typeof a.seen_pos === "number" ? a.seen_pos : (typeof a.seen === "number" ? a.seen : null) });
+      if (out.length >= 40) break;
+    }
+    return { now: typeof j.now === "number" ? j.now : null, ac: out };
+  }
   if (r.kind === "wx") return trimWx(JSON.parse(texts[0] || "[]"), JSON.parse(texts[1] || "[]"));
   if (r.kind === "places") return { places: trimPlaces(texts) };
   if (r.kind === "nas") return parseNas(texts[0]);
@@ -129,14 +154,14 @@ export async function handle(req, env, fetchFn = fetch, now = Date.now(), sleep 
   if (!cors["Access-Control-Allow-Origin"]) return out(403, '{"error":"origin not allowed"}');
   if (!env.UA) return out(500, '{"error":"UA not configured"}');
   const r = route(req.url); if (!r) return out(400, '{"error":"bad request"}');
-  const st = store(env, r.kind === "flight" || r.kind === "places"), hit = await st.get(r.key).catch(() => null);
+  const st = store(env, r.kind === "flight" || r.kind === "nearby" || r.kind === "places"), hit = await st.get(r.key).catch(() => null);
   const send = (c, state) => out(200, c.body, { "Cache-Control": `public, max-age=${Math.max(0, Math.round((c.exp - now) / 1000))}`, "X-Cache": state, "X-Fetched": new Date(c.at).toISOString() });
   if (hit && now < hit.exp) return send(hit, "HIT");
   let bkey, used = 0;
-  if (r.kind === "flight") { bkey = "b:" + new Date(now).toISOString().slice(0, 10); const m = mem.get(bkey), kb = env.FLIGHT_KV ? await env.FLIGHT_KV.get(bkey).then(v => v && JSON.parse(v)).catch(() => null) : null;
+  if (r.kind === "flight" || r.kind === "nearby") { bkey = "b:" + new Date(now).toISOString().slice(0, 10); const m = mem.get(bkey), kb = env.FLIGHT_KV ? await env.FLIGHT_KV.get(bkey).then(v => v && JSON.parse(v)).catch(() => null) : null;
     used = Math.max(m ? m.n : 0, kb ? kb.n : 0);   // other isolates count too: take the higher of ours and the shared one
     if (used >= ADSB_DAILY_CAP) return hit ? send({ ...hit, exp: now + 120e3 }, "STALE") : out(503, '{"error":"daily live-data budget used"}', { "Retry-After": "3600" });
-    r.ttl = flightTtl(used); try { await st.put(bkey, { n: used + 1 }, 2 * 86400); } catch (e) {} }
+    r.ttl = r.kind === "nearby" ? Math.max(45e3, flightTtl(used)) : flightTtl(used); try { await st.put(bkey, { n: used + 1 }, 2 * 86400); } catch (e) {} }
   try {
     const one = async (u, i) => {
       const res = await fetchFn(u, { headers: { "User-Agent": env.UA, "Accept": r.kind === "nas" ? "application/xml" : "application/json" } });
