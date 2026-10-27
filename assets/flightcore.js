@@ -483,20 +483,35 @@
     const head = isFinite(ac.track) ? angDiff(ac.track, bearing(p, leg.to)) : 0;
     return off + (head > 100 ? 400 : head * 0.5);
   }
-  const LEG_FIT_MAX = 150;   // nm-ish score; ~AAL893-on-NAS–CLT ≈ 7, on stale MIA–DFW ≈ 410
-  function legFits(ac, leg, maxScore) {
-    return legScore(ac, leg) <= (maxScore == null ? LEG_FIT_MAX : maxScore);
+  const LEG_FIT_MAX = 150;   // nm-ish score floor; ~AAL893-on-NAS–CLT ≈ 7, on stale MIA–DFW ≈ 410
+  // Airways bend away from the great circle, more on long legs: allow 150 nm or 20% of the leg, whichever is more (cap 400).
+  function legCap(leg, maxScore) {
+    if (maxScore != null) return maxScore;
+    const len = leg && leg.from && leg.to ? distNm(leg.from, leg.to) : 0;
+    return Math.min(400, Math.max(LEG_FIT_MAX, len * 0.2));
+  }
+  // Plane between the two ends (inside a generous ellipse) and heading within 60° of the destination.
+  function betweenAndHeading(ac, leg) {
+    if (!ac || !leg || !isFinite(ac.lat)) return false;
+    const len = distNm(leg.from, leg.to), off = legOffNm(ac, leg);
+    const head = isFinite(ac.track) ? angDiff(ac.track, bearing({ lat: ac.lat, lon: ac.lon }, leg.to)) : 999;
+    return off <= Math.max(200, len * 0.35) && head <= 60;
+  }
+  // agreed: two independent sources (standing data + adsbdb) name this same leg, so accept a wider path.
+  function legFits(ac, leg, maxScore, agreed) {
+    if (legScore(ac, leg) <= legCap(leg, maxScore)) return true;
+    return !!agreed && maxScore == null && betweenAndHeading(ac, leg);
   }
   // Which leg is the plane flying now? Closest to the leg line, heading roughly toward its destination.
   // Returns null when no leg is a plausible fit (stale standing data / wrong day).
   function liveLeg(L, ac, maxScore) {
-    if (!ac || !L.length) return null; let best = null;
-    const cap = maxScore == null ? LEG_FIT_MAX : maxScore;
+    if (!ac || !L || !L.length) return null; let best = null;
     for (const l of L) {
       const score = legScore(ac, l);
       if (!best || score < best.score) best = { leg: l, score };
     }
-    return best && best.score <= cap ? best.leg : null;
+    if (!best) return null;
+    return legFits(ac, best.leg, maxScore, !!best.leg.agreed) ? best.leg : null;
   }
   function userLeg(L, from, to) {
     return L.find(l => (!from || aptMatch(l.from, from)) && (!to || aptMatch(l.to, to)) && (from || to)) || null;
@@ -994,7 +1009,7 @@
   const api = Object.assign(base, {
     WEB: base.WEB.replace(/flight$/, OPEN),
     webUrl: tok => base.WEB.replace(/flight$/, OPEN) + "#" + tok,
-    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
+    validate, parseFlight, IATA_ICAO, REGIONALS, AIRLINE_REBOOK, DOT_REFUNDS, mainlineIata, rebookFor, peersForPair, matchLivePeers, nearbyAirports, googleFlightsUrl, SEMI_PRIVATE, CHARTER_OPTS, AMTRAK_NEAR, AMTRAK_ROUTES, carriersNear, carriersForRoute, charterNear, driveVsFly, amtrakFor, DRIVE_ROAD, DRIVE_MPH, distNm, bearing, gcPoints, inPoly, destPt, project, legs, liveLeg, userLeg, aptMatch, legOffNm, legScore, legFits, legCap, betweenAndHeading, LEG_FIT_MAX, fromAdsbdb, sameEndpoints,
     wxWords, readMetar, fromAwcMetar, tafWindow, fltCat, CAT_WORDS, isFogVis, isLowVis, FOG_VIS_MAX, LOW_VIS_MAX, sigmetsOnLeg, nasFor, faaCode, toMin, shortPlaceName, aptPlace, metarPlace, cleanFaaReason, fmtFaaSpan, progress, flightPhase, phaseLabel, livePollMs, POLL, PHASE_LABEL, liveEtaMs, approachBufferMin, delayEstimate, routeWxFlags, assess, fmtMin, TURN_MIN, MODES, ROAD, VISIT, modesFor, tripMinutes, plan, LV, applyAptName, APT_NAME });
   if (typeof module !== "undefined") module.exports = api; else root.YWFlight = api;
 })(this);

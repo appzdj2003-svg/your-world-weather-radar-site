@@ -25,8 +25,14 @@
     if (!document.body) document.addEventListener("DOMContentLoaded", mark, { once: true });
   }
 
-  async function getJSON(url, opt) {
-    const r = await fetch(url, opt);
+  // Every lookup gets a timeout so one slow source can never hold up the route or the plane.
+  async function fetchT(url, opt, ms = 10e3) {
+    const ac = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const tm = ac ? setTimeout(() => ac.abort(), ms) : null;
+    try { return await fetch(url, ac ? { ...(opt || {}), signal: ac.signal } : opt); } finally { if (tm) clearTimeout(tm); }
+  }
+  async function getJSON(url, opt, ms) {
+    const r = await fetchT(url, opt, ms);
     if (!r.ok) {
       const err = Object.assign(new Error("HTTP " + r.status), { status: r.status });
       const ra = r.headers.get("Retry-After");
@@ -56,10 +62,17 @@
   ["f-dep", "f-ndep"].forEach(id => { const el = $(id); if (el) el.addEventListener("input", mirrorTimes); });
   $("f-tz").textContent = tz ? `Times are in your time zone (${tz}).` : "Times are in your device's time zone.";
   $("fform").addEventListener("submit", async e => { e.preventDefault(); $("ferr").textContent = "";
-    let t; try { t = readForm(); } catch (x) { $("ferr").textContent = "Enter a flight number like DL1234 or UA 512."; return; }
+    let t; try { t = dropCarriedOver(readForm()); } catch (x) { $("ferr").textContent = "Enter a flight number like DL1234 or UA 512."; return; }
     try { const tok = await F.encode(t); history.replaceState(null, "", "#" + tok); } catch (x) {}
     start(t); if (window.gtag) gtag("event", "flight_track", { airline: (F.parseFlight(t.fn) || {}).icao || "" }); });
 
+  // A new flight number must not inherit the previous flight's airports or times (they sat in hidden fields).
+  function dropCarriedOver(t) {
+    const old = S.t; if (!old || !t || t.fn === old.fn) return t;
+    const out = { ...t };
+    for (const k of ["from", "to", "dep", "arr", "ndep"]) if (out[k] && old[k] && out[k] === old[k]) delete out[k];
+    fillForm(out); return out;
+  }
   // ---------- data loading ----------
   async function loadRoute(cs) {
     try { const j = await getJSON(`${ROUTES}${cs.slice(0, 2)}/${cs}.json`); return j && j._airports ? j : null; } catch (e) { return null; }
@@ -80,11 +93,15 @@
     S.routeSrc = S.route && S.route._src ? S.route._src : (S.route ? "standing" : "");
     const standing = reindexLegs(S.legs);
     const ac = S.ac && isFinite(S.ac.lat) && isFinite(S.ac.lon) ? S.ac : null;
-    const standingFit = ac && standing.length ? F.liveLeg(standing, ac) : null;
+    let standingFit = ac && standing.length ? F.liveLeg(standing, ac) : null;
     const needAlt = !standing.length || (ac && !standingFit) || !ac;
     if (!needAlt) return;
-    const alt = await loadAdsbdb(cs);
+    const gen = S.gen, alt = await loadAdsbdb(cs);
+    if (gen !== S.gen) return;
     const altLegs = alt ? reindexLegs(F.legs(alt)) : [];
+    // Both sources name the same leg: mark it so the fit check allows a normal airway bend.
+    for (const x of altLegs) for (const l of S.legs.concat(standing)) if (F.sameEndpoints(l, x)) { l.agreed = true; x.agreed = true; }
+    standingFit = ac && standing.length ? F.liveLeg(standing, ac) : null;
     const altFit = ac && altLegs.length ? F.liveLeg(altLegs, ac) : null;
     if (ac) {
       if (altFit) {
@@ -130,10 +147,11 @@
     const cached = loadPos(S.t && S.t.fn); if (!cached) return false;
     S.ac = cached.ac; if (!S.ac.seenAt) S.ac.seenAt = cached.seenAt; S.acStale = true; return true;
   }
-  async function loadLive() {
+  async function loadLive(gen = S.gen) {
     const p = F.parseFlight(S.t.fn); if (!API || !p || !p.cs) return;
     try {
-      const r = await fetch(API + `/flight?cs=${encodeURIComponent(p.cs)}`);
+      const r = await fetchT(API + `/flight?cs=${encodeURIComponent(p.cs)}`, undefined, 12e3);
+      if (gen !== S.gen) return;
       if (!r.ok) {
         const err = Object.assign(new Error("HTTP " + r.status), { status: r.status });
         const ra = r.headers.get("Retry-After");
@@ -141,6 +159,7 @@
         throw err;
       }
       const j = await r.json();
+      if (gen !== S.gen) return;   // a newer flight was entered meanwhile: never write this answer into it
       const cache = (r.headers.get("X-Cache") || "").toUpperCase();
       S.ac = (j.ac || [])[0] || null; S.acAt = Date.now(); S.acErr = ""; S.retryAfterMs = 0;
       if (S.ac) {
@@ -152,6 +171,7 @@
         savePos(S.ac, S.t.fn);
       } else { S.acStale = false; }
     } catch (e) {
+      if (gen !== S.gen) return;
       S.acErr = e.status === 503 ? "budget" : e.status === 429 ? "busy" : "down";
       S.retryAfterMs = Math.max(0, e.retryAfterMs || 0);
       restoreLastPos();
@@ -186,9 +206,12 @@
       if (!S.t) return;
       if (document.hidden) { scheduleLive(); return; }
       if (S.sim === "busy") { forceBusySim(); pickLeg(); render(); scheduleLive(); return; }
-      await loadLive();
+      const gen = S.gen; await loadLive(gen); if (gen !== S.gen) return;
       const p2 = F.parseFlight(S.t.fn);
-      if (p2 && p2.cs && (S.routeUnconfirmed || (S.ac && !F.liveLeg(S.legs, S.ac)))) await resolveRoute(p2.cs);
+      if (p2 && p2.cs && (S.routeUnconfirmed || !S.legs.length || (S.ac && !F.liveLeg(S.legs, S.ac)))) {
+        if (!S.legs.length) { const rt = await loadRoute(p2.cs); if (gen !== S.gen) return; if (rt) { S.route = rt; S.legs = F.legs(rt); } }
+        await resolveRoute(p2.cs); if (gen !== S.gen) return;
+      }
       pickLeg(); render(); scheduleLive();
     }, wait);
   }
@@ -214,7 +237,22 @@
   }
   async function loadPlaces() { const o = S.leg && S.leg.from; if (!API || !o || S.places) return;
     try { S.places = (await api(`/places?lat=${o.lat}&lon=${o.lon}`)).places || []; } catch (e) { S.places = null; S.placesErr = true; } }
-  const airports = () => S.leg ? [S.leg.from, S.leg.to] : [];
+  // No confirmed leg: use the airport nearest the plane so the Weather tab still has real weather to show.
+  function nearPlaneApt() {
+    const ac = S.ac; if (S.leg || !ac || !isFinite(ac.lat) || !S.airportsNa) return null;
+    let best = null, bd = Infinity;
+    for (const a of S.airportsNa) { if (!a.icao || a.icao.length !== 4 || !isFinite(a.lat)) continue; const d = F.distNm(ac, a); if (d < bd) { bd = d; best = a; } }
+    return best && bd < 150 ? { ...best, _nm: Math.round(bd) } : null;
+  }
+  const airports = () => { if (S.leg) return [S.leg.from, S.leg.to]; const n = nearPlaneApt(); return n ? [n] : []; };
+  // Fetch weather whenever the airport set changes (e.g. route resolved after the first paint).
+  function ensureWx() {
+    const ids = airports().map(a => a.icao).join(","); if (!ids || ids === S.wxIds) return;
+    S.wxIds = ids; const gen = S.gen;
+    const rk = S.leg ? S.leg.from.icao + ">" + S.leg.to.icao : "";
+    if (rk && rk !== S.rwxKey) { S.rwxKey = rk; loadRouteWx().then(() => { if (gen === S.gen) render(); }).catch(() => {}); }
+    loadWx().then(() => { if (gen === S.gen) render(); }).catch(() => {});
+  }
 
   function pickLeg() {
     const L = S.legs; let leg = F.userLeg(L, S.t.from, S.t.to);
@@ -225,7 +263,8 @@
       const soleOk = sole && (!S.ac || F.legFits(S.ac, sole));
       leg = live || (soleOk ? sole : null);
     }
-    if (!leg && (S.t.from || S.t.to)) leg = null;
+    // From/To that match none of this flight's legs (typo, old value) must not hide a leg the live plane is clearly flying.
+    if (!leg && (S.t.from || S.t.to) && live) leg = live;
     // Share link named both airports but standing route JSON missing: still build a leg for canceled/drive options.
     if (!leg && S.t && S.t.from && S.t.to && S.airportsNa) {
       const by = {};
@@ -242,7 +281,7 @@
   }
 
   async function start(t) {
-    S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, whatIfMin: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null, routeSrc: "", routeUnconfirmed: false });
+    S.liveSlow = false; S.timers.forEach(clearInterval); S.timers = []; clearLiveTimer(); Object.assign(S, { t, route: null, legs: [], leg: null, ac: null, wx: {}, routeWx: [], nas: null, sig: null, places: null, placesErr: false, acErr: "", acStale: false, retryAfterMs: 0, liveBackoff: 15e3, nextLiveAt: 0, whatIfMin: 0, prev: null, rot: null, landedAt: null, mapKey: "", tip: null, fetched: {}, estKey: "", pulse: false, canceled: false, peers: null, peersErr: "", nearbyLive: null, airportsNa: S.airportsNa || null, routePeers: S.routePeers || null, routeSrc: "", routeUnconfirmed: false, wxIds: "", rwxKey: "" });
     syncWhatIf();
     const cpanel = $("fl-canceled");
     if (cpanel) { cpanel.open = false; }
@@ -252,20 +291,28 @@
     if (p && p.unknownAirline) { $("fl-status").innerHTML = `<p class="fl-big">We don't know airline code ${E(p.iata)} yet.</p><p>Try the 3-letter airline code (for example DAL for Delta) followed by the number.</p>`; return; }
     // Preview sim: paint the AI card immediately so ?sim=high works even if live lookups are slow.
     if (S.sim) { pickLeg(); render(); }
-    await loadAirportsNa();
-    S.route = await loadRoute(p.cs); S.legs = F.legs(S.route); await loadLive(); await resolveRoute(p.cs); pickLeg();
+    // Each start() owns a generation; an older lookup that finishes late must not touch the new flight.
+    const gen = S.gen = (S.gen || 0) + 1, alive = () => S.gen === gen;
+    if (S.watchdog) clearTimeout(S.watchdog);
+    S.watchdog = setTimeout(() => { if (alive() && !S.acAt) { S.liveSlow = true; render(); } }, 20e3);
+    // Route and live plane load in parallel and paint first; weather, FAA, SIGMETs, places fill in after.
+    const routeP = loadAirportsNa().then(() => loadRoute(p.cs)).then(rt => { if (alive()) { S.route = rt; S.legs = F.legs(rt); pickLeg(); render(); } });
+    await Promise.all([routeP, loadLive(gen)]); if (!alive()) return;
+    pickLeg(); render();
+    await resolveRoute(p.cs); if (!alive()) return; pickLeg();
     if (S.sim === "busy") forceBusySim();
-    await Promise.all([loadWx(), loadNas(), loadSig(), loadRouteWx()]); render(); loadPlaces().then(renderStuck);
+    render(); scheduleLive();
+    await Promise.all([loadNas(), loadSig()]); if (!alive()) return;   // airport + route weather: ensureWx() on render
+    render(); loadPlaces().then(() => alive() && renderStuck());
     const every = (ms, fn) => S.timers.push(setInterval(() => { if (!document.hidden) fn(); }, ms));
-    scheduleLive();
     every(5 * 60e3, async () => { await loadWx(); await loadSig(); await loadRouteWx(); render(); });
     every(2 * 60e3, async () => { await loadNas(); render(); });
-    every(30e3, renderStuck);
+    every(30e3, () => { try { renderStuck(); } catch (e) { try { console.error("delayed panel failed", e); } catch (_) {} } });
     S.onVis && document.removeEventListener("visibilitychange", S.onVis);
     S.onVis = async () => { if (document.hidden || !S.t) return; const now = Date.now();
       if (S.sim === "busy") { forceBusySim(); pickLeg(); }
       else if (now - S.acAt > livePoll()) {
-        await loadLive();
+        const gen = S.gen; await loadLive(gen); if (gen !== S.gen) return;
         const p2 = F.parseFlight(S.t.fn);
         if (p2 && p2.cs && (S.routeUnconfirmed || (S.ac && !F.liveLeg(S.legs, S.ac)))) await resolveRoute(p2.cs);
         pickLeg();
@@ -317,6 +364,8 @@
     if (ac && (S.acStale || S.acErr === "busy" || S.acErr === "down") && (ac.seenAt || S.acAt)) {
       return { big: "Live position updating, last seen {LAST}", sub: "Keeping that spot on the map until a fresh fix arrives.", lastSeenMs: ac.seenAt || S.acAt, calmBusy: true };
     }
+    if (!ac && !S.acAt && !S.acErr && !S.liveSlow) return { big: S.leg ? `${code(S.leg.from)} → ${code(S.leg.to)}` : `Looking up ${S.t.fn}…`, sub: "Checking live tracking…" };
+    if (!ac && S.liveSlow && !S.acAt) return { big: S.leg ? `${code(S.leg.from)} → ${code(S.leg.to)} · live position not reachable yet` : "Live position not reachable yet.", sub: "We couldn't reach live tracking just now and will keep trying on our own. The route below is from schedule data.", calmBusy: true };
     if (S.acErr && !ac) return { big: "Live position will appear shortly.", sub: "The plane may not be airborne yet or out of receiver range.", calmBusy: true };
     if (!S.leg && S.legs.length > 1) return { big: "This flight number flies more than one leg.", sub: "Pick yours below." };
     if (S.inbound && c.inbound) { const ib = c.inbound;
@@ -331,7 +380,26 @@
     if (ac && !S.leg) return { big: "In the air", sub: "We couldn't confirm this flight's route." };
     return { big: "Not in the air right now", sub: "We don't see this flight on live tracking. It may not have left yet, may have landed, or may be outside receiver coverage." };
   }
+  // Page-level guard: if any render step throws, still show the route and the plane in plain text.
   function render() {
+    try { renderMain(); }
+    catch (e) {
+      try { console.error("flight render failed", e); } catch (_) {}
+      try { if (window.gtag) gtag("event", "flight_render_error", { msg: String(e && e.message || e).slice(0, 90) }); } catch (_) {}
+      try { $("fl-status").innerHTML = fallbackCard(); } catch (_) {}
+      // Never leave the Weather tab blank: try the airports box on its own, else say what happened.
+      try { ensureWx(); renderAirports(context()); } catch (_) {}
+      try { const w = $("fl-apts"); if (w && !w.textContent.trim()) w.innerHTML = `<div class="fl-apt"><h3>Weather</h3><p>Weather for this flight couldn't be shown just now. It refreshes on its own.</p></div>`; } catch (_) {}
+    }
+  }
+  function fallbackCard() {
+    const code = x => x.iata || x.icao, ac = S.ac, l = S.leg, fn = E(S.t ? S.t.fn : "");
+    const route = l ? `<p class="fl-big">${E(code(l.from))} → ${E(code(l.to))}</p>` : S.legs.length ? `<p>${S.legs.map(x => E(code(x.from) + " → " + code(x.to))).join(" · ")}</p>` : "";
+    const plane = ac && isFinite(ac.lat) ? `<p>${ac.alt === "ground" || ac.alt === 0 ? "On the ground" : "In the air"}${isFinite(ac.alt) ? ` · ${Math.round(ac.alt).toLocaleString()} ft` : ""}${ac.gs ? ` · ${Math.round(ac.gs * 1.15078)} mph` : ""}</p>` : `<p>Live position not available yet.</p>`;
+    return `<p class="fl-kicker">${fn}</p>${route}${plane}<p class="dim">Part of this page hit a problem, so we're showing the basics. It refreshes on its own.</p>`;
+  }
+  function renderMain() {
+    ensureWx();
     const c = context(), st = statusLine(c), a = F.assess(c), code = x => x.iata || x.icao;
     watch(c, a);
     if (EMBED && window.parent && window.parent !== window) {
@@ -586,6 +654,8 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
       if (S.inbound && S.liveLeg === S.inbound) { set("idist", mi(to).toLocaleString()); set("ieta", etaMs ? tm(etaMs) : tm(now + to / gs * 3600e3)); } }
     const fr = $("fl-fresh");
     if (fr) { if (!API) fr.innerHTML = `<i class="dot off"></i> Live position isn't connected on this preview.`;
+      else if (!S.acAt && S.liveSlow) { const n = S.nextLiveAt ? Math.max(0, Math.ceil((S.nextLiveAt - now) / 1000)) : 0;
+        fr.innerHTML = `<i class="dot off"></i> Live tracking isn't answering yet${n ? ` · trying again in ${n} s` : " · still trying"}`; }
       else if (!S.acAt) fr.innerHTML = `<i class="dot off"></i> Checking live tracking…`;
       else {
         const heard = ac && ac.seenAt ? (now - ac.seenAt) / 1000 : null;
@@ -669,7 +739,7 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
 
   // ---------- airports ----------
   function renderAirports(c) {
-    const box = $("fl-apts"); if (!S.leg) { box.innerHTML = ""; return; }
+    const box = $("fl-apts"); if (!S.leg) { box.innerHTML = noRouteWx(); return; }
     box.querySelectorAll("details[data-apt]").forEach(d => { S.open[d.dataset.apt] = d.open; });
     box.innerHTML = [[S.leg.from, "Departure", c.depMs], [S.leg.to, "Arrival", c.arrMs || (c.progress && c.progress.etaMs)]].map(([a, role, t]) => {
       const w = S.wx[a.icao], m = w && w.metar, faa = F.nasFor(S.nas, a), win = w && w.taf ? F.tafWindow(w.taf, (t || Date.now()) - 3600e3, (t || Date.now()) + 3600e3) : null;
@@ -683,6 +753,12 @@ ${why.length ? `<ul class="fl-why">${why.map(w => `<li>${E(w)}</li>`).join("")}<
       const upd = [S.fetched.wx ? `weather checked <span data-ago="${S.fetched.wx}"></span>` : "", S.fetched.nas && F.faaCode(a) ? `FAA checked <span data-ago="${S.fetched.nas}"></span>` : ""].filter(Boolean).join(" · ");
       return `<details class="card fl-apt-c" id="apt-${E(a.icao)}" data-apt="${E(a.icao)}"${S.open[a.icao] === false ? "" : " open"}><summary><span class="fl-role">${role}</span><h3>${E(a.iata || a.icao)} <small>${E(a.name)}</small></h3>${pill}</summary>${f}${now}${fc}
 ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m.raw)}</code>` : ""}${w.taf ? `<code>${E(w.taf.rawTAF)}</code>` : ""}</details>` : ""}${upd ? `<p class="dim small">${upd} · refreshes automatically</p>` : ""}</details>`; }).join("");
+  }
+  function noRouteWx() {
+    const n = nearPlaneApt(), w = n && S.wx[n.icao], m = w && w.metar;
+    const head = S.legs.length > 1 && !S.ac ? "Pick your leg to see weather at both airports." : S.t && S.t.fn ? "We haven't confirmed this flight's airports yet, so airport weather isn't shown." : "Track a flight to see airport weather.";
+    const near = n ? `<div class="card fl-apt-c"><span class="fl-role">Near the plane now</span><h3>${E(n.iata || n.icao)} <small>${E(n.name || "")} · about ${n._nm} nm away</small></h3>${m ? `<div class="fl-cat c${E(m.fltCat)}"><b>${E(F.CAT_WORDS[m.fltCat] || "")}</b></div><p>${isFinite(m.temp) && m.temp !== null ? `${Math.round(m.temp * 9 / 5 + 32)}°F · ` : ""}${m.wind ? `Wind ${Math.round(m.wind * 1.15078)} mph` : "Calm wind"}${m.vis != null ? ` · Visibility ${m.vis >= 10 ? "10+" : m.vis} mi` : ""}</p><p class="dim small">Observed ${m.obsTime ? tm(m.obsTime) : ""}</p>` : `<p class="dim">Loading the latest report…</p>`}</div>` : "";
+    return `<div class="card"><h2>Weather</h2><p>${head}</p><p class="dim">Add the airports under Change flight → From and To to see departure and arrival weather.</p></div>${near}`;
   }
   function renderHazards(c) {
     const box = $("fl-haz"); if (!S.leg || !API) { box.innerHTML = S.leg ? `<h2>Along the route</h2><p class="dim">Route hazard alerts (SIGMETs) need our relay, which isn't connected on this preview.</p>` : ""; return; }
@@ -899,7 +975,7 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
   async function loadAirportsNa() {
     if (S.airportsNa) return S.airportsNa;
     try {
-      const j = await (await fetch("/assets/airports-na.json", { credentials: "omit" })).json();
+      const j = await getJSON("/assets/airports-na.json", { credentials: "omit" }, 8e3);
       S.airportsNa = j; return j;
     } catch (e) { return []; }
   }
