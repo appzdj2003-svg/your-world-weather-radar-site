@@ -499,7 +499,8 @@ def trip_planner(path):
 <p class="err tp-wide" id="terr" role="alert"></p>
 <button class="btn primary tp-go tp-wide">Plan my trip</button></form></details>
 <p class="note">Tap 🎤 to speak. Atlas runs in your browser: it reads the National Weather Service forecast for US destinations and never books, holds or prices anything. Voice uses your browser's own speech service.</p></div></div></section>'''
-    b = f'''<a class="tp-fl" href="../flight/" data-ev="flight_page" data-sec="trip_planner"><span class="tp-fl-i" aria-hidden="true">✈️</span><span class="tp-fl-t"><b>Track my flight</b><span>Flying? Follow your plane live, with the weather and FAA delays at both airports and a plain-English delay estimate. Free.</span></span><span class="tp-fl-go" aria-hidden="true">→</span></a>
+    # Same big blue Track-my-flight promo as the home page; GA section stays trip_planner.
+    b = f'''<a class="fl-promo" href="../flight/" data-ev="flight_page" data-sec="trip_planner"><span class="fl-promo-i" aria-hidden="true">✈️</span><span class="fl-promo-b"><span class="fl-promo-k">Free on this site</span><h2>Track my flight</h2><p>Watch your plane live on the radar, with weather at both airports, US FAA delay programs, a plain-English delay estimate, and what to do if you're delayed.</p><span class="fl-promo-go">Open Track my flight →</span></span></a>
 <div id="tres" class="tp-res" hidden></div>
 <section class="tp-why"><h2>Why plan with Atlas</h2><div class="tp-wg">
 <div><b>🌦️ Weather first</b><span>See each trip day's forecast before you pick dates or book: National Weather Service with active alerts in the US, MET Norway worldwide.</span></div>
@@ -510,9 +511,7 @@ def trip_planner(path):
 <p class="note tp-attr">Forecasts and alerts: <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a> (US).{' Forecasts elsewhere: <a href="https://www.met.no/en" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>), summarized into daily values by us.' if METNO else ""} Place search: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Flight, hotel, rental and map links open those companies' own sites; we're not affiliated with them and don't see their prices.</p></section>'''
     page(path, title, "Weather trip planner with Ask Atlas, your travel agent: the forecast for your trip days (NWS in the US, MET Norway worldwide), best-weather dates, a day-by-day plan and one-tap flight, hotel and car searches.", b, h, "0.8",
          scripts=("vendor/qrcode.js", "codec-core.js", "tripcodec.js", "quickparse.js", "askdata.js", "ask.js", "tripcore.js", "metno.js", "tripgear.js", "trip.js", "voice.js", "listen.js"),
-         head_extra='<style>.tp-fl{display:flex;align-items:center;gap:12px;margin:16px 0 8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;color:inherit;text-decoration:none}'
-                    '.tp-fl:hover{border-color:var(--sky,#2b7bd8)}.tp-fl-i{font-size:1.6rem}.tp-fl-t{flex:1;min-width:0}.tp-fl b{display:block;margin-bottom:2px}'
-                    '.tp-fl-t span{color:var(--slate-3);font-size:.95rem}.tp-fl-go{font-size:1.3rem;font-weight:700}</style>')
+         head_extra=SHOW_CSS("../"))
 
 def ask():
     import askdata
