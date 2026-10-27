@@ -652,23 +652,31 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
 <div class="fl-opt"><b>Rental cars at ${E(oa)}</b><span>When driving is a better option than waiting for a new flight. One-way rentals are often available — confirm drop-off fees on the rental site.</span>
 <p class="fl-links"><a${ev("car_rental", "google_search", oa)} href="https://www.google.com/search?q=${encodeURIComponent(`rental cars ${oa} airport`)}" target="_blank" rel="noopener">Compare prices</a><a${ev("car_rental", "google_maps", oa)} href="${LINK.gmaps(`car rental ${oa} airport`, o.lat, o.lon)}" target="_blank" rel="noopener">Map</a></p></div>`;
 
-    // Private & semi-private: only carriers whose listed airports are within ~60 mi of origin or dest.
-    const semis = F.carriersNear(o, d, F.SEMI_PRIVATE, apts || [], 60);
+    // Private & semi-private: both ends of a real route near origin AND dest; else optional "Gets you closer".
+    const routed = F.carriersForRoute(o, d, F.SEMI_PRIVATE, apts || [], 60);
     const charters = F.charterNear(o, d, apts || [], 60);
-    const privItems = [
-      ...semis.map(c => {
-        const near = c.nearest ? ` · near ${E(c.nearest.code)}${c.nearest.mi < 1 ? "" : ` (${Math.round(c.nearest.mi)} mi)`}` : "";
-        return `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.kind === "semi-private" ? "Semi-private" : "Regional")}${near}</span>
-<a${ev("semi_private", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">Check ${E(c.name)}</a></li>`;
-      }),
-      ...charters.map(c => `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.blurb || "Charter")}</span>
-<a${ev("charter", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">${c.id === "charter_search" ? "Search charters" : `Check ${E(c.name)}`}</a></li>`)
-    ];
+    const fmtCarrier = (c, kindLabel) => {
+      const near = c.via ? ` · ${E(c.via)}` : (c.nearest ? ` · near ${E(c.nearest.code)}` : "");
+      const closer = c.role === "closer" && c.land ? ` · lands ${E(c.land.code)}, ~${c.cutPct}% closer` : "";
+      return `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(kindLabel)}${near}${closer}</span>
+<a${ev(c.role === "closer" ? "semi_closer" : "semi_private", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">Check ${E(c.name)}</a></li>`;
+    };
+    const matchItems = routed.match.map(c => fmtCarrier(c, c.kind === "semi-private" ? "Semi-private" : "Regional"));
+    const closerItems = routed.closer.map(c => fmtCarrier(c, "Gets you closer"));
+    const charterItems = charters.map(c => `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.blurb || "Charter")}</span>
+<a${ev("charter", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">${c.id === "charter_search" ? "Search charters" : `Check ${E(c.name)}`}</a></li>`);
+    const scheduledNote = matchItems.length || closerItems.length
+      ? ""
+      : `<p class="dim small">No scheduled regional service between these cities.</p>`;
+    const closerBlock = closerItems.length
+      ? `<p class="dim small" style="margin-top:8px">Gets you closer</p><ul class="fl-peers">${closerItems.join("")}</ul>`
+      : "";
     const privateSec = `<div data-sec="canceled_private"><h3>Private &amp; semi-private</h3>
-<p class="dim small">Options to check; availability and pricing are on their site. We never claim seats are open.</p>
-${privItems.length ? `<ul class="fl-peers">${privItems.join("")}</ul>` : `<p class="dim">No listed semi-private or regional carriers within about 60 miles of ${E(oa)} or ${E(da)} right now. You can still search charters below.</p>
-<ul class="fl-peers">${charters.map(c => `<li class="fl-peer"><b>${E(c.name)}</b> <span class="dim">${E(c.blurb || "")}</span>
-<a${ev("charter", c.id, oa)} href="${E(c.url)}" target="_blank" rel="noopener">${c.id === "charter_search" ? "Search charters" : `Check ${E(c.name)}`}</a></li>`).join("")}</ul>`}
+<p class="dim small">Availability and fares are shown on each carrier's site.</p>
+${scheduledNote}
+${matchItems.length ? `<ul class="fl-peers">${matchItems.join("")}</ul>` : ""}
+${closerBlock}
+<ul class="fl-peers">${charterItems.join("")}</ul>
 </div>`;
 
     // Drive instead? GC × 1.25 at 60 mph vs assumed rebook wait + flight + airport overhead.

@@ -185,22 +185,30 @@ t("polish2: route fog only when visibility under 3 mi; names not ICAO", () => {
   assert(!/fog/i.test(ceil[0].text), "Madison must not claim fog with 10+ mi: " + ceil[0].text);
 });
 
-t("canceled_private: Cape Air near BOS/HYA; JSX near DAL; drive shorter on short hop", () => {
+t("canceled_private: both-ends BOS-HYA / BUR-LAS; LAX-JFK no scheduled; drive/Amtrak", () => {
   const BOS = { iata: "BOS", icao: "KBOS", lat: 42.364, lon: -71.005, name: "Boston" };
   const HYA = { iata: "HYA", icao: "KHYA", lat: 41.669, lon: -70.280, name: "Hyannis" };
   const DAL = { iata: "DAL", icao: "KDAL", lat: 32.847, lon: -96.852, name: "Dallas Love" };
   const AUS = { iata: "AUS", icao: "KAUS", lat: 30.194, lon: -97.670, name: "Austin" };
   const LAX = { iata: "LAX", icao: "KLAX", lat: 33.943, lon: -118.408, name: "Los Angeles" };
   const JFK = { iata: "JFK", icao: "KJFK", lat: 40.640, lon: -73.779, name: "JFK" };
-  const apts = [BOS, HYA, DAL, AUS, LAX, JFK, { iata: "BUR", icao: "KBUR", lat: 34.201, lon: -118.359 }];
-  const cape = F.carriersNear(BOS, HYA, F.SEMI_PRIVATE, apts, 60);
-  assert(cape.some(c => c.id === "cape_air"), "Cape Air should match BOS-HYA: " + cape.map(c => c.id));
-  const jsx = F.carriersNear(DAL, AUS, F.SEMI_PRIVATE, apts, 60);
-  assert(jsx.some(c => c.id === "jsx"), "JSX should match DAL: " + jsx.map(c => c.id));
+  const BUR = { iata: "BUR", icao: "KBUR", lat: 34.201, lon: -118.359, name: "Burbank" };
+  const LAS = { iata: "LAS", icao: "KLAS", lat: 36.080, lon: -115.152, name: "Las Vegas" };
+  const apts = [BOS, HYA, DAL, AUS, LAX, JFK, BUR, LAS];
+  const bosHya = F.carriersForRoute(BOS, HYA, F.SEMI_PRIVATE, apts, 60);
+  assert(bosHya.match.some(c => c.id === "cape_air"), "Cape Air both-ends BOS-HYA: " + bosHya.match.map(c => c.id));
+  const burLas = F.carriersForRoute(BUR, LAS, F.SEMI_PRIVATE, apts, 60);
+  assert(burLas.match.some(c => c.id === "jsx"), "JSX both-ends BUR-LAS: " + burLas.match.map(c => c.id));
+  const laxJfk = F.carriersForRoute(LAX, JFK, F.SEMI_PRIVATE, apts, 60);
+  assert.strictEqual(laxJfk.match.length, 0, "no scheduled match LAX-JFK: " + laxJfk.match.map(c => c.id));
+  assert.strictEqual(laxJfk.closer.length, 0, "no closer LAX-JFK: " + laxJfk.closer.map(c => c.id));
+  // One-end proximity must NOT promote Cape Air on LAX-JFK via carriersForRoute
+  const legacy = F.carriersNear(LAX, JFK, F.SEMI_PRIVATE, apts, 60);
+  assert(legacy.some(c => c.id === "cape_air"), "carriersNear still one-end (Blade-style)");
   const DEN = { iata: "DEN", icao: "KDEN", lat: 39.862, lon: -104.673, name: "Denver" };
   const SEA = { iata: "SEA", icao: "KSEA", lat: 47.450, lon: -122.309, name: "Seattle" };
-  const none = F.carriersNear(DEN, SEA, F.SEMI_PRIVATE.filter(c => c.id === "cape_air"), apts.concat([DEN, SEA]), 60);
-  assert.strictEqual(none.length, 0, "Cape Air should not match DEN-SEA");
+  const none = F.carriersForRoute(DEN, SEA, F.SEMI_PRIVATE.filter(c => c.id === "cape_air"), apts.concat([DEN, SEA]), 60);
+  assert.strictEqual(none.match.length + none.closer.length, 0, "Cape Air should not match DEN-SEA");
   const ch = F.charterNear(JFK, BOS, apts, 60);
   assert(ch.some(c => c.id === "blade"), "Blade near JFK");
   assert(ch.some(c => c.id === "charter_search"), "general charter always");
