@@ -950,6 +950,36 @@ ${driveSec}
   }
   try { const from = sessionStorage.getItem("yw-flight-from"); if (from) { sessionStorage.removeItem("yw-flight-from");   // the Trip Planner's "Track my flight" card
     if (window.gtag && /^[a-z_]{1,30}$/.test(from)) gtag("event", "flight_page_click", { section: from }); } } catch (e) {}
+  // Sticky Play bar: on /flight while tracking, don't cover the AI delay card on the first screen.
+  // Show it only after the visitor scrolls past the AI card (still dismissible via ×).
+  (function wirePlaybarDefer() {
+    const bar = document.getElementById("playbar"); if (!bar) return;
+    const sync = () => {
+      if (bar.hidden) { bar.classList.remove("fl-play-defer", "fl-play-show"); return; }
+      if (!document.body.classList.contains("fl-tracking")) {
+        bar.classList.remove("fl-play-defer", "fl-play-show");
+        return;
+      }
+      bar.classList.add("fl-play-defer");
+      const ai = $("fl-ai-host");
+      let show = true;
+      if (ai) {
+        // Past the AI card = its bottom has scrolled off the top of the viewport.
+        show = ai.getBoundingClientRect().bottom < 12;
+      }
+      bar.classList.toggle("fl-play-show", show);
+    };
+    window.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    document.addEventListener("visibilitychange", sync);
+    const mo = new MutationObserver(sync);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    const aiHost = $("fl-ai-host");
+    if (aiHost) mo.observe(aiHost, { childList: true, subtree: true });
+    setTimeout(sync, 0);
+    setInterval(sync, 1000);
+  })();
+
   try { const sim = new URLSearchParams(location.search).get("sim"); if (sim) S.sim = sim; } catch (e) {}
   boot(); window.addEventListener("hashchange", boot);
 })();
