@@ -379,5 +379,7 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
     else if (F.parseFlight(decodeURIComponent(h))) t = F.validate({ v: 1, fn: decodeURIComponent(h) });
     if (t) { fillForm(t); start(t); }
   }
+  try { const from = sessionStorage.getItem("yw-flight-from"); if (from) { sessionStorage.removeItem("yw-flight-from");   // the Trip Planner's "Track my flight" card
+    if (window.gtag && /^[a-z_]{1,30}$/.test(from)) gtag("event", "flight_page_click", { section: from }); } } catch (e) {}
   boot(); window.addEventListener("hashchange", boot);
 })();

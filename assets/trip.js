@@ -209,10 +209,10 @@ ${android ? `<div class="btns"><a class="btn primary" href="${E(YWTrip.intentUrl
     else if (t.classList.contains("tp-pick")) { $("f-sd").focus(); try { $("f-sd").showPicker(); } catch (x) {} }
     else if (t.id === "tp-shift") { st.sd = t.dataset.sd; say("bot", `<p>Moved your trip to ${E(C.fmtRange(st.sd, st.d))}, the best stretch in the forecast.</p>`); plan(true); }
     else if (t.dataset && t.dataset.partner && window.gtag) gtag("event", "trip_outbound", { partner: t.dataset.partner });
-    else if (t.dataset && t.dataset.ev === "flight_page" && window.gtag) {   // same-tab link: send the event before leaving the page
-      const go = () => { if (!go.done) { go.done = 1; location.href = t.href; } }, plain = !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button);
-      gtag("event", "flight_page_click", { section: t.dataset.sec || "trip_planner", transport_type: "beacon", event_callback: plain ? go : undefined });
-      if (plain) { e.preventDefault(); setTimeout(go, 800); } }
+    else if (t.dataset && t.dataset.ev === "flight_page") {   // GA4 batches hits and a same-tab link can drop them, so /flight sends this click on arrival
+      const sec = t.dataset.sec || "trip_planner", plain = !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button);
+      if (plain) { try { sessionStorage.setItem("yw-flight-from", sec); } catch (x) {} }
+      else if (window.gtag) gtag("event", "flight_page_click", { section: sec }); }
   });
   let last = null; try { last = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}   // remembered on this device only
   if (last && last.to && last.sd >= today() && !location.hash && !location.search)
