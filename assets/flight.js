@@ -50,7 +50,10 @@
     return F.validate(t);
   }
   function fillForm(t) { $("f-fn").value = t.fn || ""; $("f-d").value = t.d || ""; $("f-dep").value = toLocalInput(t.dep); $("f-arr").value = toLocalInput(t.arr);
-    $("f-ndep").value = toLocalInput(t.ndep); $("f-from").value = t.from || ""; $("f-to").value = t.to || ""; }
+    $("f-ndep").value = toLocalInput(t.ndep); $("f-from").value = t.from || ""; $("f-to").value = t.to || ""; mirrorTimes(); }
+  // The Delayed panel has its own departure-time box (the form fields are hidden once tracking); keep both in sync.
+  function mirrorTimes() { const a = $("s-dep"), b = $("s-ndep"); if (a && document.activeElement !== a) a.value = $("f-dep").value; if (b && document.activeElement !== b) b.value = $("f-ndep").value; }
+  ["f-dep", "f-ndep"].forEach(id => { const el = $(id); if (el) el.addEventListener("input", mirrorTimes); });
   $("f-tz").textContent = tz ? `Times are in your time zone (${tz}).` : "Times are in your device's time zone.";
   $("fform").addEventListener("submit", async e => { e.preventDefault(); $("ferr").textContent = "";
     let t; try { t = readForm(); } catch (x) { $("ferr").textContent = "Enter a flight number like DL1234 or UA 512."; return; }
@@ -735,8 +738,8 @@ ${m || (w && w.taf) ? `<details><summary>Raw reports</summary>${m ? `<code>${E(m
       clock = `<div class="fl-clock${S.pulse ? " pulse" : ""}"><span>Be back at the gate by</span><b>${tm(P.backBy)}</b><span class="fl-cd" data-until="${P.backBy}"${estimated ? ' data-est="1"' : ""}>${P.gateMin > 0 ? `${F.fmtMin(P.gateMin)} from now` : upMsg}</span>
 <small>${basisLine}${outBit}</small></div>`;
     } else if (dep && estimated) {
-      clock = `<p class="fl-clock-miss">Estimated departure window may have started. Confirm the time and gate in your airline app, or enter an updated departure above.</p>`;
-    } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it above as the updated departure." : "Add your departure time above to see how much time you have left."}</p>`;
+      clock = `<p class="fl-clock-miss">Estimated departure window may have started. Confirm the time and gate in your airline app, and enter it under “New time if delayed” at the top of this panel.</p>`;
+    } else clock = `<p class="fl-clock-miss">${dep ? "Departure time has passed. Check your airline app for the new time and enter it under “New time if delayed” at the top of this panel." : "Enter your departure time in the box at the top of this panel to see how much time you have left. It works whether or not your flight is delayed."}</p>`;
     const warn = `<p class="fl-warn">Delays can change quickly. Confirm times in your airline app — this is an estimate.</p>`;
     const P = S.plan && dep && dep > now ? S.plan : null, short = !P || P.outMin < 60;
     const airside = `<div class="fl-opt fl-air"><b>Stay inside the airport</b><span>Food, shops and lounges past security — no re-screening. ${short ? "Best when time is short." : ""}</span>
@@ -808,6 +811,19 @@ ${pick("ride", "Rides", "Uber, Lyft or taxi to a hotel or alternate airport — 
     }
   }
   const stuckB = $("fl-stuck-b"); if (stuckB) stuckB.addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; S.tab = b.dataset.tab; S.stuckKey = ""; renderStuck(); const sw = $("fl-swipe"); if (sw) sw.scrollLeft = 0; });
+  // Typing a time in the Delayed panel: update the form, the tracked flight and the share link, then restart the countdown now.
+  ["s-dep", "s-ndep"].forEach(id => { const el = $(id); if (!el) return;
+    const apply = async () => {
+      const f = id === "s-dep" ? "f-dep" : "f-ndep"; $(f).value = el.value;
+      if (!S.t) return;
+      const v = el.value ? fromLocalInput(el.value) : undefined, key = id === "s-dep" ? "dep" : "ndep";
+      if (v === S.t[key] || (!v && !S.t[key])) return;
+      S.t = { ...S.t }; if (v) S.t[key] = v; else delete S.t[key];
+      if (key === "dep" && v && !S.t.d) { const d = new Date(v); S.t.d = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; $("f-d").value = S.t.d; }
+      try { const tok = await F.encode(S.t); history.replaceState(null, "", "#" + tok); } catch (x) {}
+      S.stuckKey = ""; S.plan = null; render(); renderStuck();
+    };
+    el.addEventListener("input", apply); el.addEventListener("change", apply); });
   ["s-board", "s-sec"].forEach(id => { const el = $(id); if (el) el.addEventListener("change", () => renderStuck()); });
   const stuckEl = $("fl-stuck");
   if (stuckEl) stuckEl.addEventListener("toggle", () => {

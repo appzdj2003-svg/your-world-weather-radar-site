@@ -84,6 +84,15 @@
 .fl-clock>span{display:block;color:#CBD5E1;font-weight:600}.fl-clock b{display:block;font-size:2.1rem;line-height:1.1}.fl-clock .fl-cd{font-size:1.2rem;color:#FBBF24;font-weight:800}
 .fl-clock small{display:block;margin-top:6px;color:#CBD5E1;font-size:.88rem}.fl-clock small b{display:inline;font-size:1em;color:#fff}
 .fl-clock-miss{font-weight:600}
+.fl-mytime{margin:12px 0 4px;padding:12px 14px;border:1.5px solid #94A3B8;border-radius:12px;background:#F8FAFC;min-width:0;max-width:100%;box-sizing:border-box}
+.fl-mytime-h{margin:0 0 10px;display:flex;flex-direction:column;gap:2px;color:#0F172A}
+.fl-mytime-h b{font-size:1.02rem}.fl-mytime-h span{font-size:.9rem;color:#334155;font-weight:500}
+.fl-mytime-g{display:grid;grid-template-columns:1fr;gap:10px;min-width:0}
+@media (min-width:560px){.fl-mytime-g{grid-template-columns:1fr 1fr}}
+.fl-mytime-f{display:flex;flex-direction:column;gap:4px;min-width:0;color:#0F172A;font-weight:700;font-size:.92rem}
+.fl-mytime-f small{color:#334155;font-weight:500}
+.fl-mytime-f input{box-sizing:border-box;width:100%;max-width:100%;min-width:0;font:inherit;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;padding:9px 12px;border-radius:10px;border:1.5px solid #94A3B8;background:#fff;color:#0F172A;color-scheme:light}
+.fl-mytime-f input:focus-visible{outline:3px solid #2563EB;outline-offset:1px}
 .fl-warn{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px;font-weight:600;margin:12px 0;font-size:.92rem;color:#78350F}
 .fl-opt{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.fl-opt b{display:block;font-size:1rem}.fl-opt span{display:block;color:var(--slate-3);font-size:.88rem;line-height:1.35}
 .fl-air{background:#F0F9FF;border-color:#7DD3FC}
