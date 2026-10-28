@@ -384,11 +384,23 @@ GEAR = [
    ("power", "INIU 20000mAh power bank", "Slim 20,000 mAh charger to keep phones going.", "B0FX7T4H7D", "Budget pick"),
    ("power", "CyberPower CP1500PFCLCD UPS battery backup", "Bigger sine-wave UPS for a computer plus network gear.", "B00429N19W", ""),
    ("power", "APC BE600M1 UPS battery backup", "Keeps a modem and router online through short outages.", "B01FWAZEIU", "Top pick"),
+ ]), ("cbaudio", "📻 CB radio to phone audio", "Hear CB road and weather chatter through your phone with a wired kit. Pages checked on amazon.com 2026-10-28.", "gear", [
+   ("cord", "StarTech USB-C to 3.5mm headset adapter (USBCAUDIO2)", "USB-C sound card with a real TRRS mic input that Android phones accept.", "B0DSGCMRLF", "Kit part 1"),
+   ("cord", "StarTech 3.5mm headset splitter (MUYHSMFF)", "Splits the TRRS jack into separate mic and headphone ports. Use the mic port.", "B078NRG76S", "Kit part 1b"),
+   ("cord", "Amazon Basics 3.5mm male to male aux cable, 4 ft", "Runs from the CB's EXT SP jack to the isolator.", "B00NO73MUQ", "Kit part 2"),
+   ("cord", "Cable Matters 3.5mm ground loop noise isolator", "Cuts engine whine and hum between the CB and the phone.", "B08G9J74VX", "Kit part 3"),
+   ("radio", "Uniden PRO520XL compact CB radio", "Small 40-channel CB with a built-in external speaker jack.", "B00004VXNI", "Compact pick"),
+   ("radio", "Midland 75-822 CB radio", "40-channel CB that works mobile or handheld, with an external speaker jack.", "B00000K2YR", ""),
+   ("radio", "Cobra 29 LTD Classic CB radio", "Classic full-size 40-channel CB with an external speaker jack on the back.", "B0BVGTZCLB", "Top pick"),
+   ("radio", "Uniden Bearcat 980 SSB CB radio", "40-channel CB with sideband, NOAA weather channels and a rear EXT SP jack.", "B007B5ZAES", "Premium pick"),
+   ("radio", "Uniden Bearcat 880 CB radio", "40-channel CB with NOAA weather channels and an external speaker jack.", "B006TA2F1M", ""),
  ]),
 ]
 GEN_SAFETY = ('<p class="callout"><strong>Generator safety:</strong> Run a generator outdoors only, far from windows, doors and vents. '
               'Never run one indoors, in a garage, basement or shed, even with the door open. Exhaust has carbon monoxide, which you can\'t see or smell. '
               'Never plug a generator into a wall outlet; use extension cords or a transfer switch installed by a licensed electrician.</p>')
+CB_AUDIO = ('<p class="callout"><strong>How it connects:</strong> Plug the cable into the CB\'s EXT SP (external speaker) jack, through the isolator, into the splitter\'s mic port, then the USB-C adapter into your phone. '
+            'It works with most CBs that have an EXT SP jack. Start with the CB volume low and turn it up slowly. Every CB also needs an antenna.</p>')
 def gear():
     jump = '<div class="tabs" style="margin-top:18px">' + "".join(f'<a href="#{sid}" class="btn" style="padding:7px 14px;font-size:.85rem">{E(t)}</a>' for sid, t, *_ in GEAR) + "</div>"
     secs = ""; seen = set()
@@ -401,7 +413,7 @@ def gear():
         return (f'<a class="pcard"{gid(k, n)} href="{E(amz_dp(asin) if asin else amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
                 f'<span class="pc-body">{tag}<b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>')
     for sid, title, sub, tone, items in GEAR:
-        safety = GEN_SAFETY if sid == "generators" else ""
+        safety = GEN_SAFETY if sid == "generators" else CB_AUDIO if sid == "cbaudio" else ""
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
     deals = load_deals()
     # Storm-power deals can be older than the newest rain/radio headlines, so the newest generator, power station and
