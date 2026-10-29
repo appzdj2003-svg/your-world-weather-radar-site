@@ -390,3 +390,7 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 .tp-live-countdown div { min-width: 120px; }
 .tp-live-countdown span { display: block; font-size: .75rem; color: var(--slate-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
 .tp-live-countdown b { font-size: 1.15rem; color: var(--slate); }
+.btn.as-btn{background:#000;border-color:#000;color:#fff}.btn.as-btn:hover{background:#1f1f1f;color:#fff}.btn.as-btn svg{width:20px;height:20px}
+.store-btns{display:inline-flex;flex-wrap:wrap;gap:10px;max-width:100%}
+@media(max-width:560px){.store-btns{display:flex;flex-direction:column;width:100%}.store-btns .btn,.btns .as-btn{justify-content:center;max-width:100%;box-sizing:border-box}.store-btns .btn{width:100%}}
+.fl-cta .as-btn{margin-top:8px}

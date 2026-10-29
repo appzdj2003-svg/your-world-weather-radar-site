@@ -33,7 +33,7 @@ QA = [
 ]
 APP_QA = [
  (["price", "cost", "premium", "subscription", "how much"], "How much is Premium?",
-  "The app is free. Premium is $4.99/month or $47.99/year through Google Play.", "../pricing.html"),
+  "The app is free on Android and iPhone. Premium is $4.99/month or $47.99/year through Google Play, or $4.99/month on iPhone through the App Store.", "../pricing.html"),
  (["cams", "camera", "webcam", "webcoos"], "Does the app have weather cams?",
   "Yes. Nearby cams from USGS, NOAA, Windy.com and WebCOOS coastal cams, plus YouTube live streams, are free.", "../features.html"),
  (["gemma", "ai", "briefing", "offline"], "What is the AI briefing?",
