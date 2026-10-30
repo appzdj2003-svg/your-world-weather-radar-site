@@ -1,191 +1,209 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
   "items": []
  },
  "metar": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1793375460,
-    "temp": 22.2,
-    "dewp": 10.6,
-    "wdir": 340,
-    "wspd": 13,
-    "wgst": null,
+    "obsTime": 1793386260,
+    "temp": 21.7,
+    "dewp": 6.1,
+    "wdir": 320,
+    "wspd": 18,
+    "wgst": 27,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 4800
+      "base": 5500
      }
     ],
-    "rawOb": "METAR KJFK 301551Z 34013KT 10SM FEW048 22/11 A3002 RMK AO2 SLP165 T02220106 $",
+    "rawOb": "METAR KJFK 301851Z 32018G27KT 10SM FEW055 22/06 A3002 RMK AO2 PK WND 34027/1845 SLP165 T02170061 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1793375400,
-    "temp": 15,
+    "obsTime": 1793386200,
+    "temp": 12,
     "dewp": 9,
-    "wdir": 80,
-    "wspd": 6,
+    "wdir": 70,
+    "wspd": 5,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR EGLL 301550Z AUTO 08006KT 9999 NCD 15/09 Q1029",
+    "rawOb": "METAR EGLL 301850Z AUTO 07005KT 9999 NCD 12/09 Q1030",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1793376000,
-    "temp": 14,
-    "dewp": 7,
+    "obsTime": 1793386800,
+    "temp": 11,
+    "dewp": 6,
     "wdir": 60,
-    "wspd": 11,
+    "wspd": 7,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR LFPG 301600Z 06011KT CAVOK 14/07 Q1026 NOSIG",
+    "rawOb": "METAR LFPG 301900Z 06007KT CAVOK 11/06 Q1027 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1793376000,
-    "temp": 32,
+    "obsTime": 1793386800,
+    "temp": 30,
     "dewp": 21,
-    "wdir": 340,
-    "wspd": 7,
+    "wdir": 80,
+    "wspd": 5,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 301600Z 34007KT 310V010 CAVOK 32/21 Q1014 NOSIG",
+    "rawOb": "METAR OMDB 301900Z 08005KT 040V110 CAVOK 30/21 Q1015 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1793376000,
+    "obsTime": 1793386800,
     "temp": 29,
-    "dewp": 24,
-    "wdir": 240,
+    "dewp": 25,
+    "wdir": 220,
     "wspd": 5,
     "wgst": null,
     "wxString": "HZ",
-    "cover": "FEW",
+    "cover": "BKN",
     "clouds": [
      {
       "cover": "FEW",
+      "base": 2000
+     },
+     {
+      "cover": "SCT",
+      "base": 2500
+     },
+     {
+      "cover": "BKN",
       "base": 10000
      }
     ],
-    "rawOb": "METAR VABB 301600Z 24005KT 3500 HZ FEW100 29/24 Q1013 NOSIG",
+    "rawOb": "METAR VABB 301900Z 22005KT 3500 HZ FEW020 SCT025 BKN100 29/25 Q1014 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1793376000,
-    "temp": 17,
-    "dewp": 13,
-    "wdir": 310,
-    "wspd": 3,
+    "obsTime": 1793386800,
+    "temp": 18,
+    "dewp": 15,
+    "wdir": 240,
+    "wspd": 8,
     "wgst": null,
     "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR RJTT 301600Z 31003KT CAVOK 17/13 Q1011 NOSIG",
+    "cover": "BKN",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 1500
+     },
+     {
+      "cover": "BKN",
+      "base": 18000
+     }
+    ],
+    "rawOb": "METAR RJTT 301900Z 24008KT 9999 FEW015 BKN180 18/15 Q1010 BECMG TL2030 33006KT",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1793376000,
-    "temp": 19,
+    "obsTime": 1793386800,
+    "temp": 18,
     "dewp": 15,
-    "wdir": 30,
-    "wspd": 7,
+    "wdir": 20,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
-    "cover": "CLR",
+    "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR YSSY 301600Z AUTO 03007KT 9999 // NCD 19/15 Q1018",
+    "rawOb": "METAR YSSY 301900Z 02006KT CAVOK 18/15 Q1017",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1793376000,
-    "temp": 22,
-    "dewp": 15,
-    "wdir": 190,
+    "obsTime": 1793386800,
+    "temp": 19,
+    "dewp": 17,
+    "wdir": 200,
     "wspd": 17,
     "wgst": null,
     "wxString": null,
-    "cover": "CAVOK",
-    "clouds": [],
-    "rawOb": "METAR FACT 301600Z 19017KT CAVOK 22/15 Q1017 NOSIG",
+    "cover": "BKN",
+    "clouds": [
+     {
+      "cover": "BKN",
+      "base": 500
+     }
+    ],
+    "rawOb": "METAR FACT 301900Z 20017KT 9999 BKN005 19/17 Q1018 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1793376000,
-    "temp": 21,
+    "obsTime": 1793386800,
+    "temp": 23,
     "dewp": 18,
     "wdir": 230,
-    "wspd": 4,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
-    "cover": "OVC",
+    "cover": "BKN",
     "clouds": [
      {
       "cover": "BKN",
-      "base": 1500
-     },
-     {
-      "cover": "OVC",
-      "base": 2000
+      "base": 2500
      }
     ],
-    "rawOb": "METAR SBGR 301600Z COR 23004KT 9999 BKN015 OVC020 21/18 Q1015",
+    "rawOb": "METAR SBGR 301900Z 23006KT 9999 BKN025 23/18 Q1014",
     "lat": -23.432,
     "lon": -46.469,
     "city": "São Paulo"
    },
    {
     "icaoId": "MMMX",
-    "obsTime": 1793375340,
-    "temp": 16,
-    "dewp": 12,
-    "wdir": 0,
-    "wspd": 0,
+    "obsTime": 1793386020,
+    "temp": 22,
+    "dewp": 11,
+    "wdir": 360,
+    "wspd": 7,
     "wgst": null,
-    "wxString": "BR HZ",
-    "cover": "OVC",
+    "wxString": "HZ",
+    "cover": "SCT",
     "clouds": [
      {
-      "cover": "OVC",
-      "base": 1500
+      "cover": "SCT",
+      "base": 2000
      }
     ],
-    "rawOb": "METAR MMMX 301549Z 00000KT 2 1/2SM BR HZ OVC015 16/12 A3037 NOSIG RMK 8/6// TWR VIS",
+    "rawOb": "METAR MMMX 301847Z 36007KT 3SM HZ SCT020 22/11 A3030 NOSIG RMK 8/800 TWR VIS",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -193,31 +211,8 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
   "items": [
-   {
-    "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
-    "name": "GSLV Mk II | IRNSS-1L (NVS-03)",
-    "net": "2026-10-30T18:21:00Z",
-    "windowStart": "2026-10-30T17:00:00Z",
-    "windowEnd": "2026-10-30T21:00:00Z",
-    "status": "Go",
-    "statusName": "Go for Launch",
-    "rocket": "GSLV Mk. II",
-    "provider": "Indian Space Research Organization",
-    "mission": "IRNSS-1L (NVS-03)",
-    "orbit": "GTO",
-    "pad": "Satish Dhawan Space Centre Second Launch Pad",
-    "site": "Satish Dhawan Space Centre, India",
-    "lat": "13.7199",
-    "lon": "80.2304",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/gslv2520mk252_image_20240101090337.jpg",
-    "precision": "MIN",
-    "country": "IND",
-    "providerType": "Government"
-   },
    {
     "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
     "name": "Falcon 9 Block 5 | Starlink Group 15-18",
@@ -769,20 +764,38 @@
     "precision": "M",
     "country": "USA",
     "providerType": "Commercial"
+   },
+   {
+    "id": "22e117bf-041c-49d5-9d09-7b180036e143",
+    "name": "Ariane 62 | Metop-SG B1",
+    "net": "2026-12-31T00:00:00Z",
+    "windowStart": "2026-12-31T00:00:00Z",
+    "windowEnd": "2026-12-31T00:00:00Z",
+    "status": "TBD",
+    "statusName": "To Be Determined",
+    "rocket": "Ariane 62",
+    "provider": "Arianespace",
+    "mission": "Metop-SG B1",
+    "orbit": "SSO",
+    "pad": "Ariane Launch Area 4",
+    "site": "Guiana Space Centre, French Guiana",
+    "lat": "5.256319",
+    "lon": "-52.786838",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_62_lifto_image_20240711132056.jpeg",
+    "precision": "M",
+    "country": "GUF",
+    "providerType": "Commercial"
    }
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
-  "items": [
-   {
-    "pid": "wp3026",
-    "tcw": "WTPN51 PGTW 301500    \nWARNING    ATCG MIL 30W NWP 261030132939\n2026103012 30W IN-FA      029  01 300 19 SATL 020\nT000 197N 1445E 120 R064 060 NE QD 055 SE QD 045 SW QD 050 NW QD R050 085 NE QD 070 SE QD 060 SW QD 070 NW QD R034 140 NE QD 120 SE QD 095 SW QD 135 NW QD \nT012 215N 1430E 120 R064 050 NE QD 050 SE QD 040 SW QD 050 NW QD R050 075 NE QD 070 SE QD 060 SW QD 070 NW QD R034 130 NE QD 120 SE QD 100 SW QD 125 NW QD \nT024 228N 1430E 115 R064 040 NE QD 040 SE QD 040 SW QD 050 NW QD R050 065 NE QD 070 SE QD 060 SW QD 060 NW QD R034 110 NE QD 110 SE QD 110 SW QD 120 NW QD \nT036 232N 1437E 105 R064 040 NE QD 040 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 060 SW QD 060 NW QD R034 110 NE QD 100 SE QD 110 SW QD 130 NW QD \nT048 231N 1436E 095 R064 040 NE QD 030 SE QD 020 SW QD 040 NW QD R050 060 NE QD 050 SE QD 050 SW QD 060 NW QD R034 120 NE QD 100 SE QD 100 SW QD 130 NW QD \nT060 229N 1422E 085 R064 040 NE QD 030 SE QD 020 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 100 SE QD 100 SW QD 120 NW QD \nT072 232N 1409E 085 R064 040 NE QD 030 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 110 SE QD 100 SW QD 120 NW QD \nT096 244N 1401E 075 R064 040 NE QD 030 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 120 SE QD 100 SW QD 120 NW QD \nT120 264N 1407E 065 R064 030 NE QD 030 SE QD 020 SW QD 030 NW QD R050 060 NE QD 060 SE QD 040 SW QD 050 NW QD R034 140 NE QD 120 SE QD 080 SW QD 110 NW QD \nAMP\nSUBJ:  TYPHOON 30W (IN-FA) WARNING NR 029    \n1. TYPHOON 30W (IN-FA) WARNING NR 029    \n   01 ACTIVE TROPICAL CYCLONE IN NORTHWESTPAC\n   MAX SUSTAINED WINDS BASED ON ONE-MINUTE AVERAGE\n   WIND RADII VALID OVER OPEN WATER ONLY\n    ---\n   WARNING POSITION:\n   301200Z --- NEAR 19.7N 144.5E\n     MOVEMENT PAST SIX HOURS - 300 DEGREES AT 19 KTS\n     POSITION ACCURATE TO WITHIN 020 NM\n     POSITION BASED ON EYE FIXED BY SATELLITE\n   PRESENT WIND DISTRIBUTION:\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            055 NM SOUTHEAST QUADRANT\n                            045 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 085 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 140 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            095 NM SOUTHWEST QUADRANT\n                            135 NM NORTHWEST QUADRANT\n   REPEAT POSIT: 19.7N 144.5E\n    ---\n   FORECASTS:\n   12 HRS, VALID AT:\n   310000Z --- 21.5N 143.0E\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 075 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 130 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            125 NM NORTHWEST QUADRANT\n   VECTOR TO 24 HR POSIT: 360 DEG/ 06 KTS\n    ---\n   24 HRS, VALID AT:\n   311200Z --- 22.8N 143.0E\n   MAX SUSTAINED WINDS - 115 KT, GUSTS 140 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 065 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 110 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 36 HR POSIT: 060 DEG/ 04 KTS\n    ---\n   36 HRS, VALID AT:\n   010000Z --- 23.2N 143.7E\n   MAX SUSTAINED WINDS - 105 KT, GUSTS 130 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 110 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 48 HR POSIT: 225 DEG/ 01 KTS\n    ---\n   EXTENDED OUTLOOK:\n   48 HRS, VALID AT:\n   011200Z --- 23.1N 143.6E\n   MAX SUSTAINED WINDS - 095 KT, GUSTS 115 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 60 HR POSIT: 260 DEG/ 07 KTS\n    ---\n   60 HRS, VALID AT:\n   020000Z --- 22.9N 142.2E\n   MAX SUSTAINED WINDS - 085 KT, GUSTS 105 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 72 HR POSIT: 285 DEG/ 06 KTS\n    ---\n   72 HRS, VALID AT:\n   021200Z --- 23.2N 140.9E\n   MAX SUSTAINED WINDS - 085 KT, GUSTS 105 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 96 HR POSIT: 330 DEG/ 04 KTS\n    ---\n   LONG RANGE OUTLOOK:\n    ---\n   96 HRS, VALID AT:\n   031200Z --- 24.4N 140.1E\n   MAX SUSTAINED WINDS - 075 KT, GUSTS 090 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 120 HR POSIT: 015 DEG/ 05 KTS\n    ---\n   120 HRS, VALID AT:\n   041200Z --- 26.4N 140.7E\n   MAX SUSTAINED WINDS - 065 KT, GUSTS 080 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 030 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            030 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 140 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            080 NM SOUTHWEST QUADRANT\n                            110 NM NORTHWEST QUADRANT\n    ---\nREMARKS:\n301500Z POSITION NEAR 20.1N 144.1E.\n30OCT26. TYPHOON 30W (IN-FA), LOCATED APPROXIMATELY 87 NM\nNORTHWEST OF AGRIHAN, HAS TRACKED WEST-NORTHWESTWARD AT 19 KNOTS\nOVER THE PAST SIX HOURS.\nMINIMUM CENTRAL PRESSURE AT 301200Z IS 949 MB. MAXIMUM\nSIGNIFICANT WAVE HEIGHT AT 301200Z IS 58 FEET. NEXT WARNINGS AT\n302100Z, 310300Z, 310900Z AND 311500Z.\n//\n3026102112 109N1665E  15\n3026102118 110N1668E  15\n3026102200 114N1669E  15\n3026102206 119N1666E  15\n3026102212 120N1660E  20\n3026102218 116N1656E  20\n3026102300 110N1658E  25\n3026102306 108N1663E  25\n3026102312 107N1662E  30\n3026102318 105N1661E  35\n3026102400 104N1661E  45\n3026102406 103N1661E  45\n3026102412 106N1660E  50\n3026102412 106N1660E  50\n3026102418 111N1656E  50\n3026102418 111N1656E  50\n3026102500 115N1653E  55\n3026102500 115N1653E  55\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\n3026103012 197N1445E 120\n3026103012 197N1445E 120\n3026103012 197N1445E 120\nNNNN\n"
-   }
-  ]
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
+  "items": []
  },
  "sun": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -813,9 +826,9 @@
     ]
    },
    "kp": {
-    "now": 0.67,
-    "nowAt": "2026-10-30T15:00:00+00:00",
-    "max24h": 2.33,
+    "now": 2.67,
+    "nowAt": "2026-10-30T18:00:00+00:00",
+    "max24h": 2.67,
     "next24h": 5.0,
     "byDate": {
      "2026-10-30": 3.67,
@@ -825,13 +838,13 @@
     }
    },
    "wind": {
-    "speed": 334.0,
-    "bz": -3.0,
-    "bt": 7.0,
-    "at": "2026-10-30T16:08:00Z"
+    "speed": 326.0,
+    "bz": -1.0,
+    "bt": 6.0,
+    "at": "2026-10-30T19:08:00Z"
    },
    "flare": {
-    "current": "B4.9",
+    "current": "B1.8",
     "max": "B5.7",
     "maxAt": "2026-10-30T16:07:00Z"
    },
@@ -842,21 +855,30 @@
   }
  },
  "pads": {
-  "fetchedAt": "2026-10-30T16:18:11+00:00",
+  "fetchedAt": "2026-10-30T19:17:34+00:00",
   "items": [
    {
     "icaoId": "KXMR",
-    "obsTime": 1793375700,
-    "temp": 29.1,
-    "dewp": 22.8,
-    "wdir": 60,
-    "wspd": 9,
-    "wgst": 17,
+    "obsTime": 1793386500,
+    "temp": 27.6,
+    "dewp": 22.3,
+    "wdir": 70,
+    "wspd": 10,
+    "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR KXMR 301555Z AUTO 06009G17KT 10SM CLR 29/23 A3000 RMK AO2 SLP162 T02910228",
+    "cover": "SCT",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 2300
+     },
+     {
+      "cover": "SCT",
+      "base": 3500
+     }
+    ],
+    "rawOb": "METAR KXMR 301855Z AUTO 07010KT 10SM FEW023 SCT035 28/22 A2997 RMK AO2 RAB23E28DZB32E38 SLP152 P0000 T02760223",
     "lat": 28.4674,
     "lon": -80.5589,
     "pad": "cape",
@@ -869,30 +891,30 @@
    },
    {
     "icaoId": "KVBG",
-    "obsTime": 1793375700,
-    "temp": 16.1,
-    "dewp": 12.6,
-    "wdir": 150,
-    "wspd": 3,
+    "obsTime": 1793386860,
+    "temp": 22,
+    "dewp": 17,
+    "wdir": 300,
+    "wspd": 6,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "BKN",
+    "cover": "OVC",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 1500
+      "cover": "SCT",
+      "base": 1800
      },
      {
       "cover": "BKN",
-      "base": 5000
+      "base": 5500
      },
      {
-      "cover": "BKN",
+      "cover": "OVC",
       "base": 16000
      }
     ],
-    "rawOb": "METAR KVBG 301555Z 15003KT 10SM FEW015 BKN050 BKN160 16/13 A2989 RMK AO2A MDT CU W-NW SLP124 T01610126",
+    "rawOb": "SPECI KVBG 301901Z 30006KT 10SM SCT018TCU BKN055 OVC160 22/17 A2990 RMK TCU NW SLP127",
     "lat": 34.733,
     "lon": -120.583,
     "pad": "vandenberg",
@@ -904,17 +926,22 @@
    },
    {
     "icaoId": "KBRO",
-    "obsTime": 1793375580,
-    "temp": 29.4,
-    "dewp": 19.4,
-    "wdir": 170,
-    "wspd": 14,
-    "wgst": null,
+    "obsTime": 1793386380,
+    "temp": 31.7,
+    "dewp": 20,
+    "wdir": 150,
+    "wspd": 10,
+    "wgst": 20,
     "visib": "10+",
     "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR KBRO 301553Z 17014KT 10SM CLR 29/19 A2999 RMK AO2 SLP154 T02940194 $",
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 4000
+     }
+    ],
+    "rawOb": "METAR KBRO 301853Z 15010G20KT 10SM FEW040 32/20 A2993 RMK AO2 SLP135 T03170200 $",
     "lat": 25.9146,
     "lon": -97.4231,
     "pad": "starbase",
