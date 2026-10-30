@@ -1,87 +1,87 @@
 {
  "nhc": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": []
  },
  "metar": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1793364660,
-    "temp": 15,
-    "dewp": 12.2,
-    "wdir": 240,
-    "wspd": 8,
+    "obsTime": 1793375460,
+    "temp": 22.2,
+    "dewp": 10.6,
+    "wdir": 340,
+    "wspd": 13,
     "wgst": null,
     "wxString": null,
-    "cover": "SCT",
+    "cover": "FEW",
     "clouds": [
      {
-      "cover": "SCT",
-      "base": 9500
+      "cover": "FEW",
+      "base": 4800
      }
     ],
-    "rawOb": "METAR KJFK 301251Z 24008KT 9SM SCT095 15/12 A3004 RMK AO2 SLP170 T01500122 $",
+    "rawOb": "METAR KJFK 301551Z 34013KT 10SM FEW048 22/11 A3002 RMK AO2 SLP165 T02220106 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1793364600,
-    "temp": 16,
+    "obsTime": 1793375400,
+    "temp": 15,
     "dewp": 9,
-    "wdir": 110,
-    "wspd": 7,
+    "wdir": 80,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR EGLL 301250Z AUTO 11007KT 080V140 9999 NCD 16/09 Q1029",
+    "rawOb": "METAR EGLL 301550Z AUTO 08006KT 9999 NCD 15/09 Q1029",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1793365200,
-    "temp": 15,
-    "dewp": 6,
+    "obsTime": 1793376000,
+    "temp": 14,
+    "dewp": 7,
     "wdir": 60,
-    "wspd": 10,
+    "wspd": 11,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR LFPG 301300Z 06010KT CAVOK 15/06 Q1026 NOSIG",
+    "rawOb": "METAR LFPG 301600Z 06011KT CAVOK 14/07 Q1026 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1793365200,
-    "temp": 33,
-    "dewp": 22,
-    "wdir": 330,
-    "wspd": 13,
+    "obsTime": 1793376000,
+    "temp": 32,
+    "dewp": 21,
+    "wdir": 340,
+    "wspd": 7,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR OMDB 301300Z 33013KT CAVOK 33/22 Q1013 NOSIG",
+    "rawOb": "METAR OMDB 301600Z 34007KT 310V010 CAVOK 32/21 Q1014 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1793365200,
-    "temp": 30,
+    "obsTime": 1793376000,
+    "temp": 29,
     "dewp": 24,
-    "wdir": 250,
-    "wspd": 8,
+    "wdir": 240,
+    "wspd": 5,
     "wgst": null,
     "wxString": "HZ",
     "cover": "FEW",
@@ -91,97 +91,101 @@
       "base": 10000
      }
     ],
-    "rawOb": "METAR VABB 301300Z 25008KT 4000 HZ FEW100 30/24 Q1012 NOSIG",
+    "rawOb": "METAR VABB 301600Z 24005KT 3500 HZ FEW100 29/24 Q1013 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1793365200,
-    "temp": 16,
-    "dewp": 11,
-    "wdir": 260,
+    "obsTime": 1793376000,
+    "temp": 17,
+    "dewp": 13,
+    "wdir": 310,
     "wspd": 3,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR RJTT 301300Z 26003KT 230V300 CAVOK 16/11 Q1014 NOSIG",
+    "rawOb": "METAR RJTT 301600Z 31003KT CAVOK 17/13 Q1011 NOSIG",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1793365200,
-    "temp": 20,
+    "obsTime": 1793376000,
+    "temp": 19,
     "dewp": 15,
-    "wdir": 20,
-    "wspd": 13,
+    "wdir": 30,
+    "wspd": 7,
     "wgst": null,
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR YSSY 301300Z AUTO 02013KT 9999 // NCD 20/15 Q1020",
+    "rawOb": "METAR YSSY 301600Z AUTO 03007KT 9999 // NCD 19/15 Q1018",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1793365200,
-    "temp": 25,
-    "dewp": 14,
+    "obsTime": 1793376000,
+    "temp": 22,
+    "dewp": 15,
     "wdir": 190,
-    "wspd": 20,
+    "wspd": 17,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 301300Z 19020KT CAVOK 25/14 Q1016 NOSIG",
+    "rawOb": "METAR FACT 301600Z 19017KT CAVOK 22/15 Q1017 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1793365200,
-    "temp": 20,
+    "obsTime": 1793376000,
+    "temp": 21,
     "dewp": 18,
-    "wdir": 220,
-    "wspd": 2,
+    "wdir": 230,
+    "wspd": 4,
     "wgst": null,
     "wxString": null,
     "cover": "OVC",
     "clouds": [
      {
+      "cover": "BKN",
+      "base": 1500
+     },
+     {
       "cover": "OVC",
-      "base": 1000
+      "base": 2000
      }
     ],
-    "rawOb": "METAR SBGR 301300Z 22002KT 7000 OVC010 20/18 Q1016",
+    "rawOb": "METAR SBGR 301600Z COR 23004KT 9999 BKN015 OVC020 21/18 Q1015",
     "lat": -23.432,
     "lon": -46.469,
     "city": "São Paulo"
    },
    {
     "icaoId": "MMMX",
-    "obsTime": 1793364420,
-    "temp": 13,
+    "obsTime": 1793375340,
+    "temp": 16,
     "dewp": 12,
-    "wdir": 80,
-    "wspd": 7,
+    "wdir": 0,
+    "wspd": 0,
     "wgst": null,
     "wxString": "BR HZ",
-    "cover": "FEW",
+    "cover": "OVC",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 2000
+      "cover": "OVC",
+      "base": 1500
      }
     ],
-    "rawOb": "METAR MMMX 301247Z 08007KT 2 1/2SM BR HZ FEW020 13/12 A3032 TEMPO 2SM BR HZ RMK 8/700",
+    "rawOb": "METAR MMMX 301549Z 00000KT 2 1/2SM BR HZ OVC015 16/12 A3037 NOSIG RMK 8/6// TWR VIS",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -189,7 +193,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": [
    {
     "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
@@ -217,7 +221,7 @@
    {
     "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
     "name": "Falcon 9 Block 5 | Starlink Group 15-18",
-    "net": "2026-10-31T03:48:00Z",
+    "net": "2026-10-31T04:02:22Z",
     "windowStart": "2026-10-31T03:48:00Z",
     "windowEnd": "2026-10-31T07:48:00Z",
     "status": "Go",
@@ -233,7 +237,7 @@
     "probability": null,
     "weatherConcerns": null,
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon2520925_image_20221009234147.png",
-    "precision": "MIN",
+    "precision": "SEC",
     "country": "USA",
     "providerType": "Commercial"
    },
@@ -353,13 +357,36 @@
     "providerType": "Commercial"
    },
    {
+    "id": "711de6bc-f755-475b-a12f-ec5240da3a11",
+    "name": "Long March 2C | Unknown Payload",
+    "net": "2026-11-05T16:00:00Z",
+    "windowStart": "2026-11-05T15:52:00Z",
+    "windowEnd": "2026-11-05T16:16:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
+    "rocket": "Long March 2C",
+    "provider": "China Aerospace Science and Technology Corporation",
+    "mission": "Unknown Payload",
+    "orbit": "N/A",
+    "pad": "Launch Complex 3 (LC-3/LA-1)",
+    "site": "Xichang Satellite Launch Center, People's Republic of China",
+    "lat": "28.247059",
+    "lon": "102.029008",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/long_march_2_image_20230803100234.jpeg",
+    "precision": "HR",
+    "country": "CHN",
+    "providerType": "Government"
+   },
+   {
     "id": "a2423132-f965-423f-8b03-6891b775dc54",
     "name": "Long March 12 | SatNet LEO Group TBD?",
-    "net": "2026-11-05T20:00:00Z",
-    "windowStart": "2026-11-05T20:00:00Z",
-    "windowEnd": "2026-11-05T23:00:00Z",
-    "status": "TBC",
-    "statusName": "To Be Confirmed",
+    "net": "2026-11-05T21:15:00Z",
+    "windowStart": "2026-11-05T21:10:00Z",
+    "windowEnd": "2026-11-05T21:39:00Z",
+    "status": "Go",
+    "statusName": "Go for Launch",
     "rocket": "Long March 12",
     "provider": "China Aerospace Science and Technology Corporation",
     "mission": "SatNet LEO Group TBD?",
@@ -468,6 +495,29 @@
     "providerType": "Commercial"
    },
    {
+    "id": "a2975167-7c6f-4403-99e1-b40df17c8140",
+    "name": "Long March 8A | SatNet LEO Group TBD?",
+    "net": "2026-11-20T11:00:00Z",
+    "windowStart": "2026-11-20T11:00:00Z",
+    "windowEnd": "2026-11-20T14:00:00Z",
+    "status": "TBC",
+    "statusName": "To Be Confirmed",
+    "rocket": "Long March 8A",
+    "provider": "China Aerospace Science and Technology Corporation",
+    "mission": "SatNet LEO Group TBD?",
+    "orbit": "LEO",
+    "pad": "Commercial LC-1",
+    "site": "Wenchang Space Launch Site, People's Republic of China",
+    "lat": "19.597275",
+    "lon": "110.930753",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/cz-8a_launch_2_image_20251206093107.jpeg",
+    "precision": "HR",
+    "country": "CHN",
+    "providerType": "Government"
+   },
+   {
     "id": "7bdc412b-c965-4517-a131-f57a01189803",
     "name": "Ariane 64 Block 2 | Amazon Leo (LE-04)",
     "net": "2026-11-23T00:00:00Z",
@@ -511,6 +561,29 @@
     "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/soyuz_2.1b_image_20230802085331.jpg",
     "precision": "MIN",
     "country": "KAZ",
+    "providerType": "Government"
+   },
+   {
+    "id": "5ce59e3a-c343-430f-ae4e-e608ba536754",
+    "name": "Long March 12 | SatNet LEO Group TBD?",
+    "net": "2026-11-24T07:00:00Z",
+    "windowStart": "2026-11-24T07:00:00Z",
+    "windowEnd": "2026-11-24T10:00:00Z",
+    "status": "TBC",
+    "statusName": "To Be Confirmed",
+    "rocket": "Long March 12",
+    "provider": "China Aerospace Science and Technology Corporation",
+    "mission": "SatNet LEO Group TBD?",
+    "orbit": "LEO",
+    "pad": "Commercial LC-2",
+    "site": "Wenchang Space Launch Site, People's Republic of China",
+    "lat": "19.59755",
+    "lon": "110.936481",
+    "probability": null,
+    "weatherConcerns": null,
+    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/cz-12_on_its_la_image_20241128132937.jpg",
+    "precision": "HR",
+    "country": "CHN",
     "providerType": "Government"
    },
    {
@@ -696,89 +769,20 @@
     "precision": "M",
     "country": "USA",
     "providerType": "Commercial"
-   },
-   {
-    "id": "22e117bf-041c-49d5-9d09-7b180036e143",
-    "name": "Ariane 62 | Metop-SG B1",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Ariane 62",
-    "provider": "Arianespace",
-    "mission": "Metop-SG B1",
-    "orbit": "SSO",
-    "pad": "Ariane Launch Area 4",
-    "site": "Guiana Space Centre, French Guiana",
-    "lat": "5.256319",
-    "lon": "-52.786838",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/ariane_62_lifto_image_20240711132056.jpeg",
-    "precision": "M",
-    "country": "GUF",
-    "providerType": "Commercial"
-   },
-   {
-    "id": "71df1dd0-d658-4762-b0bc-0fca6886aea7",
-    "name": "Falcon 9 Block 5 | SDA Tranche 2 Transport Layer D",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Falcon 9 Block 5",
-    "provider": "SpaceX",
-    "mission": "SDA Tranche 2 Transport Layer D",
-    "orbit": "PO",
-    "pad": "Unknown Pad",
-    "site": "Cape Canaveral SFS, FL, USA",
-    "lat": "28.458",
-    "lon": "-80.528",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg",
-    "precision": "M",
-    "country": "USA",
-    "providerType": "Commercial"
-   },
-   {
-    "id": "71ed4649-8d71-42e8-8548-d42ffa2c5a6e",
-    "name": "Falcon 9 Block 5 | SDA Tranche 2 Transport Layer E",
-    "net": "2026-12-31T00:00:00Z",
-    "windowStart": "2026-12-31T00:00:00Z",
-    "windowEnd": "2026-12-31T00:00:00Z",
-    "status": "TBD",
-    "statusName": "To Be Determined",
-    "rocket": "Falcon 9 Block 5",
-    "provider": "SpaceX",
-    "mission": "SDA Tranche 2 Transport Layer E",
-    "orbit": "PO",
-    "pad": "Space Launch Complex 4E",
-    "site": "Vandenberg SFB, CA, USA",
-    "lat": "34.632",
-    "lon": "-120.611",
-    "probability": null,
-    "weatherConcerns": null,
-    "image": "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg",
-    "precision": "M",
-    "country": "USA",
-    "providerType": "Commercial"
    }
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": [
    {
     "pid": "wp3026",
-    "tcw": "WTPN51 PGTW 300900    \nWARNING    ATCG MIL 30W NWP 261030073403\n2026103006 30W IN-FA      028  01 305 17 SATL 020\nT000 187N 1462E 125 R064 070 NE QD 055 SE QD 050 SW QD 060 NW QD R050 090 NE QD 065 SE QD 060 SW QD 090 NW QD R034 150 NE QD 115 SE QD 095 SW QD 135 NW QD \nT012 205N 1439E 120 R064 060 NE QD 050 SE QD 040 SW QD 055 NW QD R050 080 NE QD 060 SE QD 060 SW QD 080 NW QD R034 135 NE QD 120 SE QD 100 SW QD 125 NW QD \nT024 221N 1431E 120 R064 050 NE QD 050 SE QD 040 SW QD 050 NW QD R050 070 NE QD 070 SE QD 060 SW QD 070 NW QD R034 120 NE QD 120 SE QD 100 SW QD 120 NW QD \nT036 230N 1437E 110 R064 040 NE QD 040 SE QD 040 SW QD 040 NW QD R050 070 NE QD 060 SE QD 060 SW QD 070 NW QD R034 110 NE QD 110 SE QD 110 SW QD 140 NW QD \nT048 229N 1440E 100 R064 040 NE QD 030 SE QD 030 SW QD 040 NW QD R050 060 NE QD 050 SE QD 050 SW QD 070 NW QD R034 120 NE QD 100 SE QD 110 SW QD 140 NW QD \nT060 227N 1432E 090 R064 050 NE QD 030 SE QD 030 SW QD 040 NW QD R050 070 NE QD 060 SE QD 050 SW QD 060 NW QD R034 130 NE QD 100 SE QD 100 SW QD 130 NW QD \nT072 228N 1420E 090 R064 050 NE QD 040 SE QD 030 SW QD 040 NW QD R050 070 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 110 SE QD 110 SW QD 120 NW QD \nT096 237N 1405E 080 R064 050 NE QD 040 SE QD 040 SW QD 050 NW QD R050 070 NE QD 060 SE QD 060 SW QD 070 NW QD R034 130 NE QD 120 SE QD 110 SW QD 130 NW QD \nT120 254N 1406E 070 R064 050 NE QD 040 SE QD 030 SW QD 040 NW QD R050 070 NE QD 070 SE QD 050 SW QD 060 NW QD R034 140 NE QD 130 SE QD 100 SW QD 120 NW QD \nAMP\nSUBJ:  TYPHOON 30W (IN-FA) WARNING NR 028    \n1. TYPHOON 30W (IN-FA) WARNING NR 028    \n   01 ACTIVE TROPICAL CYCLONE IN NORTHWESTPAC\n   MAX SUSTAINED WINDS BASED ON ONE-MINUTE AVERAGE\n   WIND RADII VALID OVER OPEN WATER ONLY\n    ---\n   WARNING POSITION:\n   300600Z --- NEAR 18.7N 146.2E\n     MOVEMENT PAST SIX HOURS - 305 DEGREES AT 17 KTS\n     POSITION ACCURATE TO WITHIN 020 NM\n     POSITION BASED ON EYE FIXED BY SATELLITE\n   PRESENT WIND DISTRIBUTION:\n   MAX SUSTAINED WINDS - 125 KT, GUSTS 150 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            055 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 090 NM NORTHEAST QUADRANT\n                            065 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            090 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 150 NM NORTHEAST QUADRANT\n                            115 NM SOUTHEAST QUADRANT\n                            095 NM SOUTHWEST QUADRANT\n                            135 NM NORTHWEST QUADRANT\n   REPEAT POSIT: 18.7N 146.2E\n    ---\n   FORECASTS:\n   12 HRS, VALID AT:\n   301800Z --- 20.5N 143.9E\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            055 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 080 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            080 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 135 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            125 NM NORTHWEST QUADRANT\n   VECTOR TO 24 HR POSIT: 335 DEG/ 09 KTS\n    ---\n   24 HRS, VALID AT:\n   310600Z --- 22.1N 143.1E\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 36 HR POSIT: 030 DEG/ 05 KTS\n    ---\n   36 HRS, VALID AT:\n   311800Z --- 23.0N 143.7E\n   MAX SUSTAINED WINDS - 110 KT, GUSTS 135 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 110 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            140 NM NORTHWEST QUADRANT\n   VECTOR TO 48 HR POSIT: 110 DEG/ 01 KTS\n    ---\n   EXTENDED OUTLOOK:\n   48 HRS, VALID AT:\n   010600Z --- 22.9N 144.0E\n   MAX SUSTAINED WINDS - 100 KT, GUSTS 125 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            140 NM NORTHWEST QUADRANT\n   VECTOR TO 60 HR POSIT: 255 DEG/ 04 KTS\n    ---\n   60 HRS, VALID AT:\n   011800Z --- 22.7N 143.2E\n   MAX SUSTAINED WINDS - 090 KT, GUSTS 110 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 130 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 72 HR POSIT: 275 DEG/ 06 KTS\n    ---\n   72 HRS, VALID AT:\n   020600Z --- 22.8N 142.0E\n   MAX SUSTAINED WINDS - 090 KT, GUSTS 110 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 96 HR POSIT: 305 DEG/ 04 KTS\n    ---\n   LONG RANGE OUTLOOK:\n    ---\n   96 HRS, VALID AT:\n   030600Z --- 23.7N 140.5E\n   MAX SUSTAINED WINDS - 080 KT, GUSTS 100 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 130 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 120 HR POSIT: 005 DEG/ 04 KTS\n    ---\n   120 HRS, VALID AT:\n   040600Z --- 25.4N 140.6E\n   MAX SUSTAINED WINDS - 070 KT, GUSTS 085 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 070 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 140 NM NORTHEAST QUADRANT\n                            130 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n    ---\nREMARKS:\n300900Z POSITION NEAR 19.1N 145.6E.\n30OCT26. TYPHOON 30W (IN-FA), LOCATED APPROXIMATELY 211 NM NORTH\nOF SAIPAN, HAS TRACKED NORTHWESTWARD AT 17 KNOTS OVER THE PAST\nSIX HOURS.\nMINIMUM CENTRAL PRESSURE AT 300600Z IS 943 MB. MAXIMUM\nSIGNIFICANT WAVE HEIGHT AT 300600Z IS 60 FEET. NEXT WARNINGS AT\n301500Z, 302100Z, 310300Z AND 310900Z.\n//\n3026102112 109N1665E  15\n3026102118 110N1668E  15\n3026102200 114N1669E  15\n3026102206 119N1666E  15\n3026102212 120N1660E  20\n3026102218 116N1656E  20\n3026102300 110N1658E  25\n3026102306 108N1663E  25\n3026102312 107N1662E  30\n3026102318 105N1661E  35\n3026102400 104N1661E  45\n3026102406 103N1661E  45\n3026102412 106N1660E  50\n3026102412 106N1660E  50\n3026102418 111N1656E  50\n3026102418 111N1656E  50\n3026102500 115N1653E  55\n3026102500 115N1653E  55\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\nNNNN\n"
+    "tcw": "WTPN51 PGTW 301500    \nWARNING    ATCG MIL 30W NWP 261030132939\n2026103012 30W IN-FA      029  01 300 19 SATL 020\nT000 197N 1445E 120 R064 060 NE QD 055 SE QD 045 SW QD 050 NW QD R050 085 NE QD 070 SE QD 060 SW QD 070 NW QD R034 140 NE QD 120 SE QD 095 SW QD 135 NW QD \nT012 215N 1430E 120 R064 050 NE QD 050 SE QD 040 SW QD 050 NW QD R050 075 NE QD 070 SE QD 060 SW QD 070 NW QD R034 130 NE QD 120 SE QD 100 SW QD 125 NW QD \nT024 228N 1430E 115 R064 040 NE QD 040 SE QD 040 SW QD 050 NW QD R050 065 NE QD 070 SE QD 060 SW QD 060 NW QD R034 110 NE QD 110 SE QD 110 SW QD 120 NW QD \nT036 232N 1437E 105 R064 040 NE QD 040 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 060 SW QD 060 NW QD R034 110 NE QD 100 SE QD 110 SW QD 130 NW QD \nT048 231N 1436E 095 R064 040 NE QD 030 SE QD 020 SW QD 040 NW QD R050 060 NE QD 050 SE QD 050 SW QD 060 NW QD R034 120 NE QD 100 SE QD 100 SW QD 130 NW QD \nT060 229N 1422E 085 R064 040 NE QD 030 SE QD 020 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 100 SE QD 100 SW QD 120 NW QD \nT072 232N 1409E 085 R064 040 NE QD 030 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 110 SE QD 100 SW QD 120 NW QD \nT096 244N 1401E 075 R064 040 NE QD 030 SE QD 030 SW QD 040 NW QD R050 060 NE QD 060 SE QD 050 SW QD 060 NW QD R034 120 NE QD 120 SE QD 100 SW QD 120 NW QD \nT120 264N 1407E 065 R064 030 NE QD 030 SE QD 020 SW QD 030 NW QD R050 060 NE QD 060 SE QD 040 SW QD 050 NW QD R034 140 NE QD 120 SE QD 080 SW QD 110 NW QD \nAMP\nSUBJ:  TYPHOON 30W (IN-FA) WARNING NR 029    \n1. TYPHOON 30W (IN-FA) WARNING NR 029    \n   01 ACTIVE TROPICAL CYCLONE IN NORTHWESTPAC\n   MAX SUSTAINED WINDS BASED ON ONE-MINUTE AVERAGE\n   WIND RADII VALID OVER OPEN WATER ONLY\n    ---\n   WARNING POSITION:\n   301200Z --- NEAR 19.7N 144.5E\n     MOVEMENT PAST SIX HOURS - 300 DEGREES AT 19 KTS\n     POSITION ACCURATE TO WITHIN 020 NM\n     POSITION BASED ON EYE FIXED BY SATELLITE\n   PRESENT WIND DISTRIBUTION:\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            055 NM SOUTHEAST QUADRANT\n                            045 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 085 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 140 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            095 NM SOUTHWEST QUADRANT\n                            135 NM NORTHWEST QUADRANT\n   REPEAT POSIT: 19.7N 144.5E\n    ---\n   FORECASTS:\n   12 HRS, VALID AT:\n   310000Z --- 21.5N 143.0E\n   MAX SUSTAINED WINDS - 120 KT, GUSTS 145 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 050 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 075 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            070 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 130 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            125 NM NORTHWEST QUADRANT\n   VECTOR TO 24 HR POSIT: 360 DEG/ 06 KTS\n    ---\n   24 HRS, VALID AT:\n   311200Z --- 22.8N 143.0E\n   MAX SUSTAINED WINDS - 115 KT, GUSTS 140 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 065 NM NORTHEAST QUADRANT\n                            070 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 110 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 36 HR POSIT: 060 DEG/ 04 KTS\n    ---\n   36 HRS, VALID AT:\n   010000Z --- 23.2N 143.7E\n   MAX SUSTAINED WINDS - 105 KT, GUSTS 130 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            040 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            060 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 110 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            110 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 48 HR POSIT: 225 DEG/ 01 KTS\n    ---\n   EXTENDED OUTLOOK:\n   48 HRS, VALID AT:\n   011200Z --- 23.1N 143.6E\n   MAX SUSTAINED WINDS - 095 KT, GUSTS 115 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            050 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            130 NM NORTHWEST QUADRANT\n   VECTOR TO 60 HR POSIT: 260 DEG/ 07 KTS\n    ---\n   60 HRS, VALID AT:\n   020000Z --- 22.9N 142.2E\n   MAX SUSTAINED WINDS - 085 KT, GUSTS 105 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            100 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 72 HR POSIT: 285 DEG/ 06 KTS\n    ---\n   72 HRS, VALID AT:\n   021200Z --- 23.2N 140.9E\n   MAX SUSTAINED WINDS - 085 KT, GUSTS 105 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            110 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 96 HR POSIT: 330 DEG/ 04 KTS\n    ---\n   LONG RANGE OUTLOOK:\n    ---\n   96 HRS, VALID AT:\n   031200Z --- 24.4N 140.1E\n   MAX SUSTAINED WINDS - 075 KT, GUSTS 090 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 040 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            030 NM SOUTHWEST QUADRANT\n                            040 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            050 NM SOUTHWEST QUADRANT\n                            060 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 120 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            100 NM SOUTHWEST QUADRANT\n                            120 NM NORTHWEST QUADRANT\n   VECTOR TO 120 HR POSIT: 015 DEG/ 05 KTS\n    ---\n   120 HRS, VALID AT:\n   041200Z --- 26.4N 140.7E\n   MAX SUSTAINED WINDS - 065 KT, GUSTS 080 KT\n   WIND RADII VALID OVER OPEN WATER ONLY\n   RADIUS OF 064 KT WINDS - 030 NM NORTHEAST QUADRANT\n                            030 NM SOUTHEAST QUADRANT\n                            020 NM SOUTHWEST QUADRANT\n                            030 NM NORTHWEST QUADRANT\n   RADIUS OF 050 KT WINDS - 060 NM NORTHEAST QUADRANT\n                            060 NM SOUTHEAST QUADRANT\n                            040 NM SOUTHWEST QUADRANT\n                            050 NM NORTHWEST QUADRANT\n   RADIUS OF 034 KT WINDS - 140 NM NORTHEAST QUADRANT\n                            120 NM SOUTHEAST QUADRANT\n                            080 NM SOUTHWEST QUADRANT\n                            110 NM NORTHWEST QUADRANT\n    ---\nREMARKS:\n301500Z POSITION NEAR 20.1N 144.1E.\n30OCT26. TYPHOON 30W (IN-FA), LOCATED APPROXIMATELY 87 NM\nNORTHWEST OF AGRIHAN, HAS TRACKED WEST-NORTHWESTWARD AT 19 KNOTS\nOVER THE PAST SIX HOURS.\nMINIMUM CENTRAL PRESSURE AT 301200Z IS 949 MB. MAXIMUM\nSIGNIFICANT WAVE HEIGHT AT 301200Z IS 58 FEET. NEXT WARNINGS AT\n302100Z, 310300Z, 310900Z AND 311500Z.\n//\n3026102112 109N1665E  15\n3026102118 110N1668E  15\n3026102200 114N1669E  15\n3026102206 119N1666E  15\n3026102212 120N1660E  20\n3026102218 116N1656E  20\n3026102300 110N1658E  25\n3026102306 108N1663E  25\n3026102312 107N1662E  30\n3026102318 105N1661E  35\n3026102400 104N1661E  45\n3026102406 103N1661E  45\n3026102412 106N1660E  50\n3026102412 106N1660E  50\n3026102418 111N1656E  50\n3026102418 111N1656E  50\n3026102500 115N1653E  55\n3026102500 115N1653E  55\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102506 122N1650E  65\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102512 128N1645E  75\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102518 133N1639E  80\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102600 138N1633E  90\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102606 140N1630E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102612 141N1627E 115\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102618 142N1625E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102700 143N1624E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102706 145N1621E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102712 145N1615E 105\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102718 146N1609E 110\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102800 149N1599E 120\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102806 151N1589E 130\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102812 154N1576E 125\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102818 156N1562E 120\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102900 159N1546E 115\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102906 163N1529E 120\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102912 166N1513E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026102918 171N1496E 130\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103000 178N1477E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\n3026103006 187N1462E 125\n3026103012 197N1445E 120\n3026103012 197N1445E 120\n3026103012 197N1445E 120\nNNNN\n"
    }
   ]
  },
  "sun": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -809,8 +813,8 @@
     ]
    },
    "kp": {
-    "now": 0.33,
-    "nowAt": "2026-10-30T12:00:00+00:00",
+    "now": 0.67,
+    "nowAt": "2026-10-30T15:00:00+00:00",
     "max24h": 2.33,
     "next24h": 5.0,
     "byDate": {
@@ -821,38 +825,38 @@
     }
    },
    "wind": {
-    "speed": 340.0,
-    "bz": -6.0,
-    "bt": 8.0,
-    "at": "2026-10-30T13:17:00Z"
+    "speed": 334.0,
+    "bz": -3.0,
+    "bt": 7.0,
+    "at": "2026-10-30T16:08:00Z"
    },
    "flare": {
-    "current": "B7.1",
-    "max": null,
-    "maxAt": "Unk"
+    "current": "B4.9",
+    "max": "B5.7",
+    "maxAt": "2026-10-30T16:07:00Z"
    },
    "image": {
-    "at": "2026-10-30T10:14:06+00:00",
-    "data": "data:image/jpeg;base64,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"
+    "at": "2026-10-30T16:14:06+00:00",
+    "data": "data:image/jpeg;base64,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"
    }
   }
  },
  "pads": {
-  "fetchedAt": "2026-10-30T13:24:22+00:00",
+  "fetchedAt": "2026-10-30T16:18:11+00:00",
   "items": [
    {
     "icaoId": "KXMR",
-    "obsTime": 1793364900,
-    "temp": 26.3,
-    "dewp": 22.7,
+    "obsTime": 1793375700,
+    "temp": 29.1,
+    "dewp": 22.8,
     "wdir": 60,
-    "wspd": 8,
-    "wgst": null,
+    "wspd": 9,
+    "wgst": 17,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KXMR 301255Z AUTO 06008KT 10SM CLR 26/23 A2998 RMK AO2 SLP155 T02630227",
+    "rawOb": "METAR KXMR 301555Z AUTO 06009G17KT 10SM CLR 29/23 A3000 RMK AO2 SLP162 T02910228",
     "lat": 28.4674,
     "lon": -80.5589,
     "pad": "cape",
@@ -865,30 +869,30 @@
    },
    {
     "icaoId": "KVBG",
-    "obsTime": 1793364900,
-    "temp": 12.3,
-    "dewp": 11.2,
-    "wdir": 90,
-    "wspd": 4,
+    "obsTime": 1793375700,
+    "temp": 16.1,
+    "dewp": 12.6,
+    "wdir": 150,
+    "wspd": 3,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "OVC",
+    "cover": "BKN",
     "clouds": [
      {
-      "cover": "SCT",
-      "base": 3800
+      "cover": "FEW",
+      "base": 1500
      },
      {
       "cover": "BKN",
-      "base": 15000
+      "base": 5000
      },
      {
-      "cover": "OVC",
-      "base": 17000
+      "cover": "BKN",
+      "base": 16000
      }
     ],
-    "rawOb": "METAR KVBG 301255Z AUTO 09004KT 10SM SCT038 BKN150 OVC170 12/11 A2986 RMK AO2 SLP114 T01230112 FZRANO TSNO CHINO RWY12 $",
+    "rawOb": "METAR KVBG 301555Z 15003KT 10SM FEW015 BKN050 BKN160 16/13 A2989 RMK AO2A MDT CU W-NW SLP124 T01610126",
     "lat": 34.733,
     "lon": -120.583,
     "pad": "vandenberg",
@@ -900,22 +904,17 @@
    },
    {
     "icaoId": "KBRO",
-    "obsTime": 1793364780,
-    "temp": 22.8,
+    "obsTime": 1793375580,
+    "temp": 29.4,
     "dewp": 19.4,
-    "wdir": 130,
-    "wspd": 4,
+    "wdir": 170,
+    "wspd": 14,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 7000
-     }
-    ],
-    "rawOb": "METAR KBRO 301253Z 13004KT 10SM FEW070 23/19 A2996 RMK AO2 SLP145 T02280194 $",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR KBRO 301553Z 17014KT 10SM CLR 29/19 A2999 RMK AO2 SLP154 T02940194 $",
     "lat": 25.9146,
     "lon": -97.4231,
     "pad": "starbase",
@@ -928,17 +927,17 @@
    },
    {
     "icaoId": "KWAL",
-    "obsTime": 1793364840,
-    "temp": 15.6,
+    "obsTime": 1793375640,
+    "temp": 22.8,
     "dewp": 15,
-    "wdir": 270,
+    "wdir": 290,
     "wspd": 7,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KWAL 301254Z AUTO 27007KT 10SM CLR 16/15 A3014 RMK AO2 SLP201 T01560150",
+    "rawOb": "METAR KWAL 301554Z AUTO 29007KT 10SM CLR 23/15 A3012 RMK AO2 SLP196 T02280150",
     "lat": 37.9372,
     "lon": -75.4662,
     "pad": "wallops",
