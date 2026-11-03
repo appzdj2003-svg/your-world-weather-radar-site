@@ -328,15 +328,15 @@ def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
 def amz_dp(asin): return f"https://www.amazon.com/dp/{asin}?tag={AMZ_TAG}"  # verified product page
 import gearart, gearimg
 # (section id, title, intro, tone, [(art, product name, note[, asin, label])]). Real named products; links are Amazon searches for the exact name,
-# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22, rechecked 2026-10-26). "Best value" = list-price/typical-price discount >=20% verified that day. Labels are our picks; never prices.
+# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22, rechecked 2026-10-26 and 2026-11-03). "Best value" = list-price/typical-price discount >=20% verified that day. Labels are our picks; never prices.
 GEAR = [
  ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
    ("umbrella", "Repel windproof travel umbrella", "Compact auto open/close umbrella built for wind.", "B0160HYB8S", "Best value"),
    ("umbrella", "totes compact auto open umbrella", "Classic auto open/close folding umbrella.", "B071CWYNNW", "Best value"),
    ("jacket", "Columbia men's Watertight II rain jacket", "Packable waterproof shell for everyday rain.", "B0FYHTD33N", "Best value"),
    ("boots", "Hunter women's Original Tall rain boot", "Tall waterproof rubber rain boot.", "B01DJ3S8F8", "Best value"),
-   ("jacket", "Frogg Toggs Ultra-Lite2 rain suit", "Budget jacket and pants set that packs small.", "B07VZH1GSG", "Best value"),  # normal label: Budget pick
    ("boots", "KEEN men's Targhee 4 waterproof hiking boot", "Waterproof mid hiker for wet trails.", "B0CNF7PV5T", "Best value"),  # normal label: Top pick
+   ("jacket", "Frogg Toggs Ultra-Lite2 rain suit", "Budget jacket and pants set that packs small.", "B07VZH1GSG", "Best value"),  # normal label: Budget pick
    ("jacket", "Marmot men's PreCip Eco rain jacket", "Lightweight waterproof, breathable jacket for hiking.", "B0CMRS1Q55", ""),
    ("drybag", "Earth Pak waterproof dry bag", "Roll-top bag with shoulder strap.", "B06XD2N14J", "Top pick"),
    ("boots", "XTRATUF men's 6 inch ankle deck boot", "Waterproof rubber boot for docks, boats and puddles.", "B074NGKL9G", ""),
@@ -348,7 +348,7 @@ GEAR = [
    ("radio", "Midland WR120B NOAA weather radio", "Desktop alert radio with SAME county coding.", "B00176T9OY", "Budget pick"),
    ("radio", "Midland ER310 emergency crank radio", "Hand-crank and solar NOAA radio with flashlight.", "B015QIC1PW", "Top pick"),
    ("radio", "Midland WR400 NOAA weather radio", "Larger tabletop alert radio with SAME and battery backup.", "B071HFV836", ""),
-   ("radio", "Eton American Red Cross FRX3 weather radio", "Hand-crank, solar and USB charging.", "B007KFLVTM", "Premium pick"),
+   ("radio", "Kaito KA500 hand crank weather radio", "Hand-crank, solar, USB or AA power, with NOAA alerts and a phone charger.", "B001F0MNRM", "Premium pick"),
  ]),
  ("stations", "🏠 Weather stations & instruments", "Your own readings for your own yard.", "gear", [
    ("thermo", "ThermoPro TP50 thermometer hygrometer", "Indoor temperature and humidity.", "B01H1R0K68", "Best value"),
@@ -372,11 +372,11 @@ GEAR = [
  ]),
  ("generators", "⚡ Generators & generator safety", "Keep the fridge, lights and phones going through a long outage.", "power", [
    ("power", "Westinghouse iGen5000DFc dual fuel inverter generator", "Gas or propane, remote electric start, quiet inverter power.", "B099KSY4XG", "Best value"),
+   ("power", "Champion 25 ft 30 amp generator power cord", "L14-30 cord for a manual transfer switch your electrician installs.", "B076HQ2THC", "Best value"),  # normal label: none
    ("power", "PowerSmart 2500 watt inverter generator", "Light gas inverter for the basics: fridge, lights, chargers.", "B089FDFDH5", "Budget pick"),
    ("power", "Champion 4000-watt dual fuel inverter generator", "Gas or propane, RV ready, a step up in power.", "B0D6SQR1L1", "Top pick"),
    ("power", "Honda EU2200i inverter generator", "Quiet, proven 2200 W gas inverter.", "B079YF1HF6", "Premium pick"),
    ("power", "Kidde battery carbon monoxide alarm", "A CO alarm on every level is a must if you run a generator.", "B004Y6V5CI", "Safety pick"),
-   ("power", "Champion 25 ft 30 amp generator power cord", "L14-30 cord for a manual transfer switch your electrician installs.", "B076HQ2THC", ""),
    ("power", "HUANCHAIN 50 ft 12 gauge outdoor extension cord", "Heavy-duty cord so the generator can sit well away from the house.", "B09WR4ZHRD", ""),
  ]),
  ("batteries", "🔋 Power stations & solar", "Quiet battery backup you can run indoors. Recharge from the wall, a car or the sun.", "power", [
@@ -387,7 +387,7 @@ GEAR = [
    ("power", "BLUETTI AC180 portable power station", "1,152 Wh LiFePO4 battery, 1800 W AC output.", "B0C1SMJTDT", ""),
  ]),
  ("outage", "🔌 Outage backup for home & phone", "Keep Wi-Fi, phones and lights on when the power flickers or fails.", "power", [
-   ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", "Best value"),
+   ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", ""),
    ("power", "INIU 20000mAh power bank", "Slim 20,000 mAh charger to keep phones going.", "B0FX7T4H7D", "Budget pick"),
    ("power", "CyberPower CP1500PFCLCD UPS battery backup", "Bigger sine-wave UPS for a computer plus network gear.", "B00429N19W", ""),
    ("power", "APC BE600M1 UPS battery backup", "Keeps a modem and router online through short outages.", "B01FWAZEIU", "Top pick"),
