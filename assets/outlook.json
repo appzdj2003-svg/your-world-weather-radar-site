@@ -1,18 +1,18 @@
 {
  "nhc": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": []
  },
  "metar": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": [
    {
     "icaoId": "KJFK",
-    "obsTime": 1793800260,
-    "temp": 16.7,
-    "dewp": 11.7,
-    "wdir": 200,
-    "wspd": 6,
+    "obsTime": 1793811060,
+    "temp": 18.3,
+    "dewp": 12.8,
+    "wdir": "VRB",
+    "wspd": 5,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
@@ -22,109 +22,96 @@
       "base": 25000
      }
     ],
-    "rawOb": "METAR KJFK 041351Z 20006KT 10SM FEW250 17/12 A3020 RMK AO2 SLP226 T01670117 $",
+    "rawOb": "METAR KJFK 041651Z VRB05KT 10SM FEW250 18/13 A3015 RMK AO2 SLP209 T01830128 $",
     "lat": 40.6392,
     "lon": -73.7639,
     "city": "New York"
    },
    {
     "icaoId": "EGLL",
-    "obsTime": 1793800200,
+    "obsTime": 1793811000,
     "temp": 10,
-    "dewp": 4,
-    "wdir": 60,
-    "wspd": 14,
+    "dewp": 3,
+    "wdir": 70,
+    "wspd": 12,
     "wgst": null,
     "wxString": null,
     "cover": "OVC",
     "clouds": [
      {
-      "cover": "BKN",
-      "base": 3300
-     },
-     {
       "cover": "OVC",
-      "base": 4100
+      "base": 4000
      }
     ],
-    "rawOb": "METAR EGLL 041350Z AUTO 06014KT 030V090 9999 BKN033 OVC041 10/04 Q1028",
+    "rawOb": "METAR EGLL 041650Z AUTO 07012KT 040V100 9999 OVC040 10/03 Q1028",
     "lat": 51.477,
     "lon": -0.461,
     "city": "London"
    },
    {
     "icaoId": "LFPG",
-    "obsTime": 1793800800,
-    "temp": 9,
-    "dewp": 2,
-    "wdir": 70,
-    "wspd": 14,
+    "obsTime": 1793811600,
+    "temp": 8,
+    "dewp": 3,
+    "wdir": 60,
+    "wspd": 11,
     "wgst": null,
     "wxString": null,
-    "cover": "BKN",
+    "cover": "OVC",
     "clouds": [
      {
-      "cover": "SCT",
-      "base": 3100
-     },
-     {
-      "cover": "BKN",
-      "base": 3300
+      "cover": "OVC",
+      "base": 3400
      }
     ],
-    "rawOb": "METAR LFPG 041400Z 07014KT 9999 SCT031 BKN033 09/02 Q1023 NOSIG",
+    "rawOb": "METAR LFPG 041700Z 06011KT 9999 OVC034 08/03 Q1024 NOSIG",
     "lat": 49.015,
     "lon": 2.534,
     "city": "Paris"
    },
    {
     "icaoId": "OMDB",
-    "obsTime": 1793800800,
+    "obsTime": 1793811600,
     "temp": 32,
-    "dewp": 23,
-    "wdir": 270,
-    "wspd": 5,
+    "dewp": 22,
+    "wdir": 320,
+    "wspd": 3,
     "wgst": null,
     "wxString": null,
     "cover": "FEW",
     "clouds": [
      {
       "cover": "FEW",
-      "base": 3500
+      "base": 4000
      }
     ],
-    "rawOb": "METAR OMDB 041400Z 27005KT 240V300 8000 FEW035 32/23 Q1013 NOSIG",
+    "rawOb": "METAR OMDB 041700Z 32003KT 230V010 9999 FEW040 32/22 Q1015 NOSIG",
     "lat": 25.254,
     "lon": 55.366,
     "city": "Dubai"
    },
    {
     "icaoId": "VABB",
-    "obsTime": 1793800800,
+    "obsTime": 1793811600,
     "temp": 31,
     "dewp": 21,
-    "wdir": 330,
-    "wspd": 7,
+    "wdir": 60,
+    "wspd": 3,
     "wgst": null,
     "wxString": "FU",
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 10000
-     }
-    ],
-    "rawOb": "METAR VABB 041400Z 33007KT 3000 FU FEW100 31/21 Q1012 NOSIG",
+    "cover": "CLR",
+    "clouds": [],
+    "rawOb": "METAR VABB 041700Z 06003KT 3000 FU NSC 31/21 Q1014 NOSIG",
     "lat": 19.1,
     "lon": 72.859,
     "city": "Mumbai"
    },
    {
     "icaoId": "RJTT",
-    "obsTime": 1793800800,
-    "temp": 14,
-    "dewp": 13,
-    "wdir": 350,
+    "obsTime": 1793811600,
+    "temp": 13,
+    "dewp": 12,
+    "wdir": 340,
     "wspd": 15,
     "wgst": null,
     "wxString": "-RA",
@@ -132,100 +119,87 @@
     "clouds": [
      {
       "cover": "FEW",
-      "base": 700
+      "base": 600
+     },
+     {
+      "cover": "SCT",
+      "base": 800
      },
      {
       "cover": "BKN",
       "base": 1000
-     },
-     {
-      "cover": "BKN",
-      "base": 1400
      }
     ],
-    "rawOb": "METAR RJTT 041400Z 35015KT 9000 -RA FEW007 BKN010 BKN014 14/13 Q1025 TEMPO 4000 RA BR FEW005 BKN008",
+    "rawOb": "METAR RJTT 041700Z 34015KT 7000 -RA FEW006 SCT008 BKN010 13/12 Q1022 TEMPO 4000 RA BR FEW005 BKN008",
     "lat": 35.553,
     "lon": 139.781,
     "city": "Tokyo"
    },
    {
     "icaoId": "YSSY",
-    "obsTime": 1793800800,
+    "obsTime": 1793811600,
     "temp": 18,
     "dewp": 13,
     "wdir": 310,
-    "wspd": 7,
+    "wspd": 9,
     "wgst": null,
-    "wxString": "-SHRA",
+    "wxString": null,
     "cover": "OVC",
     "clouds": [
      {
-      "cover": "FEW",
-      "base": 6400
-     },
-     {
-      "cover": "SCT",
-      "base": 10000
-     },
-     {
       "cover": "OVC",
-      "base": 12000
+      "base": 9800
      }
     ],
-    "rawOb": "METAR YSSY 041400Z AUTO 31007KT 9999 -SHRA FEW064 SCT100 OVC120 18/13 Q1008",
+    "rawOb": "METAR YSSY 041700Z AUTO 31009KT 9999 // OVC098 18/13 Q1008",
     "lat": -33.946,
     "lon": 151.173,
     "city": "Sydney"
    },
    {
     "icaoId": "FACT",
-    "obsTime": 1793800800,
-    "temp": 28,
-    "dewp": 9,
+    "obsTime": 1793811600,
+    "temp": 20,
+    "dewp": 14,
     "wdir": 140,
-    "wspd": 7,
+    "wspd": 6,
     "wgst": null,
     "wxString": null,
     "cover": "CAVOK",
     "clouds": [],
-    "rawOb": "METAR FACT 041400Z 14007KT CAVOK 28/09 Q1011 NOSIG",
+    "rawOb": "METAR FACT 041700Z 14006KT CAVOK 20/14 Q1011 NOSIG",
     "lat": -33.965,
     "lon": 18.602,
     "city": "Cape Town"
    },
    {
     "icaoId": "SBGR",
-    "obsTime": 1793800800,
-    "temp": 29,
-    "dewp": 21,
-    "wdir": 100,
-    "wspd": 5,
+    "obsTime": 1793811600,
+    "temp": 32,
+    "dewp": 18,
+    "wdir": 320,
+    "wspd": 12,
     "wgst": null,
     "wxString": null,
-    "cover": "FEW",
-    "clouds": [
-     {
-      "cover": "FEW",
-      "base": 2000
-     }
-    ],
-    "rawOb": "METAR SBGR 041400Z 10005KT 9999 FEW020 29/21 Q1014",
+    "cover": "CAVOK",
+    "clouds": [],
+    "rawOb": "METAR SBGR 041700Z 32012KT CAVOK 32/18 Q1012",
     "lat": -23.432,
     "lon": -46.469,
     "city": "São Paulo"
    },
    {
     "icaoId": "MMMX",
-    "obsTime": 1793799780,
-    "temp": 12,
-    "dewp": 7,
-    "wdir": 80,
-    "wspd": 3,
+    "obsTime": 1793810520,
+    "temp": 20,
+    "dewp": 8,
+    "wdir": 0,
+    "wspd": 0,
     "wgst": null,
     "wxString": null,
     "cover": "SKC",
     "clouds": [],
-    "rawOb": "METAR MMMX 041343Z 08003KT 12SM SKC 12/07 A3035 NOSIG",
+    "rawOb": "METAR MMMX 041642Z 00000KT 8SM SKC 20/08 A3035 NOSIG RMK HZY",
     "lat": 19.436,
     "lon": -99.072,
     "city": "Mexico City"
@@ -233,7 +207,7 @@
   ]
  },
  "launches": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": [
    {
     "id": "711de6bc-f755-475b-a12f-ec5240da3a11",
@@ -813,7 +787,7 @@
   ]
  },
  "jtwc": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": [
    {
     "pid": "wp3026",
@@ -822,7 +796,7 @@
   ]
  },
  "sun": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": {
    "scales": {
     "g": 0,
@@ -853,8 +827,8 @@
     ]
    },
    "kp": {
-    "now": 0.67,
-    "nowAt": "2026-11-04T12:00:00+00:00",
+    "now": 1.67,
+    "nowAt": "2026-11-04T15:00:00+00:00",
     "max24h": 3.33,
     "next24h": 3.67,
     "byDate": {
@@ -866,14 +840,14 @@
    },
    "wind": {
     "speed": 402.0,
-    "bz": 4.0,
-    "bt": 4.0,
-    "at": "2026-11-04T14:14:00Z"
+    "bz": -3.0,
+    "bt": 5.0,
+    "at": "2026-11-04T17:14:00Z"
    },
    "flare": {
-    "current": "B5.6",
-    "max": "C1.2",
-    "maxAt": "2026-11-04T06:54:00Z"
+    "current": "B5.9",
+    "max": "B9.7",
+    "maxAt": "2026-11-04T15:00:00Z"
    },
    "image": {
     "at": "2026-11-04T14:14:08+00:00",
@@ -882,21 +856,21 @@
   }
  },
  "pads": {
-  "fetchedAt": "2026-11-04T14:18:55+00:00",
+  "fetchedAt": "2026-11-04T17:19:01+00:00",
   "items": [
    {
     "icaoId": "KXMR",
-    "obsTime": 1793800500,
-    "temp": 26.5,
-    "dewp": 22.1,
-    "wdir": 80,
-    "wspd": 8,
+    "obsTime": 1793811300,
+    "temp": 28.8,
+    "dewp": 21.3,
+    "wdir": 120,
+    "wspd": 11,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KXMR 041355Z AUTO 08008KT 10SM CLR 27/22 A2999 RMK AO2 LTG DSNT S AND NW SLP159 T02650221",
+    "rawOb": "METAR KXMR 041655Z AUTO 12011KT 10SM CLR 29/21 A2995 RMK AO2 SLP145 T02880213",
     "lat": 28.4674,
     "lon": -80.5589,
     "pad": "cape",
@@ -909,17 +883,22 @@
    },
    {
     "icaoId": "KVBG",
-    "obsTime": 1793800500,
-    "temp": 12.6,
-    "dewp": 11.2,
-    "wdir": 20,
-    "wspd": 6,
+    "obsTime": 1793804100,
+    "temp": 8.6,
+    "dewp": 6.4,
+    "wdir": 10,
+    "wspd": 7,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR KVBG 041355Z AUTO 02006KT 10SM CLR 13/11 A3000 RMK AO2 SLP161 T01260112 FZRANO TSNO $",
+    "cover": "FEW",
+    "clouds": [
+     {
+      "cover": "FEW",
+      "base": 1300
+     }
+    ],
+    "rawOb": "METAR KVBG 041455Z COR 01007KT 10SM FEW013 09/06 A3001 RMK AO2A SLP166 T00860064 52010 FIRST COR 1502",
     "lat": 34.733,
     "lon": -120.583,
     "pad": "vandenberg",
@@ -931,17 +910,17 @@
    },
    {
     "icaoId": "KBRO",
-    "obsTime": 1793800380,
-    "temp": 25.6,
-    "dewp": 20.6,
-    "wdir": 20,
-    "wspd": 6,
+    "obsTime": 1793811180,
+    "temp": 29.4,
+    "dewp": 19.4,
+    "wdir": 50,
+    "wspd": 12,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
     "cover": "CLR",
     "clouds": [],
-    "rawOb": "METAR KBRO 041353Z 02006KT 10SM CLR 26/21 A2997 RMK AO2 SLP146 T02560206 $",
+    "rawOb": "METAR KBRO 041653Z 05012KT 10SM CLR 29/19 A2999 RMK AO2 SLP155 T02940194 $",
     "lat": 25.9146,
     "lon": -97.4231,
     "pad": "starbase",
@@ -954,17 +933,26 @@
    },
    {
     "icaoId": "KWAL",
-    "obsTime": 1793800440,
-    "temp": 17.8,
+    "obsTime": 1793811240,
+    "temp": 21.7,
     "dewp": 15.6,
     "wdir": 150,
-    "wspd": 5,
+    "wspd": 7,
     "wgst": null,
     "visib": "10+",
     "wxString": null,
-    "cover": "CLR",
-    "clouds": [],
-    "rawOb": "METAR KWAL 041354Z AUTO 15005KT 10SM CLR 18/16 A3020 RMK AO2 SLP225 T01780156",
+    "cover": "BKN",
+    "clouds": [
+     {
+      "cover": "BKN",
+      "base": 2400
+     },
+     {
+      "cover": "BKN",
+      "base": 3000
+     }
+    ],
+    "rawOb": "METAR KWAL 041654Z AUTO 15007KT 10SM BKN024 BKN030 22/16 A3016 RMK AO2 SLP210 T02170156",
     "lat": 37.9372,
     "lon": -75.4662,
     "pad": "wallops",
