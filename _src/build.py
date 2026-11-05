@@ -31,6 +31,7 @@ OG_SPECS = {
  "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["app-radar.jpg"]),
  "static-fire/index.html": dict(kicker="Free simulator", title="Starship static fire simulator", sub="Fan-made and simulated, not real. Runs in your browser", visual=["static-fire-shot.jpg"]),
  "launches/index.html": dict(kicker="Rocket launches", title="Next launch countdown and schedule", sub="Upcoming launches worldwide and weather at the main US launch sites", visual=["launch-teaser.jpg"]),
+ "get/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play and the App Store", visual=["shot-home.jpg", "app-radar.jpg"]),
  "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play and the App Store", visual=["shot-home.jpg", "app-hurricane.jpg"]),
 }
 OG_IMG = {}  # path -> "og/<slug>.jpg", filled by build_og()
@@ -561,6 +562,40 @@ def ask():
     page("ask.html", "Ask Atlas", "Ask Atlas: quick weather safety answers from NWS and NOAA sourced guides, plus one-sentence forecast and trip planning.", b,
          hero_atlas("Ask Atlas", "Weather safety answers and one-line planning, sourced from the NWS and NOAA.", "Ask"), "0.7", scripts=("codec-core.js", "quickparse.js", "askdata.js", "ask.js", "voice.js", "listen.js"))
 
+# ---------- /get/ smart store QR landing (UA redirect; desktop shows both stores) ----------
+def get_page():
+    """Phones jump to the right store; desktop/unknown see both buttons. Used by the shared QR flyer."""
+    head = (
+        '<meta name="robots" content="noindex">'
+        '<script>(function(){var ua=navigator.userAgent||"";'
+        'var iOS=/iPhone|iPod/i.test(ua)||/iPad/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1);'
+        'var android=/Android/i.test(ua);'
+        'if(iOS){location.replace("' + APPSTORE + '");return;}'
+        'if(android){location.replace("' + PLAY + '");return;}'
+        '})();</script>'
+        '<style>.get-hero .wrap{text-align:center;padding:40px 20px 28px;max-width:560px}'
+        '.get-hero h1{font-size:clamp(1.6rem,5vw,2rem);margin:.35em 0 .25em}'
+        '.get-btns{display:flex;flex-direction:column;align-items:stretch}''.get-btns .btn{justify-content:center;width:100%;max-width:360px;margin:0 auto}'
+        '@media(min-width:480px){.get-btns{flex-direction:row!important;flex-wrap:wrap}.get-btns .btn{width:auto;max-width:none}}</style>'
+    )
+    h = f'''<section class="hero go-hero get-hero"><div class="wrap">
+<img class="go-ico" src="../assets/{V("icon-192.png")}" width="72" height="72" alt="" style="margin:0 auto 8px;border-radius:16px">
+<span class="kicker">Get the app</span>
+<h1>{APP}</h1>
+<p class="lead">Know when rain hits your spot. Free rain ETA, live radar and weather alerts for Android and iPhone.</p>
+</div></section>'''
+    play = play_btn("get", "primary", "get", "Get it on Google Play")
+    apple = as_btn("", "get")
+    b = f'''<div class="get-body" style="text-align:center;padding:8px 0 40px;max-width:520px;margin:0 auto">
+<p class="dim" style="margin:0 0 18px">Pick your phone&rsquo;s store. On a phone this page usually opens the right one for you.</p>
+<div class="btns get-btns" style="justify-content:center;align-items:stretch;gap:12px">{play}{apple}</div>
+<noscript><div class="btns get-btns" style="justify-content:center;margin:24px 0">{play}{apple}</div>
+<p class="dim small" style="text-align:center">JavaScript is off, so pick your store above.</p></noscript>
+<p class="dim small" style="margin-top:28px"><a href="../">Visit the full website</a> · <a href="../features.html">Features</a> · <a href="../pricing.html">Pricing</a></p>
+</div>'''
+    page("get/index.html", f"Get {APP}", "Download Your World Weather Radar on Google Play or the App Store.",
+         b, h, "0.5", slug="get", minimal=True, playbar=False, head_extra=head, sitemap=False)
+
 # ---------- /go/ social bio landing page (+ /tiktok/ and /facebook/ aliases) ----------
 # ?src= is whitelisted; it becomes the Play install referrer (utm_source=<src>&utm_medium=social&utm_campaign=bio) and is
 # copied into the page URL as UTMs before Google Analytics is configured, so the visit is attributed to the platform.
@@ -843,5 +878,5 @@ def flight_open_redirect():
 
 
 if __name__ == "__main__":
-    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); launches_page(); static_fire_page(); flight_page(); flight_open_redirect(); misc()
+    OUTLOOK.build(); build_og(); home(); outlook_page(); features(); pricing(); privacy(); support(); disclosure(); guides(); gear(); ask(); planner("alert-planner/index.html", "plan"); planner("trip-planner/index.html", "trip"); legacy_planners(); go_page(); get_page(); launches_page(); static_fire_page(); flight_page(); flight_open_redirect(); misc()
     print(f"Built {len(PAGES)} pages")
