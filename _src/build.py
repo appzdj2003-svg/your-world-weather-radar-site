@@ -242,6 +242,10 @@ def flight_home():
             "a plain-English delay estimate, and what to do if you're delayed.</p>"
             '<span class="fl-promo-go">Open Track my flight →</span></span></a>')
 
+# Google Search Console site ownership (homepage meta + root HTML file).
+GSC_META = '<meta name="google-site-verification" content="diLzzCKxrlEdbNNhGk8-NutdOKtYp0cP8r8gByLR47E" />'
+GSC_FILE = "googled20b928d18727c1f.html"
+GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
@@ -277,7 +281,7 @@ def home():
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]},
           dict({"@context": "https://schema.org"}, **ORG),
           {"@context": "https://schema.org", "@type": "WebSite", "name": APP, "url": SITE, "publisher": ORG}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS()+HOME_QR_CSS)
+    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS()+HOME_QR_CSS+GSC_META)
 
 def features():
     b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
@@ -640,6 +644,7 @@ document.querySelectorAll("[data-go-play]").forEach(function(a){{a.href=u}})}})(
 <body style="font-family:system-ui;padding:24px"><p><a href="/go/?src={a}">Get {APP} on Google Play</a></p></body></html>''')
 
 def misc():
+    (ROOT / GSC_FILE).write_text(GSC_FILE_BODY)  # Search Console; keep across rebuilds
     page("404.html", "Page not found", "Page not found.", f'<p style="margin-top:24px">That page isn\'t here. <a href="/">Go home</a>.</p>', hero("Page not found"))
     sm = "".join(f"<url><loc>{u}</loc><lastmod>{datetime.date.today()}</lastmod><priority>{p}</priority></url>" for u, p in PAGES)
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>\n')
