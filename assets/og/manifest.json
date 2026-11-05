@@ -2,7 +2,9 @@
  "alert-planner": "ec4db09dcf00",
  "ask": "2f4193120a9d",
  "features": "d846e273dc3e",
+ "flight": "a47ced2d0658",
  "gear": "c7c891d4a834",
+ "get": "4ba6e85ee0f7",
  "go": "b44b8b1ba670",
  "guides": "cab9ce0534e9",
  "guides-barometric-pressure-and-weather": "501f425279e4",
@@ -18,7 +20,7 @@
  "index": "00ed65c9178d",
  "launches": "798ea6cd921f",
  "outlook": "d07291820e60",
- "pricing": "b60b9b14c960",
+ "pricing": "f134fdcaa0e0",
  "static-fire": "8e1295a35ba4",
  "trip-planner": "52b0bb997e1d"
 }

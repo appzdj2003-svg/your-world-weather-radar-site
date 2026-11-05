@@ -23,7 +23,7 @@ OG_SPECS = {
  "index.html": dict(kicker="Free rain ETA", title="Know when rain hits your spot", sub="Live radar, storm tracks and weather alerts for Android and iPhone", visual=["shot-home.jpg", "app-radar.jpg"]),
  "outlook.html": dict(kicker="Live now", title="The whole planet's weather, live", sub="Satellite loop, hurricanes and typhoons, US alerts and the Sun", visual=["app-radar.jpg"]),
  "features.html": dict(kicker="Features", title="What's free and what's Premium", sub="Rain ETA, radar, alerts, AI briefings, cams and more", visual=["app-hurricane.jpg", "shot-home.jpg"]),
- "pricing.html": dict(kicker="Pricing", title="Free to download. Premium from $4.99/mo", sub="$47.99/yr. 7-day free trial for new subscribers", visual=["shot-home.jpg"]),
+ "pricing.html": dict(kicker="Pricing", title="Free to download. Premium from $4.99/mo", sub="$4.99/mo or $47.99/yr on Google Play; $4.99/mo on iPhone", visual=["shot-home.jpg"]),
  "alert-planner/index.html": dict(kicker="Alert Planner", title="Plan alerts for a day out", sub="Place, activity and dates in one link for your phone", visual=["app-hurricane.jpg"]),
  "trip-planner/index.html": dict(kicker="Trip Planner", title="Weather for your whole trip", sub="Destination, dates and how you're traveling", visual=["app-radar.jpg"]),
  "ask.html": dict(kicker="Ask Atlas", title="Weather safety answers in plain English", sub="Sourced from NWS and NOAA guides", visual=["shot-home.jpg"]),
@@ -31,7 +31,8 @@ OG_SPECS = {
  "guides/index.html": dict(kicker="Weather guides", title="Weather safety guides", sub="Radar, watches vs. warnings, hurricanes, lightning and more", visual=["app-radar.jpg"]),
  "static-fire/index.html": dict(kicker="Free simulator", title="Starship static fire simulator", sub="Fan-made and simulated, not real. Runs in your browser", visual=["static-fire-shot.jpg"]),
  "launches/index.html": dict(kicker="Rocket launches", title="Next launch countdown and schedule", sub="Upcoming launches worldwide and weather at the main US launch sites", visual=["launch-teaser.jpg"]),
- "get/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play and the App Store", visual=["shot-home.jpg", "app-radar.jpg"]),
+ "flight/index.html": dict(kicker="Track my flight", title="Track my flight", sub="Live plane, weather and delay outlook for your trip", visual=["app-radar.jpg", "shot-home.jpg"]),
+ "get/index.html": dict(kicker="Get the app", title="Your World Weather Radar", sub="Get it on iPhone and Android", visual=["shot-home.jpg", "app-radar.jpg"]),
  "go/index.html": dict(kicker="Get the app", title="Know when rain hits your spot", sub="Free rain ETA, live radar and alerts on Google Play and the App Store", visual=["shot-home.jpg", "app-hurricane.jpg"]),
 }
 OG_IMG = {}  # path -> "og/<slug>.jpg", filled by build_og()
@@ -241,7 +242,7 @@ def flight_home():
             "a plain-English delay estimate, and what to do if you're delayed.</p>"
             '<span class="fl-promo-go">Open Track my flight →</span></span></a>')
 
-HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For Android."
+HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Know when rain hits your spot.</h1>
@@ -573,7 +574,6 @@ def ask():
 def get_page():
     """Phones jump to the right store; desktop/unknown see both buttons. Used by the shared QR flyer."""
     head = (
-        '<meta name="robots" content="noindex">'
         '<script>(function(){var ua=navigator.userAgent||"";'
         'var iOS=/iPhone|iPod/i.test(ua)||/iPad/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1);'
         'var android=/Android/i.test(ua);'
@@ -600,8 +600,8 @@ def get_page():
 <p class="dim small" style="text-align:center">JavaScript is off, so pick your store above.</p></noscript>
 <p class="dim small" style="margin-top:28px"><a href="../">Visit the full website</a> · <a href="../features.html">Features</a> · <a href="../pricing.html">Pricing</a></p>
 </div>'''
-    page("get/index.html", f"Get {APP}", "Download Your World Weather Radar on Google Play or the App Store.",
-         b, h, "0.5", slug="get", minimal=True, playbar=False, head_extra=head, sitemap=False)
+    page("get/index.html", f"Get {APP}", "Download Your World Weather Radar on the App Store and Google Play. Free rain ETA, live radar and alerts for iPhone and Android.",
+         b, h, "0.7", slug="get", minimal=True, playbar=False, head_extra=head, sitemap=True)
 
 # ---------- /go/ social bio landing page (+ /tiktok/ and /facebook/ aliases) ----------
 # ?src= is whitelisted; it becomes the Play install referrer (utm_source=<src>&utm_medium=social&utm_campaign=bio) and is
@@ -629,8 +629,8 @@ def go_page():
 <p class="dim small" style="text-align:center"><a href="../">Visit the full website</a> · <a href="../outlook.html">Live storm Outlook</a> · <a href="../pricing.html">Pricing</a></p>
 <script>(function(){{var s=window.YW_GO_SRC;if(!s)return;var u="{PLAY}&referrer="+encodeURIComponent("utm_source="+s+"&utm_medium=social&utm_campaign=bio");
 document.querySelectorAll("[data-go-play]").forEach(function(a){{a.href=u}})}})();</script>'''
-    page("go/index.html", f"Get {APP} on Google Play", "Know when rain hits your spot: free rain ETA, live radar, storm tracks and NWS alerts for Android.", b, h, "0.5",
-         slug="go", minimal=True, playbar=False, head_extra=head, sitemap=False)
+    page("go/index.html", f"Get {APP}", "Know when rain hits your spot: free rain ETA, live radar, storm tracks and NWS alerts for iPhone and Android.", b, h, "0.7",
+         slug="go", minimal=True, playbar=False, head_extra=head, sitemap=True)
     for a in GO_ALIASES:
         (ROOT / a).mkdir(exist_ok=True)
         (ROOT / a / "index.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
