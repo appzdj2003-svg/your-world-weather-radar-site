@@ -246,7 +246,14 @@ def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Know when rain hits your spot.</h1>
 <p class="lead">A free rain ETA for your exact location, plus live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
-<div class="btns">{play_btn("home","primary","hero")}{as_btn("", "hero")}<a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
+<div class="home-cta">
+<div class="btns home-store">{play_btn("home","primary","hero")}{as_btn("", "hero")}</div>
+<a class="home-qr" href="get/" aria-label="Scan to get the app on iPhone or Android">
+<span class="home-qr-card"><img src="assets/{V('qr-get.png')}" width="112" height="112" alt="QR code that opens Get Your World Weather Radar — picks Google Play or the App Store for your phone"></span>
+<span class="home-qr-cap"><b>Scan with your phone</b><small>iPhone or Android</small></span>
+</a>
+</div>
+<div class="btns home-plan"><a class="btn ghost" href="alert-planner/">Plan alerts for a day out →</a></div>
 {trial_line("trial on-dark")}
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own, no ad tracking, and we never sell your data. Optional anonymous crash and usage reports can be turned off in Settings.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
@@ -269,7 +276,7 @@ def home():
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]},
           dict({"@context": "https://schema.org"}, **ORG),
           {"@context": "https://schema.org", "@type": "WebSite", "name": APP, "url": SITE, "publisher": ORG}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS())
+    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS()+HOME_QR_CSS)
 
 def features():
     b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
@@ -646,6 +653,24 @@ def misc():
 #  - Launch push alerts (T-1 h reminder + liftoff) are Premium (SysSheet ROCKET LAUNCHES toggle is locked for free users).
 #  - The FEEL THE LAUNCH button on a launch card has no entitlement check of its own (LaunchDeckLink.kt), so it is NOT
 #    labeled Premium here. The Launch Deck site itself is never linked from this website.
+HOME_QR_CSS = (
+    '<style>'
+    '.home-cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;margin:22px 0 10px}'
+    '.home-cta .btns{margin:0}'
+    '.home-plan{margin:0 0 6px}'
+    '.home-qr{display:none;text-decoration:none;color:#E2E8F0;flex:0 0 auto;flex-direction:column;align-items:center;gap:8px;text-align:center}'
+    '.home-qr-card{display:block;background:#fff;border-radius:14px;padding:8px;box-shadow:0 8px 24px rgba(2,6,23,.28);line-height:0}'
+    '.home-qr-card img{width:112px;height:112px;display:block;border-radius:4px}'
+    '.home-qr-cap{display:flex;flex-direction:column;gap:1px;font-size:.82rem;line-height:1.25}'
+    '.home-qr-cap b{font-weight:700;color:#F8FAFC}'
+    '.home-qr-cap small{font-size:.72rem;color:#CBD5E1}'
+    '.home-qr:hover .home-qr-card{box-shadow:0 10px 28px rgba(2,6,23,.4)}'
+    '.home-qr:focus-visible{outline:3px solid #7DD3FC;outline-offset:3px;border-radius:12px}'
+    '@media(min-width:700px){.home-qr{display:inline-flex}.home-cta .home-store{flex-direction:column;align-items:stretch;gap:10px;max-width:280px}.home-cta .home-store .btn{justify-content:center;width:100%}}'
+    '@media(max-width:699px){.home-cta .home-store{width:100%}.home-cta .home-store .btn{justify-content:center}}'
+    '</style>'
+)
+
 def SHOW_CSS(p="/"): return f'<link rel="stylesheet" href="{p}assets/{V("launches.css")}">'
 
 def sun_feature():
