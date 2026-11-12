@@ -249,8 +249,8 @@ GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
-<h1>Know when rain hits your spot.</h1>
-<p class="lead">A free rain ETA for your exact location, plus live radar, National Weather Service alerts, AI briefings, hurricane tracks and nearby weather cams in one clean app. Text your location by satellite when there's no signal.</p>
+<h1>Your World Weather Radar: know when rain hits your spot</h1>
+<p class="lead">A free rain ETA for your exact location, plus a live weather radar app with National Weather Service alerts, AI briefings, and nearby weather cams. For iPhone and Android.</p>
 <div class="home-cta">
 <div class="btns home-store">{play_btn("home","primary","hero")}{as_btn("", "hero")}</div>
 <a class="home-qr" href="get/" aria-label="Scan to get the app on iPhone or Android">
