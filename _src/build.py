@@ -246,7 +246,7 @@ def flight_home():
 GSC_META = '<meta name="google-site-verification" content="diLzzCKxrlEdbNNhGk8-NutdOKtYp0cP8r8gByLR47E" />'
 GSC_FILE = "googled20b928d18727c1f.html"
 GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
-HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus live radar, storm tracks and weather alerts. For iPhone and Android."
+HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Know when rain hits your spot.</h1>
@@ -277,11 +277,15 @@ def home():
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
 {hunt_promo()}{cta("", "home", "Free on Google Play and the App Store. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year on Android, $" + PRICE_M + "/month on iPhone.")}'''
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android, iOS 17.0+", "applicationCategory": "WeatherApplication",
-           "author": ORG, "installUrl": PLAY, "sameAs": [PLAY, APPSTORE], "url": SITE,
+           "author": ORG,
+           "description": "A free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android.",
+           "installUrl": [APPSTORE, PLAY],
+           "sameAs": [PLAY, APPSTORE], "url": SITE,
+           "screenshot": [SITE + "assets/shot-home.jpg", SITE + "assets/app-radar.jpg"],
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD"}]},
           dict({"@context": "https://schema.org"}, **ORG),
           {"@context": "https://schema.org", "@type": "WebSite", "name": APP, "url": SITE, "publisher": ORG}]
-    page("index.html", f"{APP}: Live Radar, Storm Alerts & AI Briefings", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS()+HOME_QR_CSS+GSC_META)
+    page("index.html", f"{APP}: Rain ETA & Weather Radar App", HOME_DESC, b, h, "1.0", jsonld=ld, scripts=("outlook.js", "teaser.js"), head_extra=SHOW_CSS()+HOME_QR_CSS+GSC_META)
 
 def features():
     b = f'''<div class="trial-box">{trial_line("trial")}<p class="dim small">Everything marked Free is included free, with no subscription.</p></div>''' + feature_cards() + f'''<h2>Also in the app</h2><ul>
