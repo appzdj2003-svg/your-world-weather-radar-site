@@ -294,7 +294,7 @@ def watch_promo():
         '<h2 id="wp-h">Weather on your wrist. 12 dials and counting.</h2>'
         '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
         '<div class="wp-offer">'
-        f'{trial_line()}'
+        f'<p class="trial"><span aria-hidden="true">🎁</span> Premium: 7-day free trial for new subscribers, then ${PRICE_M}/mo or ${PRICE_Y}/yr. Cancel anytime in your store account.</p>'
         '<p>Keel and Alto are free. Premium unlocks the Luxury and Field collections.</p>'
         f'<div class="btns wp-stores">{store_btns("watch", "primary", "watchpromo")}</div>'
         '</div>'
