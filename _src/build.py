@@ -508,7 +508,7 @@ def amz(q): return f"https://www.amazon.com/s?k={enc(q)}&tag={AMZ_TAG}"
 def amz_dp(asin): return f"https://www.amazon.com/dp/{asin}?tag={AMZ_TAG}"  # verified product page
 import gearart, gearimg
 # (section id, title, intro, tone, [(art, product name, note[, asin, label])]). Real named products; links are Amazon searches for the exact name,
-# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22, rechecked 2026-10-26 and 2026-11-03). "Best value" = list-price/typical-price discount >=20% verified that day. Labels are our picks; never prices.
+# or the product page when an ASIN is given (all sections; ASINs checked on amazon.com 2026-10-22, rechecked 2026-10-26, 2026-11-03 and 2026-11-16). "Best value" = list-price/typical-price discount >=20% verified that day. Labels are our picks; never prices.
 GEAR = [
  ("rain", "☔ Rain gear", "Stay dry from the driveway to the trailhead.", "rain", [
    ("umbrella", "Repel windproof travel umbrella", "Compact auto open/close umbrella built for wind.", "B0160HYB8S", "Best value"),
@@ -566,6 +566,14 @@ GEAR = [
    ("power", "Jackery Explorer 1000 v2 portable power station", "1,070 Wh LiFePO4 battery, 1500 W AC output.", "B0D7PPG25F", "Top pick"),
    ("power", "BLUETTI AC180 portable power station", "1,152 Wh LiFePO4 battery, 1800 W AC output.", "B0C1SMJTDT", ""),
  ]),
+ ("solarcables", "☀️ Solar cables & connectors", "Hook a portable panel to a power station, extend the run, or branch two panels.", "power", [
+   ("solarcable", "Vansdon 10AWG XT60 solar cable, 50 ft", "10 AWG cable with solar (MC4-style) plugs on one end and XT60 on the other, to charge a portable power station. Other lengths are on the product page.", "B0DSKHW19P", "Top pick"),
+   ("solarcable", "Renogy 20 ft 10AWG solar extension cables", "A red and black pair of 20 ft 10 AWG leads with male and female connectors, to put more space between a panel and the rest of the system.", "B07Z8YCR68", "Best value"),
+   ("solarcable", "TEMCo 10 AWG solar extension cable, 50 ft red and black", "A 50 ft red plus 50 ft black 10 AWG pair with Staubli MC4 connectors for a longer run.", "B071DXN1WH", "Premium pick"),
+   ("mc4kit", "iCrimp solar MC4 crimping tool kit", "Crimper, cutter, stripper and solar connector spanners for putting connectors on 10–14 AWG solar cable.", "B07BFT3B4V", ""),
+   ("adapter", "PAEKQ 10AWG MC4 to Anderson adapter, 1.6 ft", "Short 10 AWG adapter from MC4 panel leads to an Anderson port on a power station. Check polarity on your gear before you plug in.", "B09PG38HFL", ""),
+   ("ybranch", "BougeRV solar Y-branch connectors, 1 pair", "A 2-to-1 Y pair (one FMM and one MFF) for wiring two solar panels in parallel.", "B07DJ5PHSB", ""),
+ ]),
  ("outage", "🔌 Outage backup for home & phone", "Keep Wi-Fi, phones and lights on when the power flickers or fails.", "power", [
    ("light", "Glocusent rechargeable LED lantern", "Bright rechargeable lantern that can also charge a phone.", "B0FL22QSGP", ""),
    ("power", "INIU 20000mAh power bank", "Slim 20,000 mAh charger to keep phones going.", "B0FX7T4H7D", "Budget pick"),
@@ -588,6 +596,7 @@ GEN_SAFETY = ('<p class="callout"><strong>Generator safety:</strong> Run a gener
               'Never plug a generator into a wall outlet; use extension cords or a transfer switch installed by a licensed electrician.</p>')
 CB_AUDIO = ('<p class="callout"><strong>How it connects:</strong> Plug the cable into the CB\'s EXT SP (external speaker) jack, through the isolator, into the splitter\'s mic port, then the USB-C adapter into your phone. '
             'It works with most CBs that have an EXT SP jack. Start with the CB volume low and turn it up slowly. Every CB also needs an antenna.</p>')
+SOLAR_CABLES = ('<p class="callout"><strong>Match the plugs:</strong> Many portable panels use MC4 connectors. Many power stations take XT60 or Anderson. Confirm the ports and polarity on your gear before you buy.</p>')
 def gear():
     jump = '<div class="tabs" style="margin-top:18px">' + "".join(f'<a href="#{sid}" class="btn" style="padding:7px 14px;font-size:.85rem">{E(t)}</a>' for sid, t, *_ in GEAR) + "</div>"
     secs = ""; seen = set()
@@ -600,7 +609,7 @@ def gear():
         return (f'<a class="pcard"{gid(k, n)} href="{E(amz_dp(asin) if asin else amz(n))}" target="_blank" rel="sponsored nofollow noopener"><span class="pc-art">{gearimg.art(k, tone, n)}</span>'
                 f'<span class="pc-body">{tag}<b>{E(n)}</b><span>{E(d)}</span><em>See on Amazon →</em></span></a>')
     for sid, title, sub, tone, items in GEAR:
-        safety = GEN_SAFETY if sid == "generators" else CB_AUDIO if sid == "cbaudio" else ""
+        safety = GEN_SAFETY if sid == "generators" else CB_AUDIO if sid == "cbaudio" else SOLAR_CABLES if sid == "solarcables" else ""
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
     deals = load_deals()
     # Storm-power deals can be older than the newest rain/radio headlines, so the newest generator, power station and
@@ -619,9 +628,9 @@ def gear():
     )
     b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to the Amazon product page for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. Labels like “Top pick” are our own picks, not Amazon deals. We don\'t show prices or ratings because they change daily, so check the current price on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
          + watch_card + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
-    page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors, generators, power stations, UPS battery backups and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments, backup power and emergency kit worth owning before storm season.", "Gear"), "0.7")
+    page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors, generators, power stations, solar cables and connectors, UPS battery backups and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments, backup power, solar cables and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
-DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "inverter generator", "portable generator", "battery backup", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]
+DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "inverter generator", "portable generator", "battery backup", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho", "solar cable", "MC4 connector"]
 # Slickdeals search RSS is loose (a "lantern" query returns floor lamps, "umbrella" returns patio umbrellas, and some results
 # match nothing at all: lawn sweepers, Halloween lights, AV receivers). So a headline is only kept when it names weather,
 # outdoor, emergency or rain gear (DEAL_OK) and names nothing off-topic (DEAL_BAD). Deals older than DEAL_MAX_DAYS are
@@ -629,7 +638,7 @@ DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umb
 DEAL_OK = re.compile(r"weather radio|noaa|emergency (weather )?radio|hand[- ]?crank|crank radio|weather station|rain gauge|barometer|anemometer"
                      r"|lightning detector|weather alert|two-way radio|walkie[- ]?talkie|\brain\b[\w\s'’&-]{0,25}\b(jacket|coat|boots?|pants|suit|poncho|gear|shell)\b"
                      r"|raincoat|rainboots?|poncho|waterproof[\w\s-]{0,15}\b(jacket|coat|boots?|bag|pants)\b|\bumbrellas?\b|dry bag|power bank|portable charger"
-                     r"|power station|generator|solar panel|\bups\b[\w\s/-]{0,30}battery backup|lantern|headlamp|flashlight|first[- ]aid|emergency kit|survival kit|emergency blanket", re.I)
+                     r"|power station|generator|solar panel|solar cable|solar (extension )?wire|mc4|\bxt60\b|\bups\b[\w\s/-]{0,30}battery backup|lantern|headlamp|flashlight|first[- ]aid|emergency kit|survival kit|emergency blanket", re.I)
 DEAL_BAD = re.compile(r"halloween|christmas|holiday|xmas|patio|market umbrella|beach umbrella|\blamp\b|floor|desk fan|\bfan\b|duster|vacuum|\bmop\b"
                       r"|receiver|sweeper|lawn|leaf|xbox|playstation|ps5|nintendo|switch|\bgame|vinyl|\blp\b|album|lego|ceiling|hook|grill"
                       r"|docking station|\bnas\b|jump starter|magsafe|qi2|wireless charging|\bcap\b|\bhats?\b|backpack|storage bag|ice pack|cooler|\btoys?\b|inflatable|decor|fairy|string lights|squirrel|feeder|picnic|flicker|flame|hanging|garden|pathway|landscape|yard", re.I)
