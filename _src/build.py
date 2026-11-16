@@ -58,7 +58,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("flight/", "Track my flight"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
+NAV = [("index.html", "Home"), ("#watch", "Watch"), ("flight/", "Track my flight"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -99,6 +99,9 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
     url = SITE + ("" if path == "index.html" else path.replace("index.html", ""))
     cur = path.split("/")[0] + "/" if "/" in path else path
     def _nav_a(h, t):
+        if h == "#watch":
+            href = "#watch" if path == "index.html" else f"{p}index.html#watch"
+            return f'<a href="{href}">Watch</a>'
         href = "./" if h == "index.html" and not p else f"{p}{'' if h == 'index.html' else h}"
         if h == "index.html" and p: href = p
         attrs = f'href="{href}"'
@@ -249,46 +252,71 @@ GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 
 def watch_promo():
     """Homepage promo: teaser of live Apple Watch / Wear OS dials, plus coming-soon launch dials."""
-    def fig(kind, name, caption, alt, tag=""):
+    def fig(kind, name, caption, alt, tag="", pick=None):
         img = V(f"watch/{name}")
         wh = {"aw": (416, 496), "soon": (560, 670)}[kind]
+        cap = f"{E(caption)}{tag}"
+        if pick:
+            pressed = "true" if pick.get("on") else "false"
+            return (
+                f'<button type="button" class="wp-fig {kind}" data-wp-pick data-src="assets/{img}" '
+                f'data-name="{E(pick["name"])}" data-tag="{E(pick["tag"])}" data-kind="{E(pick["kind"])}" '
+                f'data-alt="{E(alt)}" aria-pressed="{pressed}" aria-label="{E(alt)}">'
+                f'<img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="" loading="lazy">'
+                f'<span class="wp-cap">{cap}</span></button>'
+            )
         return (f'<figure class="wp-fig {kind}"><img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="{E(alt)}" loading="lazy">'
-                f'<figcaption>{E(caption)}{tag}</figcaption></figure>')
+                f'<figcaption>{cap}</figcaption></figure>')
     free, prem, soon = TAG["free"], TAG["prem"], '<span class="tag soon">Coming soon</span>'
     luxury = "".join([
-        fig("aw", "aw-keel.webp", "Keel", "Keel, a free luxury dial", free),
-        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem),
-        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem),
+        fig("aw", "aw-keel.webp", "Keel", "Keel, a free luxury dial", free, {"name": "Keel", "tag": "Free", "kind": "free", "on": True}),
+        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem, {"name": "Aureole", "tag": "Premium", "kind": "prem"}),
+        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem, {"name": "Nimbus", "tag": "Premium", "kind": "prem"}),
     ])
     field = "".join([
-        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem),
-        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem),
-        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem),
+        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem, {"name": "Recon", "tag": "Premium", "kind": "prem"}),
+        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem, {"name": "Orbit", "tag": "Premium", "kind": "prem"}),
+        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem, {"name": "Cutter", "tag": "Premium", "kind": "prem"}),
     ])
     coming = "".join([
         fig("soon", "soon-ignition.webp", "Ignition", "Ignition rocket-launch dial mockup, coming soon", soon),
         fig("soon", "soon-apogee.webp", "Apogee", "Apogee rocket-launch dial mockup, coming soon", soon),
         fig("soon", "soon-gantry.webp", "Gantry", "Gantry rocket-launch dial mockup, coming soon", soon),
     ])
+    keel = V("watch/aw-keel.webp")
+    stage = (
+        f'<div class="wp-stage"><img src="assets/{keel}" width="416" height="496" alt="Keel, a free luxury dial" loading="lazy">'
+        f'<p class="wp-stage-cap"><span class="wp-stage-name">Keel</span><span class="tag free">Free</span></p></div>'
+    )
     return (
         '<section class="wp" id="watch" aria-labelledby="wp-h">'
         '<p class="kicker">On your wrist</p>'
-        '<h2 id="wp-h">Weather on Apple Watch and Wear OS</h2>'
+        '<h2 id="wp-h">Weather on your wrist. 12 dials and counting.</h2>'
         '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
+        '<div class="wp-offer">'
+        f'{trial_line()}'
+        '<p>Keel and Alto are free. Premium unlocks the Luxury and Field collections.</p>'
+        f'<div class="btns wp-stores">{store_btns("watch", "primary", "watchpromo")}</div>'
+        '</div>'
+        '<div class="wp-showcase" data-wp-demo>'
+        f'{stage}'
+        '<div class="wp-picks">'
+        '<p class="wp-hint dim small">Tap a dial to preview it.</p>'
+        '<div class="wp-group"><h3>Luxury</h3><div class="wp-grid" role="list">' + luxury + '</div></div>'
+        '<div class="wp-group"><h3>Field</h3><div class="wp-grid" role="list">' + field + '</div></div>'
+        '</div></div>'
         '<div class="wp-platforms">'
         '<div class="card wp-plat">'
         '<h3>Apple Watch</h3>'
-        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials and counting, complications, a Smart Stack widget and the Premium Field series. Keel and Alto are free. Premium adds the Luxury and Field collections.</p>'
+        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials and counting, complications, a Smart Stack widget and the Premium Field series.</p>'
         f'<div class="btns">{as_btn("", "watchpromo")}</div>'
         '</div>'
         '<div class="card wp-plat">'
         '<h3>Wear OS</h3>'
-        '<p>The Wear OS watch app includes 12 faces and counting, a tile, complications and wrist weather alerts. Keel and Alto are free. Get it with Your World Weather Radar on Google Play.</p>'
+        '<p>The Wear OS watch app includes the same 12 faces and counting, a tile, complications and wrist weather alerts. Get it with Your World Weather Radar on Google Play.</p>'
         f'<div class="btns">{play_btn("watch", "primary", "watchpromo")}</div>'
         '</div>'
         '</div>'
-        '<div class="wp-group"><h3>Luxury</h3><div class="wp-grid" role="list">' + luxury + '</div></div>'
-        '<div class="wp-group"><h3>Field</h3><div class="wp-grid" role="list">' + field + '</div></div>'
         '<div class="wp-soon">'
         '<p class="kicker">Coming soon</p>'
         '<h3>Ignition, Apogee and Gantry</h3>'
@@ -299,11 +327,13 @@ def watch_promo():
     )
 
 
+
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Your World Weather Radar: know when rain hits your spot</h1>
 <p class="lead">A free rain ETA for your exact location, plus a live weather radar app with National Weather Service alerts, AI briefings, and nearby weather cams. For iPhone and Android.</p>
+<p class="hero-watch-wrap"><a class="hero-watch" href="#watch">Now on Apple Watch and Wear OS →</a></p>
 <div class="home-cta">
 <div class="btns home-store">{play_btn("home","primary","hero")}{as_btn("", "hero")}</div>
 <a class="home-qr" href="get/" aria-label="Scan to get the app on iPhone or Android">
@@ -315,7 +345,7 @@ def home():
 {trial_line("trial on-dark")}
 <p class="small" style="color:#94A3B8">No account needed. No ads of our own, no ad tracking, and we never sell your data. Optional anonymous crash and usage reports can be turned off in Settings.</p></div>
 <div class="phone"><img src="assets/{V('shot-home.jpg')}" width="300" height="533" alt="Your World Weather Radar home screen"></div></div></section>'''
-    b = f'''{flight_home()}{sun_feature()}{ftl_home()}{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
+    b = f'''{watch_promo()}{flight_home()}{sun_feature()}{ftl_home()}{home_outlook()}<h2>Everything you need when the weather turns</h2><p class="dim">Most of the app is free. Premium adds longer briefings, hurricane and hazard trackers, and Close-One.</p>{feature_cards()}
 <div class="split" style="margin-top:40px"><div><h2 style="margin-top:0">An AI briefing for each part of the forecast</h2>
 <div class="tabs"><span class="on">NOW</span><span>6–24H</span><span>2D</span><span>3D</span><span>4D</span><span>5D</span><span>7D</span><span>10D</span></div>
 <p>Tap a tab and get a short, plain-English summary of that window. Built-in briefings are written on your phone from forecast data. With Premium you can download Gemma to write them on-device, or use your own AI provider key.</p>
@@ -324,7 +354,7 @@ def home():
 <div class="split" style="margin-top:20px"><figure style="margin:0;justify-self:center;max-width:280px"><div class="shot" style="max-width:280px"><img src="assets/{V('app-cams.jpg')}" width="600" height="1398" alt="The app's Cams view: live webcams near Reykjavik, Iceland, with thumbnails credited to Windy" loading="lazy"></div><figcaption class="dim small" style="text-align:center;margin-top:8px">In the app: live cams near you (Reykjavik, Iceland shown). Webcam images via Windy.</figcaption></figure>
 <div><h2 style="margin-top:0">Weather cams near you, free</h2><p>Real camera views from USGS, NOAA, Windy.com and <strong>WebCOOS</strong> coastal cams (SECOORA / NOAA IOOS), plus YouTube live streams. Coastal imagery courtesy of WebCOOS.</p>
 <h2>Off-Grid Safety, free for everyone</h2><p>When you're out of signal near a severe alert, the app helps you text your saved location to your emergency contacts. If your phone supports satellite texting, it can go out by satellite. Use Emergency SOS or call 911 first. <em>Satellite texting may require a compatible plan. Carrier message and data rates may apply.</em></p></div></div>
-{watch_promo()}<h2>Plan ahead</h2><div class="grid">
+<h2>Plan ahead</h2><div class="grid">
 <a class="card" href="alert-planner/" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
 <a class="card" href="trip-planner/" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
@@ -499,8 +529,16 @@ def gear():
     deals = sorted(pw + [d for d in deals if d not in pw][:12 - len(pw)], key=lambda d: d["posted"], reverse=True)
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
     dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
+    watch_card = (
+        f'<a class="card wp-gear" href="../index.html#watch">'
+        f'<span class="wp-gear-art"><img src="../assets/{V("watch/aw-keel.webp")}" width="416" height="496" alt="Keel, a free luxury watch dial" loading="lazy"></span>'
+        '<span class="wp-gear-body"><span class="kicker">On your wrist</span>'
+        '<h2>Wear it on your watch</h2>'
+        '<p>12 dials and counting on Apple Watch and Wear OS. Keel and Alto are free. Premium unlocks the Luxury and Field collections, with a 7-day free trial for new subscribers.</p>'
+        '<span class="wp-gear-go">See the watch faces →</span></span></a>'
+    )
     b = ('<p class="disclosure" style="margin-top:22px"><strong>Disclosure:</strong> Cards link to the Amazon product page for each named product. We may earn a commission at no extra cost to you. As an Amazon Associate I earn from qualifying purchases. Labels like “Top pick” are our own picks, not Amazon deals. We don\'t show prices or ratings because they change daily, so check the current price on Amazon. Card art is our own illustration, not a product photo. <a href="../affiliate-disclosure.html">Details</a></p>'
-         + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
+         + watch_card + jump + secs + dsec + cta("../", "gear", "Pair your gear with live radar and NWS alerts."))
     page("gear/index.html", "Weather Gear: Rain Gear, Weather Radios, Stations & Emergency Kits", "Rain jackets, ponchos, boots, dry bags, NOAA weather radios, home weather stations, rain gauges, lightning detectors, generators, power stations, UPS battery backups and emergency gear.", b, hero("Weather gear", "Rain gear, radios, instruments, backup power and emergency kit worth owning before storm season.", "Gear"), "0.7")
 
 DEAL_KW = ["weather radio", "weather station", "rain gauge", "rain jacket", "umbrella", "rain boots", "dry bag", "power bank", "power station", "inverter generator", "portable generator", "battery backup", "emergency radio", "lantern", "headlamp", "flashlight", "first aid kit", "poncho"]

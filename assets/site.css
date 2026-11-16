@@ -16,7 +16,7 @@ p,li{color:var(--slate-3)}.dim{color:var(--mute)}.small{font-size:.88rem}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--slate);font-weight:800;font-size:1rem;letter-spacing:-.01em}
 .brand img{width:34px;height:34px;border-radius:9px}
 .nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
-.nav a{color:var(--slate-3);text-decoration:none;font-weight:600;font-size:.9rem;padding:8px 11px;border-radius:999px}
+.nav a{color:var(--slate-3);text-decoration:none;font-weight:600;font-size:.9rem;padding:8px 11px;border-radius:999px}@media(min-width:1100px){.nav a{padding:7px 8px;font-size:.84rem}}
 .nav a:hover{background:var(--sky-l);color:var(--sky-d)}.nav a[aria-current]{background:var(--slate);color:#fff}
 @media (max-width:860px){.nav{width:100%;margin:0 -20px 0;padding:0 20px 10px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.nav a{white-space:nowrap;background:var(--white);border:1px solid var(--line)}}
 /* hero */
@@ -395,12 +395,43 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 @media(max-width:560px){.store-btns{display:flex;flex-direction:column;width:100%}.store-btns .btn,.btns .as-btn{justify-content:center;max-width:100%;box-sizing:border-box}.store-btns .btn{width:100%}}
 .fl-cta .as-btn{margin-top:8px}
 
+/* Hero watch badge (homepage) */
+.hero-watch-wrap{margin:16px 0 0}
+.hero-watch{display:inline-flex;align-items:center;color:#F8FAFC;text-decoration:none;font-weight:700;font-size:.9rem;border:1px solid rgba(125,211,252,.45);background:rgba(14,165,233,.18);padding:8px 14px;border-radius:999px}
+.hero-watch:hover{background:rgba(14,165,233,.32);color:#fff;border-color:#7DD3FC}
+.hero-watch:focus-visible{outline:3px solid #7DD3FC;outline-offset:3px}
+/* Gear page watch card */
+.wp-gear{display:flex;gap:18px;align-items:center;text-decoration:none;color:inherit;padding:18px;margin:22px 0 8px}
+.wp-gear:hover{color:inherit}
+.wp-gear-art{flex:0 0 auto;width:88px}
+.wp-gear-art img{width:88px;height:auto;border-radius:22px;background:#020617;box-shadow:var(--shadow)}
+.wp-gear-body{min-width:0}
+.wp-gear-body .kicker{margin-bottom:8px}
+.wp-gear-body h2{margin:0 0 6px;font-size:1.25rem}
+.wp-gear-body p{margin:0;color:var(--slate-3)}
+.wp-gear-go{display:inline-block;margin-top:8px;font-weight:700;color:var(--sky-d)}
+.wp-gear:hover .wp-gear-go{color:var(--amber-d)}
+@media(min-width:700px){.wp-gear{padding:22px 24px;gap:22px}.wp-gear-art{width:112px}.wp-gear-art img{width:112px;border-radius:26px}}
 /* ---------- Watch promo (homepage) ---------- */
-.wp{margin:48px 0 8px;scroll-margin-top:84px;min-width:0}
+.wp{margin:36px 0 16px;scroll-margin-top:128px;min-width:0}
 .wp > .kicker{margin-bottom:10px}
 .wp > h2{margin-top:0}
-.wp-lead{max-width:46rem;margin:0 0 22px}
-.wp-platforms{display:grid;gap:20px;min-width:0}
+.wp-lead{max-width:46rem;margin:0 0 18px}
+.wp-offer{margin:0 0 28px;padding:16px 18px 14px;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:14px;background:var(--white);max-width:46rem;box-shadow:var(--shadow)}
+.wp-offer .trial{margin:0 0 8px}
+.wp-offer > p{margin:0}
+.wp-stores{margin:14px 0 2px}
+.wp-showcase{display:grid;gap:24px;align-items:start;margin:0 0 8px}
+@media(min-width:860px){.wp-showcase{grid-template-columns:minmax(220px,340px) 1fr;gap:36px}}
+.wp-stage{margin:0;text-align:center}
+.wp-stage img{width:100%;max-width:320px;height:auto;margin:0 auto;background:#020617;box-shadow:var(--shadow);border-radius:36px}
+.wp-stage-cap{font-size:.95rem;color:var(--mute);margin:10px 0 0;font-weight:600}
+.wp-stage-name{margin-right:6px;color:var(--slate)}
+.wp-hint{margin:0 0 12px}
+.wp-picks .wp-group{margin-top:0}
+.wp-picks .wp-group + .wp-group{margin-top:22px}
+.wp-picks .wp-grid{max-width:none}
+.wp-platforms{display:grid;gap:20px;min-width:0;margin-top:28px}
 @media(min-width:860px){.wp-platforms{grid-template-columns:1fr 1fr;align-items:start}}
 .wp-plat{padding:22px;min-width:0;max-width:100%}
 .wp-plat h3{margin-top:0}
@@ -409,9 +440,12 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 .wp-group > h3{margin:0 0 14px}
 .wp-grid{display:grid;gap:16px 12px;grid-template-columns:repeat(3,1fr);min-width:0;max-width:920px}
 .wp-fig{margin:0;text-align:center;min-width:0}
+button.wp-fig{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
+button.wp-fig:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+button.wp-fig[aria-pressed="true"] img{box-shadow:0 0 0 3px var(--sky),var(--shadow)}
 .wp-fig img{width:100%;height:auto;background:#020617;box-shadow:var(--shadow);border-radius:28px}
 .wp-fig.soon img{border-radius:32px}
-.wp-fig figcaption{font-size:.8rem;color:var(--mute);margin-top:8px;font-weight:600;line-height:1.35}
+.wp-fig figcaption,.wp-cap{display:block;font-size:.8rem;color:var(--mute);margin-top:8px;font-weight:600;line-height:1.35}
 .wp-fig .tag{margin-left:4px;display:inline-block}
 .tag.soon{background:var(--sky-l);color:var(--sky-d)}
 .wp-soon{margin-top:28px;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 16px;box-shadow:var(--shadow)}

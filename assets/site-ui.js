@@ -89,6 +89,42 @@
     else if (window.gtag) gtag("event", "flight_page_click", { section: sec });
   });
 
-  var _init = init; init = function () { _init(); initYT(); initConsent(); };
+
+  // Homepage watch dial preview: tapping a Luxury or Field teaser updates the featured dial.
+  function initWatchDemo() {
+    var root = document.querySelector("[data-wp-demo]");
+    if (!root) return;
+    var img = root.querySelector(".wp-stage img");
+    var nameEl = root.querySelector(".wp-stage-name");
+    var cap = root.querySelector(".wp-stage-cap");
+    var picks = root.querySelectorAll("[data-wp-pick]");
+    if (!img || !nameEl || !cap || !picks.length) return;
+    function show(btn, focus) {
+      if (!btn) return;
+      img.src = btn.getAttribute("data-src") || img.src;
+      img.alt = btn.getAttribute("data-alt") || "";
+      nameEl.textContent = btn.getAttribute("data-name") || "";
+      var tag = cap.querySelector(".tag");
+      if (tag) {
+        tag.textContent = btn.getAttribute("data-tag") || "";
+        tag.className = "tag " + (btn.getAttribute("data-kind") || "prem");
+      }
+      Array.prototype.forEach.call(picks, function (p) {
+        p.setAttribute("aria-pressed", p === btn ? "true" : "false");
+      });
+      if (focus) btn.focus();
+    }
+    Array.prototype.forEach.call(picks, function (btn, i) {
+      btn.addEventListener("click", function () { show(btn, false); });
+      btn.addEventListener("keydown", function (e) {
+        var n = null;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") n = picks[(i + 1) % picks.length];
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") n = picks[(i - 1 + picks.length) % picks.length];
+        if (n) { e.preventDefault(); show(n, true); }
+      });
+    });
+  }
+
+  var _init = init; init = function () { _init(); initYT(); initConsent(); initWatchDemo(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
