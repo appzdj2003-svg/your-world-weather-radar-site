@@ -394,3 +394,28 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 .store-btns{display:inline-flex;flex-wrap:wrap;gap:10px;max-width:100%}
 @media(max-width:560px){.store-btns{display:flex;flex-direction:column;width:100%}.store-btns .btn,.btns .as-btn{justify-content:center;max-width:100%;box-sizing:border-box}.store-btns .btn{width:100%}}
 .fl-cta .as-btn{margin-top:8px}
+
+/* ---------- Watch promo (homepage) ---------- */
+.wp{margin:48px 0 8px}
+.wp > .kicker{margin-bottom:10px}
+.wp > h2{margin-top:0}
+.wp-lead{max-width:46rem;margin:0 0 22px}
+.wp-platforms{display:grid;gap:20px}
+@media(min-width:860px){.wp-platforms{grid-template-columns:1fr 1fr;align-items:start}}
+.wp-plat{padding:22px}
+.wp-plat h3{margin-top:0}
+.wp-plat .btns{margin:16px 0 4px}
+.wp-gallery{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 12px;margin:16px -2px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.wp-fig{flex:0 0 auto;width:148px;scroll-snap-align:start;margin:0;text-align:center}
+.wp-fig img{width:148px;height:auto;aspect-ratio:auto;background:#020617;box-shadow:var(--shadow)}
+.wp-fig.aw img{border-radius:32px}
+.wp-fig.wear img{border-radius:50%}
+.wp-fig.soon img{border-radius:32px}
+.wp-fig figcaption{font-size:.8rem;color:var(--mute);margin-top:8px;font-weight:600;line-height:1.35}
+.wp-fig .tag{margin-left:4px}
+.tag.soon{background:var(--sky-l);color:var(--sky-d)}
+.wp-soon{margin-top:28px;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 10px;box-shadow:var(--shadow)}
+.wp-soon > .kicker{margin-bottom:8px}
+.wp-soon h3{margin:0 0 .35em}
+.wp-soon > p{margin:0 0 4px;max-width:46rem}
+@media(max-width:560px){.wp-fig{width:132px}.wp-fig img{width:132px}}

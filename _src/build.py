@@ -246,6 +246,71 @@ def flight_home():
 GSC_META = '<meta name="google-site-verification" content="diLzzCKxrlEdbNNhGk8-NutdOKtYp0cP8r8gByLR47E" />'
 GSC_FILE = "googled20b928d18727c1f.html"
 GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
+
+def watch_promo():
+    """Homepage promo for the live Apple Watch and Wear OS apps, plus coming-soon launch dials."""
+    def fig(kind, name, caption, alt, tag=""):
+        img = V(f"watch/{name}")
+        wh = {"aw": (148, 176), "wear": (148, 148), "soon": (148, 177)}[kind]
+        return (f'<figure class="wp-fig {kind}"><img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="{E(alt)}" loading="lazy">'
+                f'<figcaption>{E(caption)}{tag}</figcaption></figure>')
+    free, prem, soon = TAG["free"], TAG["prem"], '<span class="tag soon">Coming soon</span>'
+    aw = "".join([
+        fig("aw", "aw-now.webp", "Now", "Apple Watch Now screen with current temperature, rain timing and an alert"),
+        fig("aw", "aw-keel.webp", "Keel", "Keel, a free Apple Watch dial with temperature and rain chance", free),
+        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium Apple Watch dial", prem),
+        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium Apple Watch dial", prem),
+        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial on Apple Watch", prem),
+        fig("aw", "aw-sentinel.webp", "Sentinel", "Sentinel, a Premium Field dial on Apple Watch", prem),
+        fig("aw", "aw-harbor.webp", "Harbor", "Harbor, a Premium Field dial on Apple Watch", prem),
+        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial on Apple Watch", prem),
+        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial on Apple Watch", prem),
+        fig("aw", "aw-skyline.webp", "Skyline", "Skyline, a Premium Field dial on Apple Watch", prem),
+    ])
+    wear = "".join([
+        fig("wear", "wear-now.webp", "Now", "Wear OS Now screen with current weather"),
+        fig("wear", "wear-tile.webp", "Tile", "Wear OS weather tile with a warning glance"),
+        fig("wear", "wear-keel.webp", "Keel", "Keel, a free Wear OS watch face", free),
+        fig("wear", "wear-aureole.webp", "Aureole", "Aureole, a Premium Wear OS watch face", prem),
+        fig("wear", "wear-lyra.webp", "Lyra", "Lyra, a Premium Wear OS watch face", prem),
+        fig("wear", "wear-atelier.webp", "Atelier", "Atelier, a Premium Wear OS watch face", prem),
+        fig("wear", "wear-harbor.webp", "Harbor", "Harbor, a Premium Field face on Wear OS", prem),
+        fig("wear", "wear-orbit.webp", "Orbit", "Orbit, a Premium Field face on Wear OS", prem),
+        fig("wear", "wear-recon.webp", "Recon", "Recon, a Premium Field face on Wear OS", prem),
+    ])
+    coming = "".join([
+        fig("soon", "soon-ignition.webp", "Ignition", "Ignition rocket-launch dial mockup, coming soon", soon),
+        fig("soon", "soon-apogee.webp", "Apogee", "Apogee rocket-launch dial mockup, coming soon", soon),
+        fig("soon", "soon-gantry.webp", "Gantry", "Gantry rocket-launch dial mockup, coming soon", soon),
+    ])
+    return (
+        '<section class="wp" id="watch" aria-labelledby="wp-h">'
+        '<p class="kicker">On your wrist</p>'
+        '<h2 id="wp-h">Weather on Apple Watch and Wear OS</h2>'
+        '<p class="wp-lead">Weather on your wrist, with full-screen luxury dials, complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
+        '<div class="wp-platforms">'
+        '<div class="card wp-plat">'
+        '<h3>Apple Watch</h3>'
+        '<p>The iPhone 1.0.5 update adds an Apple Watch app with full-screen luxury dials, complications, a Smart Stack widget and the Premium Field dial series. Free dials include Keel and Alto. Premium adds Aureole, Nimbus, Lyra, Atelier and the Field series: Recon, Sentinel, Harbor, Skyline, Orbit and Cutter.</p>'
+        f'<div class="btns">{as_btn("", "watchpromo")}</div>'
+        f'<div class="wp-gallery" role="list">{aw}</div>'
+        '</div>'
+        '<div class="card wp-plat">'
+        '<h3>Wear OS</h3>'
+        '<p>The Wear OS watch app includes luxury faces, a tile, complications and wrist weather alerts, plus the Premium Field faces. Free faces include Keel and Alto. Get it with Your World Weather Radar on Google Play.</p>'
+        f'<div class="btns">{play_btn("watch", "primary", "watchpromo")}</div>'
+        f'<div class="wp-gallery" role="list">{wear}</div>'
+        '</div>'
+        '</div>'
+        '<div class="wp-soon">'
+        '<p class="kicker">Coming soon</p>'
+        '<h3>Ignition, Apogee and Gantry</h3>'
+        '<p>Three Premium rocket-launch dials are on the way, with a launch countdown and pad weather at a glance.</p>'
+        f'<div class="wp-gallery" role="list">{coming}</div>'
+        '</div>'
+        '</section>'
+    )
+
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android."
 def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
@@ -271,7 +336,7 @@ def home():
 <div class="split" style="margin-top:20px"><figure style="margin:0;justify-self:center;max-width:280px"><div class="shot" style="max-width:280px"><img src="assets/{V('app-cams.jpg')}" width="600" height="1398" alt="The app's Cams view: live webcams near Reykjavik, Iceland, with thumbnails credited to Windy" loading="lazy"></div><figcaption class="dim small" style="text-align:center;margin-top:8px">In the app: live cams near you (Reykjavik, Iceland shown). Webcam images via Windy.</figcaption></figure>
 <div><h2 style="margin-top:0">Weather cams near you, free</h2><p>Real camera views from USGS, NOAA, Windy.com and <strong>WebCOOS</strong> coastal cams (SECOORA / NOAA IOOS), plus YouTube live streams. Coastal imagery courtesy of WebCOOS.</p>
 <h2>Off-Grid Safety, free for everyone</h2><p>When you're out of signal near a severe alert, the app helps you text your saved location to your emergency contacts. If your phone supports satellite texting, it can go out by satellite. Use Emergency SOS or call 911 first. <em>Satellite texting may require a compatible plan. Carrier message and data rates may apply.</em></p></div></div>
-<h2>Plan ahead</h2><div class="grid">
+{watch_promo()}<h2>Plan ahead</h2><div class="grid">
 <a class="card" href="alert-planner/" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
 <a class="card" href="trip-planner/" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
