@@ -248,35 +248,28 @@ GSC_FILE = "googled20b928d18727c1f.html"
 GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 
 def watch_promo():
-    """Homepage promo for the live Apple Watch and Wear OS apps, plus coming-soon launch dials."""
+    """Homepage promo: 12 live dials/faces on Apple Watch and Wear OS, plus coming-soon launch dials."""
     def fig(kind, name, caption, alt, tag=""):
         img = V(f"watch/{name}")
-        wh = {"aw": (148, 176), "wear": (148, 148), "soon": (148, 177)}[kind]
+        wh = {"aw": (416, 496), "soon": (560, 670)}[kind]
         return (f'<figure class="wp-fig {kind}"><img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="{E(alt)}" loading="lazy">'
                 f'<figcaption>{E(caption)}{tag}</figcaption></figure>')
     free, prem, soon = TAG["free"], TAG["prem"], '<span class="tag soon">Coming soon</span>'
-    aw = "".join([
-        fig("aw", "aw-now.webp", "Now", "Apple Watch Now screen with current temperature, rain timing and an alert"),
-        fig("aw", "aw-keel.webp", "Keel", "Keel, a free Apple Watch dial with temperature and rain chance", free),
-        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium Apple Watch dial", prem),
-        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium Apple Watch dial", prem),
-        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial on Apple Watch", prem),
-        fig("aw", "aw-sentinel.webp", "Sentinel", "Sentinel, a Premium Field dial on Apple Watch", prem),
-        fig("aw", "aw-harbor.webp", "Harbor", "Harbor, a Premium Field dial on Apple Watch", prem),
-        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial on Apple Watch", prem),
-        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial on Apple Watch", prem),
-        fig("aw", "aw-skyline.webp", "Skyline", "Skyline, a Premium Field dial on Apple Watch", prem),
+    luxury = "".join([
+        fig("aw", "aw-keel.webp", "Keel", "Keel, a free luxury dial", free),
+        fig("aw", "aw-alto.webp", "Alto", "Alto, a free luxury dial", free),
+        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem),
+        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem),
+        fig("aw", "aw-lyra.webp", "Lyra", "Lyra, a Premium luxury dial", prem),
+        fig("aw", "aw-atelier.webp", "Atelier", "Atelier, a Premium luxury dial", prem),
     ])
-    wear = "".join([
-        fig("wear", "wear-now.webp", "Now", "Wear OS Now screen with current weather"),
-        fig("wear", "wear-tile.webp", "Tile", "Wear OS weather tile with a warning glance"),
-        fig("wear", "wear-keel.webp", "Keel", "Keel, a free Wear OS watch face", free),
-        fig("wear", "wear-aureole.webp", "Aureole", "Aureole, a Premium Wear OS watch face", prem),
-        fig("wear", "wear-lyra.webp", "Lyra", "Lyra, a Premium Wear OS watch face", prem),
-        fig("wear", "wear-atelier.webp", "Atelier", "Atelier, a Premium Wear OS watch face", prem),
-        fig("wear", "wear-harbor.webp", "Harbor", "Harbor, a Premium Field face on Wear OS", prem),
-        fig("wear", "wear-orbit.webp", "Orbit", "Orbit, a Premium Field face on Wear OS", prem),
-        fig("wear", "wear-recon.webp", "Recon", "Recon, a Premium Field face on Wear OS", prem),
+    field = "".join([
+        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem),
+        fig("aw", "aw-sentinel.webp", "Sentinel", "Sentinel, a Premium Field dial", prem),
+        fig("aw", "aw-harbor.webp", "Harbor", "Harbor, a Premium Field dial", prem),
+        fig("aw", "aw-skyline.webp", "Skyline", "Skyline, a Premium Field dial", prem),
+        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem),
+        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem),
     ])
     coming = "".join([
         fig("soon", "soon-ignition.webp", "Ignition", "Ignition rocket-launch dial mockup, coming soon", soon),
@@ -287,29 +280,30 @@ def watch_promo():
         '<section class="wp" id="watch" aria-labelledby="wp-h">'
         '<p class="kicker">On your wrist</p>'
         '<h2 id="wp-h">Weather on Apple Watch and Wear OS</h2>'
-        '<p class="wp-lead">Weather on your wrist, with full-screen luxury dials, complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
+        '<p class="wp-lead">12 dials on Apple Watch and 12 faces on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
         '<div class="wp-platforms">'
         '<div class="card wp-plat">'
         '<h3>Apple Watch</h3>'
-        '<p>The iPhone 1.0.5 update adds an Apple Watch app with full-screen luxury dials, complications, a Smart Stack widget and the Premium Field dial series. Free dials include Keel and Alto. Premium adds Aureole, Nimbus, Lyra, Atelier and the Field series: Recon, Sentinel, Harbor, Skyline, Orbit and Cutter.</p>'
+        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials, complications, a Smart Stack widget and the Premium Field series. Keel and Alto are free. Premium adds Aureole, Nimbus, Lyra, Atelier and the six Field dials: Recon, Sentinel, Harbor, Skyline, Orbit and Cutter.</p>'
         f'<div class="btns">{as_btn("", "watchpromo")}</div>'
-        f'<div class="wp-gallery" role="list">{aw}</div>'
         '</div>'
         '<div class="card wp-plat">'
         '<h3>Wear OS</h3>'
-        '<p>The Wear OS watch app includes luxury faces, a tile, complications and wrist weather alerts, plus the Premium Field faces. Free faces include Keel and Alto. Get it with Your World Weather Radar on Google Play.</p>'
+        '<p>The Wear OS watch app includes the same 12 faces, a tile, complications and wrist weather alerts. Keel and Alto are free. Get it with Your World Weather Radar on Google Play.</p>'
         f'<div class="btns">{play_btn("watch", "primary", "watchpromo")}</div>'
-        f'<div class="wp-gallery" role="list">{wear}</div>'
         '</div>'
         '</div>'
+        '<div class="wp-group"><h3>Luxury</h3><div class="wp-grid" role="list">' + luxury + '</div></div>'
+        '<div class="wp-group"><h3>Field</h3><div class="wp-grid" role="list">' + field + '</div></div>'
         '<div class="wp-soon">'
         '<p class="kicker">Coming soon</p>'
         '<h3>Ignition, Apogee and Gantry</h3>'
         '<p>Three Premium rocket-launch dials are on the way, with a launch countdown and pad weather at a glance.</p>'
-        f'<div class="wp-gallery" role="list">{coming}</div>'
+        f'<div class="wp-grid" role="list">{coming}</div>'
         '</div>'
         '</section>'
     )
+
 
 HOME_DESC = "Know when rain hits your spot: a free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android."
 def home():
