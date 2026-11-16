@@ -407,8 +407,7 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 .wp-plat .btns{margin:16px 0 4px}
 .wp-group{margin-top:28px}
 .wp-group > h3{margin:0 0 14px}
-.wp-grid{display:grid;gap:16px 12px;grid-template-columns:repeat(3,1fr);min-width:0}
-@media(min-width:860px){.wp-grid{grid-template-columns:repeat(6,1fr)}}
+.wp-grid{display:grid;gap:16px 12px;grid-template-columns:repeat(3,1fr);min-width:0;max-width:920px}
 .wp-fig{margin:0;text-align:center;min-width:0}
 .wp-fig img{width:100%;height:auto;background:#020617;box-shadow:var(--shadow);border-radius:28px}
 .wp-fig.soon img{border-radius:32px}

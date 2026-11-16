@@ -248,7 +248,7 @@ GSC_FILE = "googled20b928d18727c1f.html"
 GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 
 def watch_promo():
-    """Homepage promo: 12 live dials/faces on Apple Watch and Wear OS, plus coming-soon launch dials."""
+    """Homepage promo: teaser of live Apple Watch / Wear OS dials, plus coming-soon launch dials."""
     def fig(kind, name, caption, alt, tag=""):
         img = V(f"watch/{name}")
         wh = {"aw": (416, 496), "soon": (560, 670)}[kind]
@@ -257,17 +257,11 @@ def watch_promo():
     free, prem, soon = TAG["free"], TAG["prem"], '<span class="tag soon">Coming soon</span>'
     luxury = "".join([
         fig("aw", "aw-keel.webp", "Keel", "Keel, a free luxury dial", free),
-        fig("aw", "aw-alto.webp", "Alto", "Alto, a free luxury dial", free),
         fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem),
         fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem),
-        fig("aw", "aw-lyra.webp", "Lyra", "Lyra, a Premium luxury dial", prem),
-        fig("aw", "aw-atelier.webp", "Atelier", "Atelier, a Premium luxury dial", prem),
     ])
     field = "".join([
         fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem),
-        fig("aw", "aw-sentinel.webp", "Sentinel", "Sentinel, a Premium Field dial", prem),
-        fig("aw", "aw-harbor.webp", "Harbor", "Harbor, a Premium Field dial", prem),
-        fig("aw", "aw-skyline.webp", "Skyline", "Skyline, a Premium Field dial", prem),
         fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem),
         fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem),
     ])
@@ -280,16 +274,16 @@ def watch_promo():
         '<section class="wp" id="watch" aria-labelledby="wp-h">'
         '<p class="kicker">On your wrist</p>'
         '<h2 id="wp-h">Weather on Apple Watch and Wear OS</h2>'
-        '<p class="wp-lead">12 dials on Apple Watch and 12 faces on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
+        '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
         '<div class="wp-platforms">'
         '<div class="card wp-plat">'
         '<h3>Apple Watch</h3>'
-        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials, complications, a Smart Stack widget and the Premium Field series. Keel and Alto are free. Premium adds Aureole, Nimbus, Lyra, Atelier and the six Field dials: Recon, Sentinel, Harbor, Skyline, Orbit and Cutter.</p>'
+        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials and counting, complications, a Smart Stack widget and the Premium Field series. Keel and Alto are free. Premium adds the Luxury and Field collections.</p>'
         f'<div class="btns">{as_btn("", "watchpromo")}</div>'
         '</div>'
         '<div class="card wp-plat">'
         '<h3>Wear OS</h3>'
-        '<p>The Wear OS watch app includes the same 12 faces, a tile, complications and wrist weather alerts. Keel and Alto are free. Get it with Your World Weather Radar on Google Play.</p>'
+        '<p>The Wear OS watch app includes 12 faces and counting, a tile, complications and wrist weather alerts. Keel and Alto are free. Get it with Your World Weather Radar on Google Play.</p>'
         f'<div class="btns">{play_btn("watch", "primary", "watchpromo")}</div>'
         '</div>'
         '</div>'
