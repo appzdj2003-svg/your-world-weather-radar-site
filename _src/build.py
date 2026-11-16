@@ -58,7 +58,7 @@ def V(name):  # cache-busting: short content hash of the asset
     f = ROOT / "assets" / name
     return name + ("?v=" + hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.exists() else "")
 
-NAV = [("index.html", "Home"), ("#watch", "Watch"), ("flight/", "Track my flight"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
+NAV = [("index.html", "Home"), ("watch/", "Watch"), ("flight/", "Track my flight"), ("features.html", "Features"), ("alert-planner/", "Alert Planner"), ("trip-planner/", "Trip Planner"), ("ask.html", "Ask Atlas"), ("outlook.html", "Outlook"), ("launches/", "Launches"),
        ("guides/", "Guides"), ("gear/", "Gear"), ("pricing.html", "Pricing"), ("support.html", "Support")]
 MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg>'
 def mic(target, submit): return f'<button type="button" class="mic" data-voice-for="{target}" data-voice-submit="{submit}" aria-label="Speak your plan" aria-pressed="false" title="Speak">{MIC_SVG}</button>'
@@ -99,9 +99,6 @@ def page(path, title, desc, body, hero=None, prio="0.6", scripts=(), jsonld=None
     url = SITE + ("" if path == "index.html" else path.replace("index.html", ""))
     cur = path.split("/")[0] + "/" if "/" in path else path
     def _nav_a(h, t):
-        if h == "#watch":
-            href = "#watch" if path == "index.html" else f"{p}index.html#watch"
-            return f'<a href="{href}">Watch</a>'
         href = "./" if h == "index.html" and not p else f"{p}{'' if h == 'index.html' else h}"
         if h == "index.html" and p: href = p
         attrs = f'href="{href}"'
@@ -250,54 +247,108 @@ GSC_META = '<meta name="google-site-verification" content="diLzzCKxrlEdbNNhGk8-N
 GSC_FILE = "googled20b928d18727c1f.html"
 GSC_FILE_BODY = "google-site-verification: googled20b928d18727c1f.html"
 
-def watch_promo():
-    """Homepage promo: teaser of live Apple Watch / Wear OS dials, plus coming-soon launch dials."""
-    def fig(kind, name, caption, alt, tag="", pick=None):
-        img = V(f"watch/{name}")
-        wh = {"aw": (416, 496), "soon": (560, 670)}[kind]
-        cap = f"{E(caption)}{tag}"
-        if pick:
-            pressed = "true" if pick.get("on") else "false"
-            return (
-                f'<button type="button" class="wp-fig {kind}" data-wp-pick data-src="assets/{img}" '
-                f'data-name="{E(pick["name"])}" data-tag="{E(pick["tag"])}" data-kind="{E(pick["kind"])}" '
-                f'data-alt="{E(alt)}" aria-pressed="{pressed}" aria-label="{E(alt)}">'
-                f'<img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="" loading="lazy">'
-                f'<span class="wp-cap">{cap}</span></button>'
-            )
-        return (f'<figure class="wp-fig {kind}"><img src="assets/{img}" width="{wh[0]}" height="{wh[1]}" alt="{E(alt)}" loading="lazy">'
-                f'<figcaption>{cap}</figcaption></figure>')
-    free, prem, soon = TAG["free"], TAG["prem"], '<span class="tag soon">Coming soon</span>'
-    luxury = "".join([
-        fig("aw", "aw-keel.webp", "Keel", "Keel, a free luxury dial", free, {"name": "Keel", "tag": "Free", "kind": "free", "on": True}),
-        fig("aw", "aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem, {"name": "Aureole", "tag": "Premium", "kind": "prem"}),
-        fig("aw", "aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem, {"name": "Nimbus", "tag": "Premium", "kind": "prem"}),
-    ])
-    field = "".join([
-        fig("aw", "aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem, {"name": "Recon", "tag": "Premium", "kind": "prem"}),
-        fig("aw", "aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem, {"name": "Orbit", "tag": "Premium", "kind": "prem"}),
-        fig("aw", "aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem, {"name": "Cutter", "tag": "Premium", "kind": "prem"}),
-    ])
-    coming = "".join([
-        fig("soon", "soon-ignition.webp", "Ignition", "Ignition rocket-launch dial mockup, coming soon", soon),
-        fig("soon", "soon-apogee.webp", "Apogee", "Apogee rocket-launch dial mockup, coming soon", soon),
-        fig("soon", "soon-gantry.webp", "Gantry", "Gantry rocket-launch dial mockup, coming soon", soon),
-    ])
-    keel = V("watch/aw-keel.webp")
-    stage = (
-        f'<div class="wp-stage"><img src="assets/{keel}" width="416" height="496" alt="Keel, a free luxury dial" loading="lazy">'
-        f'<p class="wp-stage-cap"><span class="wp-stage-name">Keel</span><span class="tag free">Free</span></p></div>'
-    )
+def watch_fig(p, kind, name, caption, alt, tag="", pick=None):
+    img = V(f"watch/{name}")
+    src = f"{p}assets/{img}"
+    wh = {"aw": (416, 496), "soon": (560, 670)}[kind]
+    cap = f"{E(caption)}{tag}"
+    if pick:
+        pressed = "true" if pick.get("on") else "false"
+        return (
+            f'<button type="button" class="wp-fig {kind}" data-wp-pick data-src="{src}" '
+            f'data-name="{E(pick["name"])}" data-tag="{E(pick["tag"])}" data-kind="{E(pick["kind"])}" '
+            f'data-alt="{E(alt)}" aria-pressed="{pressed}" aria-label="{E(alt)}">'
+            f'<img src="{src}" width="{wh[0]}" height="{wh[1]}" alt="" loading="lazy">'
+            f'<span class="wp-cap">{cap}</span></button>'
+        )
+    return (f'<figure class="wp-fig {kind}"><img src="{src}" width="{wh[0]}" height="{wh[1]}" alt="{E(alt)}" loading="lazy">'
+            f'<figcaption>{cap}</figcaption></figure>')
+
+def watch_pitch():
     return (
-        '<section class="wp" id="watch" aria-labelledby="wp-h">'
-        '<p class="kicker">On your wrist</p>'
-        '<h2 id="wp-h">Weather on your wrist. 12 dials and counting.</h2>'
-        '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
         '<div class="wp-offer">'
         f'<p class="trial"><span aria-hidden="true">🎁</span> Premium: 7-day free trial for new subscribers, then ${PRICE_M}/mo or ${PRICE_Y}/yr. Cancel anytime in your store account.</p>'
         '<p>Keel and Alto are free. Premium unlocks the Luxury and Field collections.</p>'
         f'<div class="btns wp-stores">{store_btns("watch", "primary", "watchpromo")}</div>'
         '</div>'
+    )
+
+def watch_coming(p):
+    soon = '<span class="tag soon">Coming soon</span>'
+    return "".join([
+        watch_fig(p, "soon", "soon-ignition.webp", "Ignition", "Ignition rocket-launch dial mockup, coming soon", soon),
+        watch_fig(p, "soon", "soon-apogee.webp", "Apogee", "Apogee rocket-launch dial mockup, coming soon", soon),
+        watch_fig(p, "soon", "soon-gantry.webp", "Gantry", "Gantry rocket-launch dial mockup, coming soon", soon),
+    ])
+
+def watch_dials(p, full=False):
+    """Luxury and Field teaser (home) or the full 12-dial gallery (/watch/)."""
+    free, prem = TAG["free"], TAG["prem"]
+    luxury_all = [
+        ("aw-keel.webp", "Keel", "Keel, a free luxury dial", free, "free"),
+        ("aw-alto.webp", "Alto", "Alto, a free luxury dial", free, "free"),
+        ("aw-aureole.webp", "Aureole", "Aureole, a Premium luxury dial", prem, "prem"),
+        ("aw-nimbus.webp", "Nimbus", "Nimbus, a Premium luxury dial", prem, "prem"),
+        ("aw-lyra.webp", "Lyra", "Lyra, a Premium luxury dial", prem, "prem"),
+        ("aw-atelier.webp", "Atelier", "Atelier, a Premium luxury dial", prem, "prem"),
+    ]
+    field_all = [
+        ("aw-recon.webp", "Recon", "Recon, a Premium Field dial", prem, "prem"),
+        ("aw-sentinel.webp", "Sentinel", "Sentinel, a Premium Field dial", prem, "prem"),
+        ("aw-harbor.webp", "Harbor", "Harbor, a Premium Field dial", prem, "prem"),
+        ("aw-skyline.webp", "Skyline", "Skyline, a Premium Field dial", prem, "prem"),
+        ("aw-orbit.webp", "Orbit", "Orbit, a Premium Field dial", prem, "prem"),
+        ("aw-cutter.webp", "Cutter", "Cutter, a Premium Field dial", prem, "prem"),
+    ]
+    luxury = luxury_all if full else [luxury_all[0], luxury_all[2], luxury_all[3]]  # Keel, Aureole, Nimbus
+    field = field_all if full else [field_all[0], field_all[4], field_all[5]]  # Recon, Orbit, Cutter
+    lux_html, field_html = [], []
+    for i, (fn, name, alt, tag, kind) in enumerate(luxury):
+        lux_html.append(watch_fig(p, "aw", fn, name, alt, tag, {"name": name, "tag": "Free" if kind=="free" else "Premium", "kind": kind, "on": i==0}))
+    for fn, name, alt, tag, kind in field:
+        field_html.append(watch_fig(p, "aw", fn, name, alt, tag, {"name": name, "tag": "Free" if kind=="free" else "Premium", "kind": kind, "on": False}))
+    keel = V("watch/aw-keel.webp")
+    stage = (
+        f'<div class="wp-stage"><img src="{p}assets/{keel}" width="416" height="496" alt="Keel, a free luxury dial" loading="lazy">'
+        f'<p class="wp-stage-cap"><span class="wp-stage-name">Keel</span><span class="tag free">Free</span></p></div>'
+    )
+    return stage, "".join(lux_html), "".join(field_html)
+
+def watch_platforms(sec):
+    return (
+        '<div class="wp-platforms">'
+        '<div class="card wp-plat">'
+        '<h3>Apple Watch</h3>'
+        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials and counting, complications, a Smart Stack widget and the Premium Field series.</p>'
+        f'<div class="btns">{as_btn("", sec)}</div>'
+        '</div>'
+        '<div class="card wp-plat">'
+        '<h3>Wear OS</h3>'
+        '<p>The Wear OS watch app includes the same 12 faces and counting, a tile, complications and wrist weather alerts. Get it with Your World Weather Radar on Google Play.</p>'
+        f'<div class="btns">{play_btn("watch", "primary", sec)}</div>'
+        '</div>'
+        '</div>'
+    )
+
+def watch_soon_block(p):
+    return (
+        '<div class="wp-soon">'
+        '<p class="kicker">Coming soon</p>'
+        '<h3>Ignition, Apogee and Gantry</h3>'
+        '<p>Three Premium rocket-launch dials are on the way, with a launch countdown and pad weather at a glance.</p>'
+        f'<div class="wp-grid" role="list">{watch_coming(p)}</div>'
+        '</div>'
+    )
+
+def watch_promo():
+    """Homepage teaser: a few live dials, with a link to the full /watch/ gallery."""
+    stage, luxury, field = watch_dials("", full=False)
+    return (
+        '<section class="wp" id="watch" aria-labelledby="wp-h">'
+        '<p class="kicker">On your wrist</p>'
+        '<h2 id="wp-h">Weather on your wrist. 12 dials and counting.</h2>'
+        '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget. The Apple Watch app is included with iPhone 1.0.5. On Android, the Wear OS watch app comes with the app on Google Play.</p>'
+        f'{watch_pitch()}'
         '<div class="wp-showcase" data-wp-demo>'
         f'{stage}'
         '<div class="wp-picks">'
@@ -305,25 +356,54 @@ def watch_promo():
         '<div class="wp-group"><h3>Luxury</h3><div class="wp-grid" role="list">' + luxury + '</div></div>'
         '<div class="wp-group"><h3>Field</h3><div class="wp-grid" role="list">' + field + '</div></div>'
         '</div></div>'
-        '<div class="wp-platforms">'
-        '<div class="card wp-plat">'
-        '<h3>Apple Watch</h3>'
-        '<p>The iPhone 1.0.5 update adds an Apple Watch app with 12 dials and counting, complications, a Smart Stack widget and the Premium Field series.</p>'
-        f'<div class="btns">{as_btn("", "watchpromo")}</div>'
-        '</div>'
-        '<div class="card wp-plat">'
-        '<h3>Wear OS</h3>'
-        '<p>The Wear OS watch app includes the same 12 faces and counting, a tile, complications and wrist weather alerts. Get it with Your World Weather Radar on Google Play.</p>'
-        f'<div class="btns">{play_btn("watch", "primary", "watchpromo")}</div>'
-        '</div>'
-        '</div>'
-        '<div class="wp-soon">'
-        '<p class="kicker">Coming soon</p>'
-        '<h3>Ignition, Apogee and Gantry</h3>'
-        '<p>Three Premium rocket-launch dials are on the way, with a launch countdown and pad weather at a glance.</p>'
-        f'<div class="wp-grid" role="list">{coming}</div>'
-        '</div>'
+        '<p class="wp-seeall"><a class="btn dark" href="watch/">See all watch faces →</a></p>'
+        + watch_platforms("watchpromo")
+        + watch_soon_block("")
+        + '</section>'
+    )
+
+def watch_page():
+    """Dedicated /watch/ gallery of all 12 live dials, plus coming-soon launch dials."""
+    p = "../"
+    stage, luxury, field = watch_dials(p, full=True)
+    faq = (
+        '<section class="wp-faq" aria-labelledby="wp-faq-h">'
+        '<h2 id="wp-faq-h">Watch FAQ</h2>'
+        '<h3>What is free?</h3>'
+        '<p>Keel and Alto are free. Premium unlocks the rest of the Luxury collection and the Field series.</p>'
+        '<h3>How much is Premium?</h3>'
+        f'<p>New subscribers get a 7-day free trial, then ${PRICE_M}/mo or ${PRICE_Y}/yr on Apple Watch and Wear OS. Cancel anytime in your store account.</p>'
+        '<h3>Does it work on Apple Watch and Wear OS?</h3>'
+        '<p>Yes. The Apple Watch app is included with iPhone 1.0.5, with 12 dials, complications and a Smart Stack widget. The Wear OS app comes with Your World Weather Radar on Google Play, with the same 12 faces, a tile, complications and wrist weather alerts.</p>'
+        '<h3>What is coming soon?</h3>'
+        '<p>Ignition, Apogee and Gantry are three Premium rocket-launch dials on the way, with a launch countdown and pad weather at a glance.</p>'
         '</section>'
+    )
+    body = (
+        '<section class="wp wp-page" aria-labelledby="wp-h">'
+        '<p class="wp-lead">12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS, with complications and a glanceable widget.</p>'
+        f'{watch_pitch()}'
+        '<div class="wp-showcase wp-showcase-full" data-wp-demo>'
+        f'{stage}'
+        '<div class="wp-picks">'
+        '<p class="wp-hint dim small">Tap a dial to preview it.</p>'
+        '<div class="wp-group"><h3>Luxury</h3><div class="wp-grid" role="list">' + luxury + '</div></div>'
+        '<div class="wp-group"><h3>Field</h3><div class="wp-grid" role="list">' + field + '</div></div>'
+        '</div></div>'
+        + watch_platforms("watchpage")
+        + watch_soon_block(p)
+        + faq
+        + f'<div class="wp-seeall" style="margin-top:28px">{store_btns("watch", "primary", "watchpage")}</div>'
+        + '</section>'
+    )
+    lead = "12 dials on Apple Watch and 12 faces on Wear OS, with a free Keel and Alto, Premium Luxury and Field collections, and a 7-day free trial."
+    page(
+        "watch/index.html",
+        "Watch faces: 12 dials on Apple Watch and Wear OS",
+        "12 dials and counting on Apple Watch, and 12 faces and counting on Wear OS. Keel and Alto are free. Premium unlocks the Luxury and Field collections, with a 7-day free trial, then $4.99/mo or $47.99/yr.",
+        body,
+        hero("Weather on your wrist. 12 dials and counting.", lead, "On your wrist"),
+        "0.8",
     )
 
 
@@ -333,7 +413,7 @@ def home():
     h = f'''<section class="hero home"><div class="blip"></div><div class="wrap"><div>
 <h1>Your World Weather Radar: know when rain hits your spot</h1>
 <p class="lead">A free rain ETA for your exact location, plus a live weather radar app with National Weather Service alerts, AI briefings, and nearby weather cams. For iPhone and Android.</p>
-<p class="hero-watch-wrap"><a class="hero-watch" href="#watch">Now on Apple Watch and Wear OS →</a></p>
+<p class="hero-watch-wrap"><a class="hero-watch" href="watch/">Now on Apple Watch and Wear OS →</a></p>
 <div class="home-cta">
 <div class="btns home-store">{play_btn("home","primary","hero")}{as_btn("", "hero")}</div>
 <a class="home-qr" href="get/" aria-label="Scan to get the app on iPhone or Android">
@@ -530,7 +610,7 @@ def gear():
     dl = "".join(f'<div class="deal"><a href="{E(d["link"])}" target="_blank" rel="nofollow noopener">{E(d["title"])}</a><time>{E(d["posted"][:10])}</time></div>' for d in deals[:12])
     dsec = f'<h2 id="deals">🔥 Weather &amp; emergency deals</h2><p class="dim small">Latest matching headlines from the Slickdeals RSS feed, refreshed when the site is built. Prices and availability change fast.</p><div class="card">{dl}</div>' if dl else ""
     watch_card = (
-        f'<a class="card wp-gear" href="../index.html#watch">'
+        f'<a class="card wp-gear" href="../watch/">'
         f'<span class="wp-gear-art"><img src="../assets/{V("watch/aw-keel.webp")}" width="416" height="496" alt="Keel, a free luxury watch dial" loading="lazy"></span>'
         '<span class="wp-gear-body"><span class="kicker">On your wrist</span>'
         '<h2>Wear it on your watch</h2>'

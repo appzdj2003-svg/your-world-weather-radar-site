@@ -453,3 +453,13 @@ button.wp-fig[aria-pressed="true"] img{box-shadow:0 0 0 3px var(--sky),var(--sha
 .wp-soon h3{margin:0 0 .35em}
 .wp-soon > p{margin:0 0 14px;max-width:46rem}
 .wp-soon .wp-grid{max-width:720px;grid-template-columns:repeat(3,1fr)}
+
+.wp-seeall{margin:22px 0 8px}
+.wp-showcase-full{grid-template-columns:1fr;justify-items:center}
+.wp-showcase-full .wp-stage{width:100%}
+.wp-showcase-full .wp-picks,.wp-showcase-full .wp-grid{width:100%;max-width:none}
+@media(min-width:860px){.wp-page .wp-grid{grid-template-columns:repeat(6,1fr)}.wp-page .wp-soon .wp-grid{grid-template-columns:repeat(3,1fr);max-width:720px}}
+.wp-faq{margin-top:36px;max-width:46rem}
+.wp-faq h2{margin-top:0}
+.wp-faq h3{margin:1.15em 0 .3em}
+.wp-faq p{margin:0}
