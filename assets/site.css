@@ -396,16 +396,16 @@ body:has(.playbar.fl-play-show:not([hidden])){padding-bottom:calc(64px + env(saf
 .fl-cta .as-btn{margin-top:8px}
 
 /* ---------- Watch promo (homepage) ---------- */
-.wp{margin:48px 0 8px}
+.wp{margin:48px 0 8px;scroll-margin-top:84px;min-width:0}
 .wp > .kicker{margin-bottom:10px}
 .wp > h2{margin-top:0}
 .wp-lead{max-width:46rem;margin:0 0 22px}
-.wp-platforms{display:grid;gap:20px}
+.wp-platforms{display:grid;gap:20px;min-width:0}
 @media(min-width:860px){.wp-platforms{grid-template-columns:1fr 1fr;align-items:start}}
-.wp-plat{padding:22px}
+.wp-plat{padding:22px;min-width:0;max-width:100%}
 .wp-plat h3{margin-top:0}
 .wp-plat .btns{margin:16px 0 4px}
-.wp-gallery{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 12px;margin:16px -2px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.wp-gallery{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 12px;margin:16px -2px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;min-width:0;max-width:100%}
 .wp-fig{flex:0 0 auto;width:148px;scroll-snap-align:start;margin:0;text-align:center}
 .wp-fig img{width:148px;height:auto;aspect-ratio:auto;background:#020617;box-shadow:var(--shadow)}
 .wp-fig.aw img{border-radius:32px}
