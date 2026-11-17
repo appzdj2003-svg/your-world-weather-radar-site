@@ -214,6 +214,29 @@ def hunt_promo():
 <li>🗺️ Trip Planner with Ask Hawk and Top spots: public refuges and private lodges near you</li><li>🎧 Guides with a Listen button, in English and Spanish</li></ul>
 <span class="hp-go">Visit hunt.yourworldapps.si →</span></div></a>'''
 
+
+HUNT_SHOP_SURVIVAL = "https://hunt.yourworldapps.si/shop/survival-emergency-food.html"
+def shop_survival_url(placement):
+    q = urllib.parse.urlencode({
+        "utm_source": "weather_site",
+        "utm_medium": "web",
+        "utm_campaign": "survival_gear",
+        "utm_content": placement,
+    })
+    return f"{HUNT_SHOP_SURVIVAL}?{q}"
+def gear_shop_promo(placement):
+    """Calm shop card for the Hunt survival page. Dismissible; no Amazon tag; GA4 via data-ev=gear_shop."""
+    href = shop_survival_url(placement)
+    return (
+        f'<aside class="gs-promo" data-gs-promo="{E(placement)}" role="complementary" aria-label="Your World shop">'
+        f'<button type="button" class="gs-x" aria-label="Dismiss this shop suggestion">&times;</button>'
+        f'<a href="{E(href)}" target="_blank" rel="noopener" data-ev="gear_shop" data-placement="{E(placement)}">'
+        f'<span class="kicker">Your World shop</span>'
+        f"<h2>Survival &amp; emergency food</h2>"
+        f"<p>Meals, water filters, and first-aid kits for a home kit.</p>"
+        f'<span class="gs-go">Browse the Your World shop →</span></a></aside>'
+    )
+
 # ---------- features (from the app source; keep in sync) ----------
 FEATURES = [
  ("☔", "Rain ETA", "free", "An early heads-up on when rain should reach your exact spot, worked out from live radar, with an optional notification. Included free."),
@@ -438,7 +461,7 @@ def home():
 <a class="card" href="alert-planner/" style="text-decoration:none"><div class="ico">🔔</div><h3>Forecast &amp; Alert Planner</h3><p>Tell us the place, activity and dates. You get a link and QR code that open the plan in the app.</p></a>
 <a class="card" href="trip-planner/" style="text-decoration:none"><div class="ico">🧳</div><h3>Weather Trip Planner</h3><p>Destination, dates and how you're traveling, in one link for your phone.</p></a>
 <a class="card" href="guides/" style="text-decoration:none"><div class="ico">📚</div><h3>Weather guides</h3><p>Reading radar, watches vs. warnings, hurricanes, lightning and more, sourced from NWS and NOAA.</p></a></div>
-{hunt_promo()}{cta("", "home", "Free on Google Play and the App Store. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year on Android, $" + PRICE_M + "/month on iPhone.")}'''
+{gear_shop_promo("home")}{hunt_promo()}{cta("", "home", "Free on Google Play and the App Store. Premium is $" + PRICE_M + "/month or $" + PRICE_Y + "/year on Android, $" + PRICE_M + "/month on iPhone.")}'''
     ld = [{"@context": "https://schema.org", "@type": "MobileApplication", "name": APP, "operatingSystem": "Android, iOS 17.0+", "applicationCategory": "WeatherApplication",
            "author": ORG,
            "description": "A free rain ETA for your exact location, plus a live weather radar app, storm tracks and weather alerts. For iPhone and Android.",
@@ -497,8 +520,9 @@ def guides():
     page("guides/index.html", "Weather Guides", "Plain-English weather safety guides sourced from the National Weather Service and NOAA.", f'<div class="grid" style="margin-top:24px">{cards}</div>', hero("Weather guides", "Short, practical and sourced from the National Weather Service and NOAA.", "Learn"), "0.8")
     for g in GUIDES:
         src = "".join(f'<li><a href="{u}" target="_blank" rel="noopener">{E(t)}</a></li>' for t, u in g["sources"])
+        shop = gear_shop_promo("emergency_kit") if g["slug"] == "weather-emergency-kit" else ""
         body = (f'<div class="listen" data-listen=".article" hidden></div><div class="article"><p class="crumbs"><a href="../">Home</a> / <a href="./">Guides</a> / {E(g["short"])}</p>{g["body"]}'
-                f'{related(g)}{cta("../", "guide-" + g["slug"], g["app"])}<h2 data-nolisten>Sources</h2><ul class="sources">{src}</ul>{hunt_promo()}<p class="dim small">Last reviewed {datetime.date.today():%B %Y}. General information only; follow official guidance in an emergency.</p></div>')
+                f'{shop}{related(g)}{cta("../", "guide-" + g["slug"], g["app"])}<h2 data-nolisten>Sources</h2><ul class="sources">{src}</ul>{hunt_promo()}<p class="dim small">Last reviewed {datetime.date.today():%B %Y}. General information only; follow official guidance in an emergency.</p></div>')
         ld = [{"@context": "https://schema.org", "@type": "Article", "headline": g["title"], "description": g["desc"], "author": {"@type": "Organization", "name": "Your World Apps"},
                "dateModified": datetime.date.today().isoformat(), "mainEntityOfPage": SITE + f'guides/{g["slug"]}.html'}]
         page(f'guides/{g["slug"]}.html', g["title"], g["desc"], body, hero(g["title"], "", "Guide"), "0.7", jsonld=ld, scripts=("listen.js",))
@@ -611,6 +635,7 @@ def gear():
     for sid, title, sub, tone, items in GEAR:
         safety = GEN_SAFETY if sid == "generators" else CB_AUDIO if sid == "cbaudio" else SOLAR_CABLES if sid == "solarcables" else ""
         secs += f'<h2 id="{sid}">{E(title)}</h2><p class="dim">{E(sub)}</p>{safety}<div class="pgrid">' + "".join(card(*it) for it in items) + "</div>"
+        if sid == "outage": secs += gear_shop_promo("gear")
     deals = load_deals()
     # Storm-power deals can be older than the newest rain/radio headlines, so the newest generator, power station and
     # UPS battery backup deal each keep a slot in the 12 shown; the rest fill by date. Same filters and age limit as every other deal.

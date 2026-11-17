@@ -125,6 +125,30 @@
     });
   }
 
-  var _init = init; init = function () { _init(); initYT(); initConsent(); initWatchDemo(); };
+
+  // Your World shop survival promo: GA4 click + per-placement dismiss (7 days, same idea as the play bar).
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest('a[data-ev="gear_shop"]');
+    if (!t) return;
+    if (window.gtag) gtag("event", "gear_shop_click", { placement: t.getAttribute("data-placement") || "site" });
+  });
+
+  function initGearShopPromo() {
+    var list = document.querySelectorAll ? document.querySelectorAll("[data-gs-promo]") : [];
+    var now = Date.now();
+    Array.prototype.forEach.call(list, function (el) {
+      var place = el.getAttribute("data-gs-promo") || "site";
+      var KEY = "yw-gear-shop-hidden:" + place, until = 0;
+      try { until = +localStorage.getItem(KEY) || 0; } catch (err) {}
+      if (until > now) { el.hidden = true; return; }
+      var x = el.querySelector(".gs-x");
+      if (x) x.addEventListener("click", function () {
+        el.hidden = true;
+        try { localStorage.setItem(KEY, String(Date.now() + 7 * 864e5)); } catch (err) {}
+      });
+    });
+  }
+
+  var _init = init; init = function () { _init(); initYT(); initConsent(); initWatchDemo(); initGearShopPromo(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

@@ -222,6 +222,21 @@ footer .fine{font-size:.8rem;color:#94A3B8;margin-top:26px;border-top:1px solid 
 .hunt-promo ul{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}.hunt-promo li{color:#E7E5E4;font-size:.92rem}
 .hp-go{display:inline-block;font-weight:800;color:#1C1917;background:#F97316;padding:9px 16px;border-radius:10px;font-size:.92rem}
 @media(min-width:760px){.hunt-promo ul{grid-template-columns:1fr 1fr;gap:6px 18px}}
+
+/* ---------- Your World shop survival promo (dismissible in-content card) ---------- */
+.gs-promo{position:relative;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:20px 52px 20px 20px;margin:28px 0;box-shadow:var(--shadow)}
+.gs-promo a{display:block;text-decoration:none;color:inherit}
+.gs-promo a:hover{color:inherit}
+.gs-promo .kicker{margin-bottom:8px}
+.gs-promo h2{margin:0 0 6px;font-size:1.25rem}
+.gs-promo p{margin:0;color:var(--slate-3)}
+.gs-go{display:inline-block;margin-top:8px;font-weight:700;color:var(--sky-d)}
+.gs-promo a:hover .gs-go{color:var(--amber-d)}
+.gs-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;border-radius:50%;background:var(--sky-l);color:var(--slate-3);font-size:1.2rem;line-height:1;cursor:pointer}
+.gs-x:hover{background:var(--line);color:var(--slate)}
+.gs-promo[hidden]{display:none!important}
+@media(min-width:700px){.gs-promo{padding:22px 56px 22px 24px}}
+
 .atl-ic{width:24px;height:24px;border-radius:7px;display:inline-block;vertical-align:-6px;margin-right:7px}
 img.atl-av{background:none;border-radius:12px;box-shadow:0 4px 14px rgba(14,165,233,.3)}
 .atl-h1{display:flex;align-items:center;gap:16px}.atl-h1 img{width:clamp(52px,12vw,72px);height:auto;border-radius:18px;box-shadow:0 8px 28px rgba(14,165,233,.35)}
